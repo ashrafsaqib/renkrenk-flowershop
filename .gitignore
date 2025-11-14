@@ -60,3 +60,5 @@ system/storage*
 # ENV
 .env
 .env.docker
+admin/config-dist.php
+config-dist.php
