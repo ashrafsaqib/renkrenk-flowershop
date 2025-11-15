@@ -130,28 +130,6 @@ class Information extends \Opencart\System\Engine\Model {
 	}
 
 	/**
-	 * Edit Status
-	 *
-	 * Edit information status record in the database.
-	 *
-	 * @param int  $information_id primary key of the information record
-	 * @param bool $status
-	 *
-	 * @return void
-	 *
-	 * @example
-	 *
-	 * $this->load->model('catalog/information');
-	 *
-	 * $this->model_catalog_information->editStatus($information_id, $status);
-	 */
-	public function editStatus(int $information_id, bool $status): void {
-		$this->db->query("UPDATE `" . DB_PREFIX . "information` SET `status` = '" . (bool)$status . "' WHERE `information_id` = '" . (int)$information_id . "'");
-
-		$this->cache->delete('information');
-	}
-
-	/**
 	 * Delete Information
 	 *
 	 * Delete information record in the database.
@@ -197,7 +175,7 @@ class Information extends \Opencart\System\Engine\Model {
 	 * $information_info = $this->model_catalog_information->getInformation($information_id);
 	 */
 	public function getInformation(int $information_id): array {
-		$query = $this->db->query("SELECT DISTINCT * FROM `" . DB_PREFIX . "information` `i` LEFT JOIN `" . DB_PREFIX . "information_description` `id` ON (`i`.`information_id` = `id`.`information_id`) WHERE `i`.`information_id` = '" . (int)$information_id . "' AND `language_id` = '" . (int)$this->config->get('config_language_id') . "'");
+		$query = $this->db->query("SELECT DISTINCT * FROM `" . DB_PREFIX . "information` WHERE `information_id` = '" . (int)$information_id . "'");
 
 		return $query->row;
 	}
@@ -225,34 +203,15 @@ class Information extends \Opencart\System\Engine\Model {
 	 * $results = $this->model_catalog_information->getInformations($filter_data);
 	 */
 	public function getInformations(array $data = []): array {
-		if (!empty($data['filter_language_id'])) {
-			$language_id = $data['filter_language_id'];
-		} else {
-			$language_id = $this->config->get('config_language_id');
-		}
-
-		$sql = "SELECT * FROM `" . DB_PREFIX . "information` `i` LEFT JOIN `" . DB_PREFIX . "information_description` `id` ON (`i`.`information_id` = `id`.`information_id`) WHERE `id`.`language_id` = '" . (int)$language_id . "'";
-
-		if (isset($data['filter_store_id']) && $data['filter_store_id'] !== '') {
-			$sql .= " LEFT JOIN `" . DB_PREFIX . "information_to_store` `i2s` ON (`i`.`information_id` = `i2s`.`information_id`)";
-		}
-
-		if (isset($data['filter_store_id']) && $data['filter_store_id'] !== '') {
-			$sql .= " AND `i2s`.`store_id` = '" . (int)$data['filter_store_id'] . "'";
-		}
-
-		if (isset($data['filter_status']) && $data['filter_status'] !== '') {
-			$sql .= " AND `i`.`status` = '" . (int)$data['filter_status'] . "'";
-		}
+		$sql = "SELECT * FROM `" . DB_PREFIX . "information` `i` LEFT JOIN `" . DB_PREFIX . "information_description` `id` ON (`i`.`information_id` = `id`.`information_id`) WHERE `id`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'";
 
 		$sort_data = [
-			'title'      => 'id.title',
-			'status'     => 'i.status',
-			'sort_order' => 'i.sort_order'
+			'id.title',
+			'i.sort_order'
 		];
 
-		if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $sort_data[$data['sort']];
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			$sql .= " ORDER BY " . $data['sort'];
 		} else {
 			$sql .= " ORDER BY `id`.`title`";
 		}
@@ -303,30 +262,8 @@ class Information extends \Opencart\System\Engine\Model {
 	 *
 	 * $information_total = $this->model_catalog_information->getTotalInformations();
 	 */
-	public function getTotalInformations(array $data = []): int {
-		if (!empty($data['filter_language_id'])) {
-			$language_id = $data['filter_language_id'];
-		} else {
-			$language_id = $this->config->get('config_language_id');
-		}
-
-		$sql = "SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "information` `i` LEFT JOIN `" . DB_PREFIX . "information_description` `id` ON (`i`.`information_id` = `id`.`information_id`)";
-
-		if (isset($data['filter_store_id']) && $data['filter_store_id'] !== '') {
-			$sql .= " LEFT JOIN `" . DB_PREFIX . "information_to_store` `i2s` ON (`i`.`information_id` = `i2s`.`information_id`) WHERE `i2s`.`store_id` = '" . (int)$data['filter_store_id'] . "'";
-		}
-
-		$sql .= " WHERE `id`.`language_id` = '" . (int)$language_id . "'";
-
-		if (isset($data['filter_store_id']) && $data['filter_store_id'] !== '') {
-			$sql .= " AND `i2s`.`store_id` = '" . (int)$data['filter_store_id'] . "'";
-		}
-
-		if (isset($data['filter_status']) && $data['filter_status'] !== '') {
-			$sql .= " AND `i`.`status` = '" . (int)$data['filter_status'] . "'";
-		}
-
-		$query = $this->db->query($sql);
+	public function getTotalInformations(): int {
+		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "information`");
 
 		return (int)$query->row['total'];
 	}

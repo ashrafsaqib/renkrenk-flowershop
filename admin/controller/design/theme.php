@@ -18,24 +18,11 @@ class Theme extends \Opencart\System\Engine\Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		if (isset($this->request->get['filter_store_id'])) {
-			$filter_store_id = (int)$this->request->get['filter_store_id'];
-		} else {
-			$filter_store_id = '';
+		$url = '';
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . (int)$this->request->get['page'];
 		}
-
-		if (isset($this->request->get['filter_status'])) {
-			$filter_status = $this->request->get['filter_status'];
-		} else {
-			$filter_status = '';
-		}
-
-		$remove = [
-			'route',
-			'user_token'
-		];
-
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
 
 		$data['breadcrumbs'] = [];
 
@@ -51,18 +38,8 @@ class Theme extends \Opencart\System\Engine\Controller {
 
 		$data['add'] = $this->url->link('design/theme.form', 'user_token=' . $this->session->data['user_token'] . $url);
 		$data['delete'] = $this->url->link('design/theme.delete', 'user_token=' . $this->session->data['user_token']);
-		$data['enable']	= $this->url->link('design/theme.enable', 'user_token=' . $this->session->data['user_token']);
-		$data['disable'] = $this->url->link('design/theme.disable', 'user_token=' . $this->session->data['user_token']);
 
 		$data['list'] = $this->load->controller('design/theme.getList');
-
-		// Stores
-		$this->load->model('setting/store');
-
-		$data['stores'] = $this->model_setting_store->getStores();
-
-		$data['filter_store_id'] = $filter_store_id;
-		$data['filter_status'] = $filter_status;
 
 		$data['user_token'] = $this->session->data['user_token'];
 
@@ -90,17 +67,7 @@ class Theme extends \Opencart\System\Engine\Controller {
 	 * @return string
 	 */
 	public function getList(): string {
-		if (isset($this->request->get['filter_store_id'])) {
-			$filter_store_id = (int)$this->request->get['filter_store_id'];
-		} else {
-			$filter_store_id = '';
-		}
-
-		if (isset($this->request->get['filter_status'])) {
-			$filter_status = $this->request->get['filter_status'];
-		} else {
-			$filter_status = '';
-		}
+		$this->load->language('design/theme');
 
 		if (isset($this->request->get['page'])) {
 			$page = (int)$this->request->get['page'];
@@ -108,31 +75,23 @@ class Theme extends \Opencart\System\Engine\Controller {
 			$page = 1;
 		}
 
-		$remove = [
-			'route',
-			'user_token'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['action'] = $this->url->link('design/theme.list', 'user_token=' . $this->session->data['user_token'] . $url);
 
 		$data['themes'] = [];
 
-		$filter_data = [
-			'filter_store_id' => $filter_store_id,
-			'filter_status'   => $filter_status,
-			'start'           => ($page - 1) * $this->config->get('config_pagination_admin'),
-			'limit'           => $this->config->get('config_pagination_admin')
-		];
-
-		// Themes
+		// Theme
 		$this->load->model('design/theme');
 
-		// Setting
+		// Store
 		$this->load->model('setting/store');
 
-		$results = $this->model_design_theme->getThemes($filter_data);
+		$results = $this->model_design_theme->getThemes(($page - 1) * $this->config->get('config_pagination_admin'), $this->config->get('config_pagination_admin'));
 
 		foreach ($results as $result) {
 			$store_info = $this->model_setting_store->getStore($result['store_id']);
@@ -151,22 +110,14 @@ class Theme extends \Opencart\System\Engine\Controller {
 			] + $result;
 		}
 
-		// Total Themes
 		$theme_total = $this->model_design_theme->getTotalThemes();
 
-		$remove = [
-			'route',
-			'user_token',
-			'page'
-		];
-
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
-
-		// Pagination
-		$data['total'] = $theme_total;
-		$data['page'] = $page;
-		$data['limit'] = $this->config->get('config_pagination_admin');
-		$data['pagination'] = $this->url->link('design/theme.list', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}');
+		$data['pagination'] = $this->load->controller('common/pagination', [
+			'total' => $theme_total,
+			'page'  => $page,
+			'limit' => $this->config->get('config_pagination_admin'),
+			'url'   => $this->url->link('design/theme.list', 'user_token=' . $this->session->data['user_token'] . '&page={page}')
+		]);
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($theme_total) ? (($page - 1) * $this->config->get('config_pagination_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_pagination_admin')) > ($theme_total - $this->config->get('config_pagination_admin'))) ? $theme_total : ((($page - 1) * $this->config->get('config_pagination_admin')) + $this->config->get('config_pagination_admin')), $theme_total, ceil($theme_total / $this->config->get('config_pagination_admin')));
 
@@ -185,13 +136,11 @@ class Theme extends \Opencart\System\Engine\Controller {
 
 		$data['text_form'] = !isset($this->request->get['theme_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
-		$remove = [
-			'route',
-			'user_token',
-			'theme_id'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['breadcrumbs'] = [];
 
@@ -208,7 +157,6 @@ class Theme extends \Opencart\System\Engine\Controller {
 		$data['save'] = $this->url->link('design/theme.save', 'user_token=' . $this->session->data['user_token']);
 		$data['back'] = $this->url->link('design/theme', 'user_token=' . $this->session->data['user_token'] . $url);
 
-		// Theme
 		if (isset($this->request->get['theme_id'])) {
 			$this->load->model('design/theme');
 
@@ -221,7 +169,7 @@ class Theme extends \Opencart\System\Engine\Controller {
 			$data['theme_id'] = 0;
 		}
 
-		// Setting
+		// Store
 		$this->load->model('setting/store');
 
 		$data['stores'] = $this->model_setting_store->getStores();
@@ -233,52 +181,67 @@ class Theme extends \Opencart\System\Engine\Controller {
 		}
 
 		// We grab the files from the default template directory
-		$directory = DIR_CATALOG . 'view/stylesheet/';
+		$files = [];
 
-		$data['stylesheets'] = [];
+		$path = DIR_CATALOG . 'view/template/';
 
-		$files = oc_directory_read($directory, true);
+		$directory = [$path];
 
-		foreach ($files as $file) {
-			$stylesheet = substr(substr($file, 0, strrpos($file, '.')), strlen($directory));
+		while (count($directory) != 0) {
+			$next = array_shift($directory);
 
-			if ($stylesheet) {
-				$data['stylesheets'][] = $stylesheet;
+			if (is_dir($next)) {
+				foreach (glob(rtrim($next, '/') . '/{*,.[!.]*,..?*}', GLOB_BRACE) as $file) {
+					$directory[] = $file;
+				}
 			}
+
+			// Add the file to the files to be deleted array
+			$files[] = $next;
 		}
 
-		// We grab the files from the default template directory
-		$directory = DIR_CATALOG . 'view/template/';
+		sort($files);
 
 		$data['templates'] = [];
 
-		$files = oc_directory_read($directory, true);
-
 		foreach ($files as $file) {
-			$template = substr(substr($file, 0, strrpos($file, '.')), strlen($directory));
-
-			if ($template) {
-				$data['templates'][] = $template;
+			if (is_file($file)) {
+				$data['templates'][] = substr(substr($file, 0, strrpos($file, '.')), strlen($path));
 			}
 		}
 
 		// We grab the files from the extension template directory
 		$data['extensions'] = [];
 
-		$directories = oc_directory_read(DIR_EXTENSION, false);
+		$extensions = glob(DIR_EXTENSION . '*', GLOB_ONLYDIR);
 
-		foreach ($directories as $directory) {
-			$extension = basename($directory);
+		foreach ($extensions as $extension) {
+			$extension = basename($extension);
 
-			$path = DIR_EXTENSION . $extension . '/catalog/view/template/';
+			$path = DIR_EXTENSION . $extension . '/catalog/view/template';
 
-			$files = oc_directory_read($path, true, '/.+\.twig$/');
+			$directory = [$path];
+
+			$files = [];
+
+			while (count($directory) != 0) {
+				$next = array_shift($directory);
+
+				if (is_dir($next)) {
+					foreach (glob(rtrim($next, '/') . '/{*,.[!.]*,..?*}', GLOB_BRACE) as $file) {
+						$directory[] = $file;
+					}
+				}
+
+				// Add the file to the files to be deleted array
+				$files[] = $next;
+			}
+
+			sort($files);
 
 			foreach ($files as $file) {
-				$template = substr(substr($file, 0, strrpos($file, '.')), strlen($path));
-
-				if ($template) {
-					$data['extensions'][] = 'extension/' . $extension . '/' . $template;
+				if (is_file($file)) {
+					$data['extensions'][] = 'extension/' . $extension . substr(substr($file, 0, strrpos($file, '.')), strlen($path));
 				}
 			}
 		}
@@ -404,81 +367,12 @@ class Theme extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			// Theme
 			$this->load->model('design/theme');
 
 			if (!$post_info['theme_id']) {
 				$json['theme_id'] = $this->model_design_theme->addTheme($post_info);
 			} else {
 				$this->model_design_theme->editTheme($post_info['theme_id'], $post_info);
-			}
-
-			$json['success'] = $this->language->get('text_success');
-		}
-
-		$this->response->addHeader('Content-Type: application/json');
-		$this->response->setOutput(json_encode($json));
-	}
-
-	/**
-	 * Enable
-	 *
-	 * @return void
-	 */
-	public function enable(): void {
-		$this->load->language('design/theme');
-
-		$json = [];
-
-		if (isset($this->request->post['selected'])) {
-			$selected = (array)$this->request->post['selected'];
-		} else {
-			$selected = [];
-		}
-
-		if (!$this->user->hasPermission('modify', 'design/theme')) {
-			$json['error'] = $this->language->get('error_permission');
-		}
-
-		if (!$json) {
-			$this->load->model('design/theme');
-
-			foreach ($selected as $theme_id) {
-				$this->model_design_theme->editStatus((int)$theme_id, true);
-			}
-
-			$json['success'] = $this->language->get('text_success');
-		}
-
-		$this->response->addHeader('Content-Type: application/json');
-		$this->response->setOutput(json_encode($json));
-	}
-
-	/**
-	 * Disable
-	 *
-	 * @return void
-	 */
-	public function disable(): void {
-		$this->load->language('design/theme');
-
-		$json = [];
-
-		if (isset($this->request->post['selected'])) {
-			$selected = (array)$this->request->post['selected'];
-		} else {
-			$selected = [];
-		}
-
-		if (!$this->user->hasPermission('modify', 'design/theme')) {
-			$json['error'] = $this->language->get('error_permission');
-		}
-
-		if (!$json) {
-			$this->load->model('design/theme');
-
-			foreach ($selected as $theme_id) {
-				$this->model_design_theme->editStatus((int)$theme_id, false);
 			}
 
 			$json['success'] = $this->language->get('text_success');
@@ -514,7 +408,6 @@ class Theme extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			// Theme
 			$this->load->model('design/theme');
 
 			foreach ($selected as $theme_id) {

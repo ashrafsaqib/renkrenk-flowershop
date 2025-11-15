@@ -144,25 +144,19 @@ class Download extends \Opencart\System\Engine\Model {
 	 * $results = $this->model_catalog_download->getDownloads($filter_data);
 	 */
 	public function getDownloads(array $data = []): array {
-		if (!empty($data['filter_language_id'])) {
-			$language_id = $data['filter_language_id'];
-		} else {
-			$language_id = $this->config->get('config_language_id');
-		}
-
-		$sql = "SELECT * FROM `" . DB_PREFIX . "download` `d` LEFT JOIN `" . DB_PREFIX . "download_description` `dd` ON (`d`.`download_id` = `dd`.`download_id`) WHERE `dd`.`language_id` = '" . (int)$language_id . "'";
+		$sql = "SELECT * FROM `" . DB_PREFIX . "download` `d` LEFT JOIN `" . DB_PREFIX . "download_description` `dd` ON (`d`.`download_id` = `dd`.`download_id`) WHERE `dd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'";
 
 		if (!empty($data['filter_name'])) {
 			$sql .= " AND LCASE(`dd`.`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_name']) . '%') . "'";
 		}
 
 		$sort_data = [
-			'name'       => 'dd.name',
-			'date_added' => 'd.date_added'
+			'dd.name',
+			'd.date_added'
 		];
 
-		if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $sort_data[$data['sort']];
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			$sql .= " ORDER BY " . $data['sort'];
 		} else {
 			$sql .= " ORDER BY `dd`.`name`";
 		}
@@ -188,37 +182,6 @@ class Download extends \Opencart\System\Engine\Model {
 		$query = $this->db->query($sql);
 
 		return $query->rows;
-	}
-
-	/**
-	 * Get Total Downloads
-	 *
-	 * Get the total number of download records in the database.
-	 *
-	 * @return int total number of download records
-	 *
-	 * @example
-	 *
-	 * $this->load->model('catalog/download');
-	 *
-	 * $download_total = $this->model_catalog_download->getTotalDownloads();
-	 */
-	public function getTotalDownloads(array $data = []): int {
-		if (!empty($data['filter_language_id'])) {
-			$language_id = $data['filter_language_id'];
-		} else {
-			$language_id = $this->config->get('config_language_id');
-		}
-
-		$sql = "SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "download` `d` LEFT JOIN `" . DB_PREFIX . "download_description` `dd` ON (`d`.`download_id` = `dd`.`download_id`) WHERE `dd`.`language_id` = '" . (int)$language_id . "'";
-
-		if (!empty($data['filter_name'])) {
-			$sql .= " AND LCASE(`dd`.`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_name']) . '%') . "'";
-		}
-
-		$query = $this->db->query($sql);
-
-		return (int)$query->row['total'];
 	}
 
 	/**
@@ -330,6 +293,25 @@ class Download extends \Opencart\System\Engine\Model {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "download_description` WHERE `language_id` = '" . (int)$language_id . "'");
 
 		return $query->rows;
+	}
+
+	/**
+	 * Get Total Downloads
+	 *
+	 * Get the total number of download records in the database.
+	 *
+	 * @return int total number of download records
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/download');
+	 *
+	 * $download_total = $this->model_catalog_download->getTotalDownloads();
+	 */
+	public function getTotalDownloads(): int {
+		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "download`");
+
+		return (int)$query->row['total'];
 	}
 
 	/**

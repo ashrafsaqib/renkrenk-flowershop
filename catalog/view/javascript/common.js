@@ -1,135 +1,39 @@
-$(document).ready(async () => {
+function getURLVar(key) {
+    var value = [];
 
-    const loadScript = () => {
-        let script = document.createElement('script');
+    var query = String(document.location).split('?');
 
-        script.src = src;
-        script.onload = callback; // Execute callback after script loads
-        script.onerror = () => console.error(`Error loading script: ${src}`);
+    if (query[1]) {
+        var part = query[1].split('&');
 
-        document.head.appendChild(script);
-    };
+        for (i = 0; i < part.length; i++) {
+            var data = part[i].split('=');
 
-/*
-    const cart =
-
-    let loader = {
-        'setting'    => 'setting',
-        'currencies' => '',
-        'language'
-        'tax',
-        ''
-    }
-
-*/
-
-    //JSON.parse();
-
-
-    let response = await fetch('catalog/view/data/setting/setting.json');
-
-    if (response.status == 200) {
-        //const setting =
-    }
-
-    response.then((e) => {
-        console.log(e);
-
-    });
-
-   // localStorage.setItem('setting', );
-
-
-
-    $.ajax({
-        url: 'catalog/view/data/setting/setting.json',
-        dataType: 'json',
-        success: function (json, textStatus) {
-
-            // Replace any form values that correspond to form names.
-            //for (key in json) {
-                //$(element).find('[name=\'' + key + '\']').val(json[key]);
-           // }
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-        }
-    });
-
-
-
-
-
-    $.ajax({
-        url: 'catalog/view/data/localisation/currency.json',
-        dataType: 'json',
-        success: function (json, textStatus) {
-
-            // Replace any form values that correspond to form names.
-            for (key in json) {
-                $(element).find('[name=\'' + key + '\']').val(json[key]);
+            if (data[0] && data[1]) {
+                value[data[0]] = data[1];
             }
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
         }
-    });
-});
 
-
-
-// Retrieve currency from local storage
-let json = localStorage.getItem('currency');
-
-// Check if currency exists
-if (!json) {
-    // Use the currency value as needed
-    //const currency = parse(json);
-} else {
-
-
-
-    sessionStorage.setItem('currency', 'USD');
-
-    console.log('No currency found in session storage');
-    // Set a default currency or prompt user
-
-
+        if (value[key]) {
+            return value[key];
+        } else {
+            return '';
+        }
+    }
 }
 
-let currency = localStorage.getItem('currency');
+// Observe
++function($) {
+    $.fn.observe = function(callback) {
+        observer = new MutationObserver(callback);
 
-// Currency
-$('#form-currency .dropdown-item').on('click', function(e) {
-    e.preventDefault();
-
-    $('#form-currency input[name=\'code\']').val($(this).attr('href'));
-
-    let currencies = [];
-
-    localStorage.setItem('currency');
-
-
-});
-
-// Local Storage
-if (currency == undefined) {
-
-}
-
-
-
-
-// Store a simple currency string
-sessionStorage.setItem('currency', 'USD');
-
-// Or store a currency object
-const currencyObj = { code: 'USD', symbol: '$' };
-
-
-sessionStorage.setItem('currency', JSON.stringify(currencyObj));
-
-
+        observer.observe($(this)[0], {
+            characterData: false,
+            childList: true,
+            attributes: false
+        });
+    };
+}(jQuery);
 
 $(document).ready(function() {
     // Tooltip
@@ -150,24 +54,6 @@ $(document).ready(function() {
         $('.tooltip').remove();
     });
 
-
-});
-
-
-$(document).ready(function() {
-    // Observe
-    +function($) {
-        $.fn.observe = function(callback) {
-            observer = new MutationObserver(callback);
-
-            observer.observe($(this)[0], {
-                characterData: false,
-                childList: true,
-                attributes: false
-            });
-        };
-    }(jQuery);
-
     $('#alert').observe(function() {
         window.setTimeout(function() {
             $('#alert .alert-dismissible').fadeTo(3000, 0, function() {
@@ -175,54 +61,24 @@ $(document).ready(function() {
             });
         }, 3000);
     });
+});
 
-
-
-
-    // Button
+// Button
+$(document).ready(function() {
     +function($) {
         $.fn.button = function(state) {
             return this.each(function() {
-                let element = this;
+                var element = this;
 
                 if (state == 'loading') {
                     this.html = $(element).html();
+                    this.state = $(element).prop('disabled');
 
-                    $(element).width($(element).width()).html('<i class="fa-solid fa-circle-notch fa-spin text-light"></i>');
+                    $(element).prop('disabled', true).width($(element).width()).html('<i class="fa-solid fa-circle-notch fa-spin text-light"></i>');
                 }
 
                 if (state == 'reset') {
-                    $(element).width('').html(this.html);
-                }
-
-                // If button
-                if ($(element).is('button')) {
-                    if (state == 'loading') {
-                        this.state = $(element).prop('disabled');
-
-                        $(element).prop('disabled', true);
-                    }
-
-                    if (state == 'reset') {
-                        $(element).prop('disabled', this.state);
-                    }
-                }
-
-                // If link
-                if ($(element).is('a')) {
-                    if (state == 'loading') {
-                        this.state = $(element).hasClass('disabled');
-
-                        $(element).addClass('disabled');
-                    }
-
-                    if (state == 'reset') {
-                        if (this.state) {
-                            $(element).addClass('disabled');
-                        } else {
-                            $(element).removeClass('disabled');
-                        }
-                    }
+                    $(element).prop('disabled', this.state).width('').html(this.html);
                 }
             });
         };
@@ -518,8 +374,14 @@ var chain = new Chain();
 }(jQuery);
 
 $(document).ready(function() {
+    // Currency
+    $('#form-currency .dropdown-item').on('click', function(e) {
+        e.preventDefault();
 
+        $('#form-currency input[name=\'code\']').val($(this).attr('href'));
 
+        $('#form-currency').submit();
+    });
 
     // Language
     $('#form-language .dropdown-item').on('click', function(e) {
