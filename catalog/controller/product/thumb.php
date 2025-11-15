@@ -30,8 +30,6 @@ class Thumb extends \Opencart\System\Engine\Controller {
 	public function index(array $data): string {
 		$this->load->language('product/thumb');
 
-		print_r($data); // For Debugging Purpose
-
 		return $this->load->view('product/thumb', $data);
 	}
 }
