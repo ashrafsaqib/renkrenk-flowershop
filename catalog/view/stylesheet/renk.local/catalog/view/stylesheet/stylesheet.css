@@ -10781,21 +10781,20 @@ button:focus {
 }
 /* menu */
 #menu {
-  background-color: #229ac8;
-  background-image: linear-gradient(to bottom, #23a1d1, #1f90bb);
-  background-repeat: repeat-x;
-  border: 1px solid #1f90bb;
-  border-color: #1f90bb #1f90bb #145e7a;
   min-height: 40px;
   border-radius: 4px;
   padding: 0 1rem;
   margin-bottom: 20px;
 }
 #menu .navbar-nav > li > a {
-  color: #fff;
+  color: #212529;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   padding: 10px 15px 10px 15px;
   background-color: transparent;
+  'text-transform': 'uppercase';
+  'text-transform': 'uppercase';
+  'text-transform': 'uppercase';
+  text-transform: uppercase;
 }
 #menu .navbar-nav > li > a:hover {
   background-color: rgba(0, 0, 0, 0.1);
