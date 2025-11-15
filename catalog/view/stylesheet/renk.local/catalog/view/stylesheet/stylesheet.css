@@ -10721,7 +10721,7 @@ button:focus {
   margin-bottom: 0;
 }
 #top .list-inline-item > a, #top .list-inline-item .dropdown > a {
-  font-size: 1.1em;
+  font-size: 1.45em;
   color: var(--bs-gray-600);
   line-height: 40px;
   vertical-align: middle;

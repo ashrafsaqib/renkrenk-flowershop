@@ -62,3 +62,4 @@ system/storage*
 .env.docker
 admin/config-dist.php
 config-dist.php
+catalog/view/stylesheet/renk.local/catalog/view/stylesheet/stylesheet.css
