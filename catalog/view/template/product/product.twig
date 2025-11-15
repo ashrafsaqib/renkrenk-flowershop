@@ -1,10 +1,6 @@
 {{ header }}
 <div id="product-info" class="container">
-  <ul class="breadcrumb">
-    {% for breadcrumb in breadcrumbs %}
-      <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-    {% endfor %}
-  </ul>
+
   <div class="row">{{ column_left }}
     <div id="content" class="col">
       {{ content_top }}
@@ -26,33 +22,14 @@
           </div>
         {% endif %}
         <div class="col-sm">
+            <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+      <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
           <h1>{{ heading_title }}</h1>
           <ul class="list-unstyled">
-            {% if manufacturer %}
-              <li>{{ text_manufacturer }} <a href="{{ manufacturers }}">{{ manufacturer }}</a></li>
-            {% endif %}
-            <li>{{ text_model }} {{ model }}</li>
-            {% for product_code in product_codes %}
-              <li>{{ product_code.code }}: {{ product_code.value }}</li>
-            {% endfor %}
-            {% if reward %}
-              <li>{{ text_reward }} {{ reward }}</li>
-            {% endif %}
-            <li>{{ text_stock }} {{ stock }}</li>
-          </ul>
-          {% if review_status %}
-            <div class="rating">
-              <p>
-                {% for i in 1..5 %}
-                  {% if rating < i %}
-                    <span class="fa-stack"><i class="fa-regular fa-star fa-stack-1x"></i></span>
-                  {% else %}
-                    <span class="fa-stack"><i class="fa-solid fa-star fa-stack-1x"></i><i class="fa-regular fa-star fa-stack-1x"></i></span>
-                  {% endif %}
-                {% endfor %}
-                <a href="#" onclick="$('a[href=\'#tab-review\']').tab('show'); return false;">{{ text_reviews }}</a> / <a href="#" onclick="$('a[href=\'#tab-review\']').tab('show'); return false;">{{ text_write }}</a></p>
-            </div>
-          {% endif %}
+            
           {% if price %}
             <ul class="list-unstyled">
               {% if not special %}
@@ -64,9 +41,6 @@
               {% if tax %}
                 <li>{{ text_tax }} {{ tax }}</li>
               {% endif %}
-              {% if points %}
-                <li>{{ text_points }} {{ points }}</li>
-              {% endif %}
               {% if discounts %}
                 <li>
                   <hr>
@@ -77,13 +51,7 @@
               {% endif %}
             </ul>
           {% endif %}
-          <form method="post" data-oc-toggle="ajax">
-            <div class="btn-group">
-              <button type="submit" formaction="{{ wishlist_add }}" data-bs-toggle="tooltip" class="btn btn-light btn-lg" title="{{ button_wishlist }}"><i class="fa-solid fa-heart"></i></button>
-              <button type="submit" formaction="{{ compare_add }}" data-bs-toggle="tooltip" class="btn btn-light btn-lg" title="{{ button_compare }}"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
-            </div>
-            <input type="hidden" name="product_id" value="{{ product_id }}"/>
-          </form>
+        
           <br/>
           <div id="product">
             <form id="form-product">
@@ -219,15 +187,14 @@
                   <div id="error-subscription" class="invalid-feedback"></div>
                 </div>
               {% endif %}
-              <div class="mb-3">
+                <div class="mb-3">
                 <div class="input-group">
-                  <div class="input-group-text">{{ entry_qty }}</div>
-                  <input type="text" name="quantity" value="{{ minimum }}" size="2" id="input-quantity" class="form-control"/>
-                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg btn-block">{{ button_cart }}</button>
+                  <input type="hidden" name="quantity" value="{{ minimum }}" id="input-quantity"/>
+                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg w-100">{{ button_cart }}</button>
                 </div>
                 <input type="hidden" name="product_id" value="{{ product_id }}" id="input-product-id"/>
                 <div id="error-quantity" class="form-text"></div>
-              </div>
+                </div>
               {% if minimum > 1 %}
                 <div class="alert alert-warning"><i class="fa-solid fa-circle-info"></i> {{ text_minimum }}</div>
               {% endif %}
