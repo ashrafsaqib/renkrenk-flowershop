@@ -10868,18 +10868,18 @@ label.required:before, label:has(+ input:required):before, label:has(+ select:re
 }
 /* footer */
 footer {
-  border: 1px solid #000000;
+  /* border: 1px solid #000000; */
   padding-top: 30px;
-  background-color: #303030;
+  background-color: #f8f9fa;
   border-top: 1px solid #ddd;
-  color: #e2e2e2;
+  color: #212529;
 }
 footer hr {
   border-top: none;
   border-bottom: 1px solid #666;
 }
 footer a {
-  color: #ccc;
+  color: #343a40;
   text-decoration: none;
 }
 footer a:hover {
@@ -10889,7 +10889,7 @@ footer h5, footer .h5 {
   font-family: "Open Sans", sans-serif;
   font-size: 13px;
   font-weight: bold;
-  color: #fff;
+  color: #212529;
   margin-top: 10px;
   margin-bottom: 10px;
 }
