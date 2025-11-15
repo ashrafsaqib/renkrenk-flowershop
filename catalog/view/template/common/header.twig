@@ -30,9 +30,22 @@
     <nav id="top">
       <div class="container">
         <div class="row">
-          <div class="col-4">
+          <div class="col-4" id="top-left">
             <ul class="list-inline">
-              <li class="list-inline-item me-3">{{ currency }}</li>
+              <li class="list-inline-item">
+                <div class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-label="Select location">
+                    <i class="fa-solid fa-location-dot"></i> <span class="d-none d-lg-inline">Your Location</span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-right">
+                    <li><a href="#" class="dropdown-item">Kadıköy</a></li>
+                    <li><a href="#" class="dropdown-item">Beşiktaş</a></li>
+                    <li><a href="#" class="dropdown-item">Şişli</a></li>
+                    <li><a href="#" class="dropdown-item">Fatih</a></li>
+                    <li><a href="#" class="dropdown-item">Üsküdar</a></li>
+                  </ul>
+                </div>
+              </li>
               <li class="list-inline-item">{{ language }}</li>
               <li class="list-inline-item"><a href="{{ contact }}"><i class="fa-solid fa-phone"></i> <span class="d-none d-lg-inline">{{ telephone }}</span></a></li>
             </ul>

@@ -1,5 +1,5 @@
 @charset "UTF-8";
-@import "../fonts/fontawesome/css/all.min.css";
+@import "./fonts/fontawesome/css/all.min.css";
 /*!
    * Bootstrap  v5.3.7 (https://getbootstrap.com/)
    * Copyright 2011-2025 The Bootstrap Authors
@@ -10725,6 +10725,14 @@ button:focus {
   vertical-align: middle;
   padding: 10px 0px 5px 0px;
 }
+#top-left a,#top-left span {
+  font-size: 0.75em;
+}
+#top-left .dropdown-item{
+  font-size: 1.25em;
+  line-height: 1.25em;
+}
+
 /* logo */
 #logo {
   text-align: center;
@@ -10789,9 +10797,6 @@ button:focus {
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   padding: 10px 15px 10px 15px;
   background-color: transparent;
-  'text-transform': 'uppercase';
-  'text-transform': 'uppercase';
-  'text-transform': 'uppercase';
   text-transform: uppercase;
 }
 #menu .navbar-nav > li > a:hover {
