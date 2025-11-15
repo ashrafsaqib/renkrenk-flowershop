@@ -10948,7 +10948,7 @@ footer h5, footer .h5 {
   margin-bottom: 45px;
 }
 .product-thumb .description h4, .product-thumb .description .h4 {
-  font-weight: bold;
+  /* font-weight: bold; */
 }
 .product-thumb .button {
   display: flex;
