@@ -24,8 +24,11 @@ class Log {
 	 * @param string $filename
 	 */
 	public function __construct(string $filename) {
-		$this->file = DIR_LOGS . $filename;
 
+		$this->file = DIR_LOGS . $filename;
+		if ($this->file == DIR_LOGS) {
+			$this->file .= 'error.log';
+		}
 		if (!is_file($this->file)) {
 			$handle = fopen($this->file, 'w');
 

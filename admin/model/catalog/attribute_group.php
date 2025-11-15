@@ -136,21 +136,15 @@ class AttributeGroup extends \Opencart\System\Engine\Model {
 	 * $attribute_groups = $this->model_catalog_attribute_group->getAttributeGroups($filter_data);
 	 */
 	public function getAttributeGroups(array $data = []): array {
-		if (!empty($data['filter_language_id'])) {
-			$language_id = $data['filter_language_id'];
-		} else {
-			$language_id = $this->config->get('config_language_id');
-		}
-
-		$sql = "SELECT * FROM `" . DB_PREFIX . "attribute_group` `ag` LEFT JOIN `" . DB_PREFIX . "attribute_group_description` `agd` ON (`ag`.`attribute_group_id` = `agd`.`attribute_group_id`) WHERE `agd`.`language_id` = '" . (int)$language_id . "'";
+		$sql = "SELECT * FROM `" . DB_PREFIX . "attribute_group` `ag` LEFT JOIN `" . DB_PREFIX . "attribute_group_description` `agd` ON (`ag`.`attribute_group_id` = `agd`.`attribute_group_id`) WHERE `agd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'";
 
 		$sort_data = [
-			'name'       => 'agd.name',
-			'sort_order' => 'ag.sort_order'
+			'agd.name',
+			'ag.sort_order'
 		];
 
-		if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $sort_data[$data['sort']];
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			$sql .= " ORDER BY " . $data['sort'];
 		} else {
 			$sql .= " ORDER BY `agd`.`name`";
 		}
@@ -191,14 +185,8 @@ class AttributeGroup extends \Opencart\System\Engine\Model {
 	 *
 	 * $attribute_group_total = $this->model_catalog_attribute_group->getTotalAttributeGroups();
 	 */
-	public function getTotalAttributeGroups(array $data = []): int {
-		if (!empty($data['filter_language_id'])) {
-			$language_id = $data['filter_language_id'];
-		} else {
-			$language_id = $this->config->get('config_language_id');
-		}
-
-		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "attribute_group` `ag` LEFT JOIN `" . DB_PREFIX . "attribute_group_description` `agd` ON (`ag`.`attribute_group_id` = `agd`.`attribute_group_id`) WHERE `agd`.`language_id` = '" . (int)$language_id . "'");
+	public function getTotalAttributeGroups(): int {
+		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "attribute_group`");
 
 		return (int)$query->row['total'];
 	}

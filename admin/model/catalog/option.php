@@ -162,13 +162,13 @@ class Option extends \Opencart\System\Engine\Model {
 		}
 
 		$sort_data = [
-			'name'       => 'od.name',
-			'type'       => 'o.type',
-			'sort_order' => 'o.sort_order'
+			'od.name',
+			'o.type',
+			'o.sort_order'
 		];
 
-		if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $sort_data[$data['sort']];
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			$sql .= " ORDER BY " . $data['sort'];
 		} else {
 			$sql .= " ORDER BY `od`.`name`";
 		}
@@ -340,10 +340,10 @@ class Option extends \Opencart\System\Engine\Model {
 	 *
 	 * $option_value_data = [
 	 *     'option_value_description' => [],
-	 *     'option_value_id'          => 0,
-	 *     'option_id'                => 1,
-	 *     'image'                    => 'option_image',
-	 *     'sort_order'               => 0
+	 *     'option_value_id' => 0,
+	 *     'option_id'       => 1,
+	 *     'image'           => 'option_image',
+	 *     'sort_order'      => 0
 	 * ];
 	 *
 	 * $this->load->model('catalog/option');
@@ -447,7 +447,7 @@ class Option extends \Opencart\System\Engine\Model {
 	 *
 	 * @example
 	 *
-	 * $option_value_description_data[1] = [
+	 * $option_value_description_data = [
 	 *     'name' => 'Option Value Name'
 	 * ];
 	 *

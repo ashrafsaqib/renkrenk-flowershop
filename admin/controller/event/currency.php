@@ -11,9 +11,9 @@ class Currency extends \Opencart\System\Engine\Controller {
 	 *
 	 * Auto update currencies
 	 *
-	 * Called using model/localisation/currency/addCurrency/after
-	 * Called using model/localisation/currency/editCurrency/after
-	 * Called using model/localisation/currency/deleteCurrency/after
+	 * model/setting/setting/editSetting
+	 * model/localisation/currency/addCurrency
+	 * model/localisation/currency/editCurrency
 	 *
 	 * @param string            $route
 	 * @param array<int, mixed> $args
@@ -22,51 +22,19 @@ class Currency extends \Opencart\System\Engine\Controller {
 	 * @return void
 	 */
 	public function index(string &$route, array &$args, &$output): void {
-		$task_data = [
-			'code'   => 'currency',
-			'action' => 'task/catalog/currency',
-			'args'   => []
-		];
-
-		$this->load->model('setting/task');
-
-		$this->model_setting_task->addTask($task_data);
-
-		$task_data = [
-			'code'   => 'currency',
-			'action' => 'task/admin/currency',
-			'args'   => []
-		];
-
-		$this->model_setting_task->addTask($task_data);
-	}
-
-	/**
-	 * Index
-	 *
-	 * Auto update currencies
-	 *
-	 * Called using model/setting/setting/editSetting/after
-	 *
-	 * @param string            $route
-	 * @param array<int, mixed> $args
-	 * @param mixed             $output
-	 *
-	 * @return void
-	 */
-	public function refresh(string &$route, array &$args, &$output) {
-		if (!$this->config->get('config_currency_auto') || $route != 'setting/setting.editSetting') {
-			return;
+		if ($route == 'model/setting/setting/editSetting' && $args[0] == 'config' && isset($args[1]['config_currency'])) {
+			$currency = $args[1]['config_currency'];
+		} else {
+			$currency = $this->config->get('config_currency');
 		}
 
-		$task_data = [
-			'code'   => 'currency',
-			'action' => 'task/admin/currency.refresh',
-			'args'   => []
-		];
+		// Extension
+		$this->load->model('setting/extension');
 
-		$this->load->model('setting/task');
+		$extension_info = $this->model_setting_extension->getExtensionByCode('currency', $this->config->get('config_currency_engine'));
 
-		$this->model_setting_task->addTask($task_data);
+		if ($extension_info) {
+			$this->load->controller('extension/' . $extension_info['extension'] . '/currency/' . $extension_info['code'] . '.currency', $currency);
+		}
 	}
 }

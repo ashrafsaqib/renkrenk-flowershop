@@ -16,12 +16,19 @@ class CustomField extends \Opencart\System\Engine\Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$remove = [
-			'route',
-			'user_token'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['breadcrumbs'] = [];
 
@@ -37,8 +44,6 @@ class CustomField extends \Opencart\System\Engine\Controller {
 
 		$data['add'] = $this->url->link('customer/custom_field.form', 'user_token=' . $this->session->data['user_token'] . $url);
 		$data['delete'] = $this->url->link('customer/custom_field.delete', 'user_token=' . $this->session->data['user_token']);
-		$data['enable']	= $this->url->link('customer/custom_field.enable', 'user_token=' . $this->session->data['user_token']);
-		$data['disable'] = $this->url->link('customer/custom_field.disable', 'user_token=' . $this->session->data['user_token']);
 
 		$data['list'] = $this->getList();
 
@@ -71,7 +76,7 @@ class CustomField extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = (string)$this->request->get['sort'];
 		} else {
-			$sort = 'name';
+			$sort = 'cfd.name';
 		}
 
 		if (isset($this->request->get['order'])) {
@@ -86,12 +91,19 @@ class CustomField extends \Opencart\System\Engine\Controller {
 			$page = 1;
 		}
 
-		$remove = [
-			'route',
-			'user_token'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['action'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . $url);
 
@@ -152,14 +164,7 @@ class CustomField extends \Opencart\System\Engine\Controller {
 			] + $result;
 		}
 
-		$remove = [
-			'route',
-			'user_token',
-			'sort',
-			'order'
-		];
-
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		$url = '';
 
 		if ($order == 'ASC') {
 			$url .= '&order=DESC';
@@ -167,29 +172,30 @@ class CustomField extends \Opencart\System\Engine\Controller {
 			$url .= '&order=ASC';
 		}
 
-		// Sorts
-		$data['sort_name'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url);
-		$data['sort_location'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . '&sort=location' . $url);
-		$data['sort_type'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . '&sort=type' . $url);
-		$data['sort_status'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . '&sort=status' . $url);
-		$data['sort_sort_order'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . '&sort=sort_order' . $url);
+		$data['sort_name'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . '&sort=cfd.name' . $url);
+		$data['sort_location'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . '&sort=cf.location' . $url);
+		$data['sort_type'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . '&sort=cf.type' . $url);
+		$data['sort_status'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . '&sort=cf.status' . $url);
+		$data['sort_sort_order'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . '&sort=cf.sort_order' . $url);
 
-		$remove = [
-			'route',
-			'user_token',
-			'page'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
 
-		// Total Custom Fields
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
 		$custom_field_total = $this->model_customer_custom_field->getTotalCustomFields();
 
-		// Pagination
-		$data['total'] = $custom_field_total;
-		$data['page'] = $page;
-		$data['limit'] = $this->config->get('config_pagination_admin');
-		$data['pagination'] = $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}');
+		$data['pagination'] = $this->load->controller('common/pagination', [
+			'total' => $custom_field_total,
+			'page'  => $page,
+			'limit' => $this->config->get('config_pagination_admin'),
+			'url'   => $this->url->link('customer/custom_field.list', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}')
+		]);
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($custom_field_total) ? (($page - 1) * $this->config->get('config_pagination_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_pagination_admin')) > ($custom_field_total - $this->config->get('config_pagination_admin'))) ? $custom_field_total : ((($page - 1) * $this->config->get('config_pagination_admin')) + $this->config->get('config_pagination_admin')), $custom_field_total, ceil($custom_field_total / $this->config->get('config_pagination_admin')));
 
@@ -211,13 +217,19 @@ class CustomField extends \Opencart\System\Engine\Controller {
 
 		$data['text_form'] = !isset($this->request->get['custom_field_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
-		$remove = [
-			'route',
-			'user_token',
-			'custom_field_id'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['breadcrumbs'] = [];
 
@@ -234,7 +246,6 @@ class CustomField extends \Opencart\System\Engine\Controller {
 		$data['save'] = $this->url->link('customer/custom_field.save', 'user_token=' . $this->session->data['user_token']);
 		$data['back'] = $this->url->link('customer/custom_field', 'user_token=' . $this->session->data['user_token'] . $url);
 
-		// Custom Field
 		if (isset($this->request->get['custom_field_id'])) {
 			$this->load->model('customer/custom_field');
 
@@ -247,7 +258,7 @@ class CustomField extends \Opencart\System\Engine\Controller {
 			$data['custom_field_id'] = 0;
 		}
 
-		// Languages
+		// Language
 		$this->load->model('localisation/language');
 
 		$data['languages'] = $this->model_localisation_language->getLanguages();
@@ -306,7 +317,7 @@ class CustomField extends \Opencart\System\Engine\Controller {
 			$data['custom_field_values'][] = $custom_field_value;
 		}
 
-		// Customer Groups
+		// Customer Group
 		if (!empty($custom_field_info)) {
 			$custom_field_customer_groups = $this->model_customer_custom_field->getCustomerGroups($custom_field_info['custom_field_id']);
 		} else {
@@ -390,7 +401,6 @@ class CustomField extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			// Custom Field
 			$this->load->model('customer/custom_field');
 
 			if (!$post_info['custom_field_id']) {
@@ -405,75 +415,6 @@ class CustomField extends \Opencart\System\Engine\Controller {
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
-
-	/**
-	 * Enable
-	 *
-	 * @return void
-	 */
-	public function enable(): void {
-		$this->load->language('customer/custom_field');
-
-		$json = [];
-
-		if (isset($this->request->post['selected'])) {
-			$selected = (array)$this->request->post['selected'];
-		} else {
-			$selected = [];
-		}
-
-		if (!$this->user->hasPermission('modify', 'customer/custom_field')) {
-			$json['error'] = $this->language->get('error_permission');
-		}
-
-		if (!$json) {
-			$this->load->model('customer/custom_field');
-
-			foreach ($selected as $custom_field_id) {
-				$this->model_customer_custom_field->editStatus((int)$custom_field_id, true);
-			}
-
-			$json['success'] = $this->language->get('text_success');
-		}
-
-		$this->response->addHeader('Content-Type: application/json');
-		$this->response->setOutput(json_encode($json));
-	}
-
-	/**
-	 * Disable
-	 *
-	 * @return void
-	 */
-	public function disable(): void {
-		$this->load->language('customer/custom_field');
-
-		$json = [];
-
-		if (isset($this->request->post['selected'])) {
-			$selected = (array)$this->request->post['selected'];
-		} else {
-			$selected = [];
-		}
-
-		if (!$this->user->hasPermission('modify', 'customer/custom_field')) {
-			$json['error'] = $this->language->get('error_permission');
-		}
-
-		if (!$json) {
-			$this->load->model('customer/custom_field');
-
-			foreach ($selected as $custom_field_id) {
-				$this->model_customer_custom_field->editStatus((int)$custom_field_id, false);
-			}
-
-			$json['success'] = $this->language->get('text_success');
-		}
-
-		$this->response->addHeader('Content-Type: application/json');
-		$this->response->setOutput(json_encode($json));
-	}
-
 
 	/**
 	 * Delete
@@ -496,11 +437,10 @@ class CustomField extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			// Custom Field
 			$this->load->model('customer/custom_field');
 
 			foreach ($selected as $custom_field_id) {
-				$this->model_customer_custom_field->deleteCustomField((int)$custom_field_id);
+				$this->model_customer_custom_field->deleteCustomField($custom_field_id);
 			}
 
 			$json['success'] = $this->language->get('text_success');

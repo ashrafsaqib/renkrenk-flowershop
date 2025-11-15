@@ -18,12 +18,19 @@ class Filter extends \Opencart\System\Engine\Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$remove = [
-			'route',
-			'user_token'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['breadcrumbs'] = [];
 
@@ -71,7 +78,7 @@ class Filter extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = (string)$this->request->get['sort'];
 		} else {
-			$sort = 'name';
+			$sort = 'fgd.name';
 		}
 
 		if (isset($this->request->get['order'])) {
@@ -86,16 +93,23 @@ class Filter extends \Opencart\System\Engine\Controller {
 			$page = 1;
 		}
 
-		$remove = [
-			'route',
-			'user_token'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['action'] = $this->url->link('catalog/filter.list', 'user_token=' . $this->session->data['user_token'] . $url);
 
-		// Filters
+		// Filter
 		$data['filters'] = [];
 
 		$filter_data = [
@@ -113,14 +127,7 @@ class Filter extends \Opencart\System\Engine\Controller {
 			$data['filters'][] = ['edit' => $this->url->link('catalog/filter.form', 'user_token=' . $this->session->data['user_token'] . '&filter_id=' . $result['filter_id'] . $url)] + $result;
 		}
 
-		$remove = [
-			'route',
-			'user_token',
-			'sort',
-			'order'
-		];
-
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		$url = '';
 
 		if ($order == 'ASC') {
 			$url .= '&order=DESC';
@@ -128,27 +135,32 @@ class Filter extends \Opencart\System\Engine\Controller {
 			$url .= '&order=ASC';
 		}
 
-		// Sorts
-		$data['sort_name'] = $this->url->link('catalog/filter.list', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url);
-		$data['sort_filter_group'] = $this->url->link('catalog/filter.list', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url);
-		$data['sort_sort_order'] = $this->url->link('catalog/filter.list', 'user_token=' . $this->session->data['user_token'] . '&sort=sort_order' . $url);
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
-		$remove = [
-			'route',
-			'user_token',
-			'page'
-		];
+		$data['sort_name'] = $this->url->link('catalog/filter.list', 'user_token=' . $this->session->data['user_token'] . '&sort=fd.name' . $url);
+		$data['sort_filter_group'] = $this->url->link('catalog/filter.list', 'user_token=' . $this->session->data['user_token'] . '&sort=filter_group' . $url);
+		$data['sort_sort_order'] = $this->url->link('catalog/filter.list', 'user_token=' . $this->session->data['user_token'] . '&sort=f.sort_order' . $url);
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		$url = '';
 
-		// Total Filters
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
 		$filter_total = $this->model_catalog_filter->getTotalFilters();
 
-		// Pagination
-		$data['total'] = $filter_total;
-		$data['page'] = $page;
-		$data['limit'] = $this->config->get('config_pagination_admin');
-		$data['pagination'] = $this->url->link('catalog/filter.list', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}');
+		$data['pagination'] = $this->load->controller('common/pagination', [
+			'total' => $filter_total,
+			'page'  => $page,
+			'limit' => $this->config->get('config_pagination_admin'),
+			'url'   => $this->url->link('catalog/filter.list', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}')
+		]);
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($filter_total) ? (($page - 1) * $this->config->get('config_pagination_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_pagination_admin')) > ($filter_total - $this->config->get('config_pagination_admin'))) ? $filter_total : ((($page - 1) * $this->config->get('config_pagination_admin')) + $this->config->get('config_pagination_admin')), $filter_total, ceil($filter_total / $this->config->get('config_pagination_admin')));
 
@@ -170,13 +182,19 @@ class Filter extends \Opencart\System\Engine\Controller {
 
 		$data['text_form'] = !isset($this->request->get['filter_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
-		$remove = [
-			'route',
-			'user_token',
-			'filter_id'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['breadcrumbs'] = [];
 
@@ -193,7 +211,6 @@ class Filter extends \Opencart\System\Engine\Controller {
 		$data['save'] = $this->url->link('catalog/filter.save', 'user_token=' . $this->session->data['user_token']);
 		$data['back'] = $this->url->link('catalog/filter', 'user_token=' . $this->session->data['user_token'] . $url);
 
-		// Filter
 		if (isset($this->request->get['filter_id'])) {
 			$this->load->model('catalog/filter');
 
@@ -206,7 +223,7 @@ class Filter extends \Opencart\System\Engine\Controller {
 			$data['filter_id'] = 0;
 		}
 
-		// Languages
+		// Language
 		$this->load->model('localisation/language');
 
 		$data['languages'] = $this->model_localisation_language->getLanguages();
@@ -223,7 +240,7 @@ class Filter extends \Opencart\System\Engine\Controller {
 			$data['sort_order'] = '';
 		}
 
-		// Filter Groups
+		// Filter Group
 		$this->load->model('catalog/filter_group');
 
 		$data['filter_groups'] = $this->model_catalog_filter_group->getFilterGroups();
@@ -279,7 +296,6 @@ class Filter extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			// Filter
 			$this->load->model('catalog/filter');
 
 			if (!$post_info['filter_id']) {
@@ -316,7 +332,6 @@ class Filter extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			// Filter
 			$this->load->model('catalog/filter');
 
 			foreach ($selected as $filter_id) {
@@ -339,7 +354,6 @@ class Filter extends \Opencart\System\Engine\Controller {
 		$json = [];
 
 		if (isset($this->request->get['filter_name'])) {
-			// Filters
 			$filter_data = [
 				'filter_name' => $this->request->get['filter_name'] . '%',
 				'start'       => 0,

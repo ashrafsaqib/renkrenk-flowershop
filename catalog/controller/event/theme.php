@@ -9,8 +9,6 @@ class Theme extends \Opencart\System\Engine\Controller {
 	/**
 	 * Index
 	 *
-	 * Trigger
-	 *
 	 * @param string            $route
 	 * @param array<int, mixed> $args
 	 * @param string            $code

@@ -1,6 +1,6 @@
 <?php
 // Locale
-$_['code']                  = 'en-GB';
+$_['code']                  = 'en';
 $_['direction']             = 'ltr';
 $_['date_format_short']     = 'd/m/Y';
 $_['date_format_long']      = 'l jS F Y';
@@ -15,7 +15,6 @@ $_['text_yes']              = 'Yes';
 $_['text_no']               = 'No';
 $_['text_none']             = ' --- None --- ';
 $_['text_select']           = ' --- Please Select --- ';
-$_['text_all']              = 'All';
 $_['text_all_zones']        = 'All Zones';
 $_['text_pagination']       = 'Showing %d to %d of %d (%d Pages)';
 $_['text_loading']          = 'Loading...';

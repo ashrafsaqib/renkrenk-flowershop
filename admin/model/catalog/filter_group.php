@@ -142,25 +142,19 @@ class FilterGroup extends \Opencart\System\Engine\Model {
 	 * $results = $this->model_catalog_filter_group->getFilterGroups($filter_data);
 	 */
 	public function getFilterGroups(array $data = []): array {
-		if (!empty($data['filter_language_id'])) {
-			$language_id = $data['filter_language_id'];
-		} else {
-			$language_id = $this->config->get('config_language_id');
-		}
-
-		$sql = "SELECT * FROM `" . DB_PREFIX . "filter_group` `fg` LEFT JOIN `" . DB_PREFIX . "filter_group_description` `fgd` ON (`fg`.`filter_group_id` = `fgd`.`filter_group_id`) WHERE `fgd`.`language_id` = '" . (int)$language_id . "'";
+		$sql = "SELECT * FROM `" . DB_PREFIX . "filter_group` `fg` LEFT JOIN `" . DB_PREFIX . "filter_group_description` `fgd` ON (`fg`.`filter_group_id` = `fgd`.`filter_group_id`) WHERE `fgd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'";
 
 		if (!empty($data['filter_name'])) {
 			$sql .= " AND LCASE(`fgd`.`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_name'])) . "'";
 		}
 
 		$sort_data = [
-			'name'       => 'fgd.name',
-			'sort_order' => 'fg.sort_order'
+			'fgd.name',
+			'fg.sort_order'
 		];
 
-		if (isset($data['sort']) && array_key_exists($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $sort_data[$data['sort']];
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			$sql .= " ORDER BY " . $data['sort'];
 		} else {
 			$sql .= " ORDER BY `fgd`.`name`";
 		}
@@ -201,20 +195,8 @@ class FilterGroup extends \Opencart\System\Engine\Model {
 	 *
 	 * $filter_group_total = $this->model_catalog_filter_group->getTotalFilterGroups();
 	 */
-	public function getTotalFilterGroups(array $data = []): int {
-		if (!empty($data['filter_language_id'])) {
-			$language_id = $data['filter_language_id'];
-		} else {
-			$language_id = $this->config->get('config_language_id');
-		}
-
-		$sql = "SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "filter_group` `fg` LEFT JOIN `" . DB_PREFIX . "filter_group_description` `fgd` ON (`fg`.`filter_group_id` = `fgd`.`filter_group_id`) WHERE `fgd`.`language_id` = '" . (int)$language_id . "'";
-
-		if (!empty($data['filter_name'])) {
-			$sql .= " AND LCASE(`fgd`.`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_name'])) . "'";
-		}
-
-		$query = $this->db->query($sql);
+	public function getTotalFilterGroups(): int {
+		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "filter_group`");
 
 		return (int)$query->row['total'];
 	}

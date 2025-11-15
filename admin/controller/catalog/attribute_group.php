@@ -18,12 +18,18 @@ class AttributeGroup extends \Opencart\System\Engine\Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$remove = [
-			'route',
-			'user_token'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['breadcrumbs'] = [];
 
@@ -71,7 +77,7 @@ class AttributeGroup extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = (string)$this->request->get['sort'];
 		} else {
-			$sort = 'name';
+			$sort = 'agd.name';
 		}
 
 		if (isset($this->request->get['order'])) {
@@ -86,16 +92,23 @@ class AttributeGroup extends \Opencart\System\Engine\Controller {
 			$page = 1;
 		}
 
-		$remove = [
-			'route',
-			'user_token'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['action'] = $this->url->link('catalog/attribute_group.list', 'user_token=' . $this->session->data['user_token'] . $url);
 
-		// Attribute Groups
+		// Attribute Group
 		$data['attribute_groups'] = [];
 
 		$filter_data = [
@@ -113,14 +126,7 @@ class AttributeGroup extends \Opencart\System\Engine\Controller {
 			$data['attribute_groups'][] = ['edit' => $this->url->link('catalog/attribute_group.form', 'user_token=' . $this->session->data['user_token'] . '&attribute_group_id=' . $result['attribute_group_id'] . $url)] + $result;
 		}
 
-		$remove = [
-			'route',
-			'user_token',
-			'sort',
-			'order'
-		];
-
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		$url = '';
 
 		if ($order == 'ASC') {
 			$url .= '&order=DESC';
@@ -128,26 +134,27 @@ class AttributeGroup extends \Opencart\System\Engine\Controller {
 			$url .= '&order=ASC';
 		}
 
-		// Sorts
-		$data['sort_name'] = $this->url->link('catalog/attribute_group.list', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url);
-		$data['sort_sort_order'] = $this->url->link('catalog/attribute_group.list', 'user_token=' . $this->session->data['user_token'] . '&sort=sort_order' . $url);
+		$data['sort_name'] = $this->url->link('catalog/attribute_group.list', 'user_token=' . $this->session->data['user_token'] . '&sort=agd.name' . $url);
+		$data['sort_sort_order'] = $this->url->link('catalog/attribute_group.list', 'user_token=' . $this->session->data['user_token'] . '&sort=ag.sort_order' . $url);
 
-		$remove = [
-			'route',
-			'user_token',
-			'page'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
 
-		// Total Attribute Groups
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
 		$attribute_group_total = $this->model_catalog_attribute_group->getTotalAttributeGroups();
 
-		// Pagination
-		$data['total'] = $attribute_group_total;
-		$data['page'] = $page;
-		$data['limit'] = $this->config->get('config_pagination_admin');
-		$data['pagination'] = $this->url->link('catalog/attribute_group.list', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}');
+		$data['pagination'] = $this->load->controller('common/pagination', [
+			'total' => $attribute_group_total,
+			'page'  => $page,
+			'limit' => $this->config->get('config_pagination_admin'),
+			'url'   => $this->url->link('catalog/attribute_group.list', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}')
+		]);
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($attribute_group_total) ? (($page - 1) * $this->config->get('config_pagination_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_pagination_admin')) > ($attribute_group_total - $this->config->get('config_pagination_admin'))) ? $attribute_group_total : ((($page - 1) * $this->config->get('config_pagination_admin')) + $this->config->get('config_pagination_admin')), $attribute_group_total, ceil($attribute_group_total / $this->config->get('config_pagination_admin')));
 
@@ -169,13 +176,19 @@ class AttributeGroup extends \Opencart\System\Engine\Controller {
 
 		$data['text_form'] = !isset($this->request->get['attribute_group_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
-		$remove = [
-			'route',
-			'user_token',
-			'attribute_group_id'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['breadcrumbs'] = [];
 
@@ -192,7 +205,6 @@ class AttributeGroup extends \Opencart\System\Engine\Controller {
 		$data['save'] = $this->url->link('catalog/attribute_group.save', 'user_token=' . $this->session->data['user_token']);
 		$data['back'] = $this->url->link('catalog/attribute_group', 'user_token=' . $this->session->data['user_token'] . $url);
 
-		// Attribute Group
 		if (isset($this->request->get['attribute_group_id'])) {
 			$this->load->model('catalog/attribute_group');
 
@@ -264,7 +276,6 @@ class AttributeGroup extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			// Attribute Group
 			$this->load->model('catalog/attribute_group');
 
 			if (!$post_info['attribute_group_id']) {
@@ -304,7 +315,6 @@ class AttributeGroup extends \Opencart\System\Engine\Controller {
 		$this->load->model('catalog/attribute');
 
 		foreach ($selected as $attribute_group_id) {
-			// Total Attributes
 			$attribute_total = $this->model_catalog_attribute->getTotalAttributesByAttributeGroupId($attribute_group_id);
 
 			if ($attribute_total) {
@@ -313,7 +323,6 @@ class AttributeGroup extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			// Attribute Group
 			$this->load->model('catalog/attribute_group');
 
 			foreach ($selected as $attribute_group_id) {

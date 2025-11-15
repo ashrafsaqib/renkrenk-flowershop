@@ -18,12 +18,19 @@ class Attribute extends \Opencart\System\Engine\Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		$remove = [
-			'route',
-			'user_token'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . (string)$this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . (string)$this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . (int)$this->request->get['page'];
+		}
 
 		$data['breadcrumbs'] = [];
 
@@ -71,7 +78,7 @@ class Attribute extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->get['sort'])) {
 			$sort = (string)$this->request->get['sort'];
 		} else {
-			$sort = 'name';
+			$sort = 'ad.name';
 		}
 
 		if (isset($this->request->get['order'])) {
@@ -86,16 +93,23 @@ class Attribute extends \Opencart\System\Engine\Controller {
 			$page = 1;
 		}
 
-		$remove = [
-			'route',
-			'user_token'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['action'] = $this->url->link('catalog/attribute.list', 'user_token=' . $this->session->data['user_token'] . $url);
 
-		// Attributes
+		// Attribute
 		$data['attributes'] = [];
 
 		$filter_data = [
@@ -113,14 +127,7 @@ class Attribute extends \Opencart\System\Engine\Controller {
 			$data['attributes'][] = ['edit' => $this->url->link('catalog/attribute.form', 'user_token=' . $this->session->data['user_token'] . '&attribute_id=' . $result['attribute_id'] . $url)] + $result;
 		}
 
-		$remove = [
-			'route',
-			'user_token',
-			'sort',
-			'order'
-		];
-
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		$url = '';
 
 		if ($order == 'ASC') {
 			$url .= '&order=DESC';
@@ -128,27 +135,28 @@ class Attribute extends \Opencart\System\Engine\Controller {
 			$url .= '&order=ASC';
 		}
 
-		// Sorts
-		$data['sort_name'] = $this->url->link('catalog/attribute.list', 'user_token=' . $this->session->data['user_token'] . '&sort=name' . $url);
+		$data['sort_name'] = $this->url->link('catalog/attribute.list', 'user_token=' . $this->session->data['user_token'] . '&sort=ad.name' . $url);
 		$data['sort_attribute_group'] = $this->url->link('catalog/attribute.list', 'user_token=' . $this->session->data['user_token'] . '&sort=attribute_group' . $url);
-		$data['sort_sort_order'] = $this->url->link('catalog/attribute.list', 'user_token=' . $this->session->data['user_token'] . '&sort=sort_order' . $url);
+		$data['sort_sort_order'] = $this->url->link('catalog/attribute.list', 'user_token=' . $this->session->data['user_token'] . '&sort=a.sort_order' . $url);
 
-		$remove = [
-			'route',
-			'user_token',
-			'page'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if ($sort) {
+			$url .= '&sort=' . $sort;
+		}
 
-		// Total Attributes
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
 		$attribute_total = $this->model_catalog_attribute->getTotalAttributes();
 
-		// Pagination
-		$data['total'] = $attribute_total;
-		$data['page'] = $page;
-		$data['limit'] = $this->config->get('config_pagination_admin');
-		$data['pagination'] = $this->url->link('catalog/attribute.list', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}');
+		$data['pagination'] = $this->load->controller('common/pagination', [
+			'total' => $attribute_total,
+			'page'  => $page,
+			'limit' => $this->config->get('config_pagination_admin'),
+			'url'   => $this->url->link('catalog/attribute.list', 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}')
+		]);
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($attribute_total) ? (($page - 1) * $this->config->get('config_pagination_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_pagination_admin')) > ($attribute_total - $this->config->get('config_pagination_admin'))) ? $attribute_total : ((($page - 1) * $this->config->get('config_pagination_admin')) + $this->config->get('config_pagination_admin')), $attribute_total, ceil($attribute_total / $this->config->get('config_pagination_admin')));
 
@@ -170,13 +178,19 @@ class Attribute extends \Opencart\System\Engine\Controller {
 
 		$data['text_form'] = !isset($this->request->get['attribute_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
-		$remove = [
-			'route',
-			'user_token',
-			'attribute_id'
-		];
+		$url = '';
 
-		$url = '&' . http_build_query(array_diff_key($this->request->get, array_flip($remove)));
+		if (isset($this->request->get['sort'])) {
+			$url .= '&sort=' . $this->request->get['sort'];
+		}
+
+		if (isset($this->request->get['order'])) {
+			$url .= '&order=' . $this->request->get['order'];
+		}
+
+		if (isset($this->request->get['page'])) {
+			$url .= '&page=' . $this->request->get['page'];
+		}
 
 		$data['breadcrumbs'] = [];
 
@@ -193,7 +207,6 @@ class Attribute extends \Opencart\System\Engine\Controller {
 		$data['save'] = $this->url->link('catalog/attribute.save', 'user_token=' . $this->session->data['user_token']);
 		$data['back'] = $this->url->link('catalog/attribute', 'user_token=' . $this->session->data['user_token'] . $url);
 
-		// Attribute
 		if (isset($this->request->get['attribute_id'])) {
 			$this->load->model('catalog/attribute');
 
@@ -206,7 +219,7 @@ class Attribute extends \Opencart\System\Engine\Controller {
 			$data['attribute_id'] = 0;
 		}
 
-		// Languages
+		// Language
 		$this->load->model('localisation/language');
 
 		$data['languages'] = $this->model_localisation_language->getLanguages();
@@ -217,7 +230,7 @@ class Attribute extends \Opencart\System\Engine\Controller {
 			$data['attribute_description'] = [];
 		}
 
-		// Attribute Groups
+		// Attribute Group
 		$this->load->model('catalog/attribute_group');
 
 		$data['attribute_groups'] = $this->model_catalog_attribute_group->getAttributeGroups();
@@ -281,7 +294,6 @@ class Attribute extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			// Attribute
 			$this->load->model('catalog/attribute');
 
 			if (!$post_info['attribute_id']) {
@@ -321,7 +333,6 @@ class Attribute extends \Opencart\System\Engine\Controller {
 		$this->load->model('catalog/product');
 
 		foreach ($selected as $attribute_id) {
-			// Total Attributes
 			$product_total = $this->model_catalog_product->getTotalAttributesByAttributeId((int)$attribute_id);
 
 			if ($product_total) {
@@ -330,7 +341,6 @@ class Attribute extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			// Attribute
 			$this->load->model('catalog/attribute');
 
 			foreach ($selected as $attribute_id) {
@@ -353,14 +363,13 @@ class Attribute extends \Opencart\System\Engine\Controller {
 		$json = [];
 
 		if (isset($this->request->get['filter_name'])) {
-			// Attributes
+			$this->load->model('catalog/attribute');
+
 			$filter_data = [
 				'filter_name' => $this->request->get['filter_name'],
 				'start'       => 0,
 				'limit'       => $this->config->get('config_autocomplete_limit')
 			];
-
-			$this->load->model('catalog/attribute');
 
 			$results = $this->model_catalog_attribute->getAttributes($filter_data);
 
@@ -373,7 +382,13 @@ class Attribute extends \Opencart\System\Engine\Controller {
 			}
 		}
 
-		array_multisort(array_column($json, 'name'), SORT_ASC, $json);
+		$sort_order = [];
+
+		foreach ($json as $key => $value) {
+			$sort_order[$key] = $value['name'];
+		}
+
+		array_multisort($sort_order, SORT_ASC, $json);
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
