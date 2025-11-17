@@ -36,12 +36,19 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 	 * $subscription_plan_id = $this->model_catalog_subscription_plan->addSubscriptionPlan($subscription_data);
 	 */
 	public function addSubscriptionPlan(array $data): int {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan` SET `trial_frequency` = '" . $this->db->escape((string)$data['trial_frequency']) . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_status` = '" . (int)$data['trial_status'] . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `duration` = '" . (int)$data['duration'] . "', `cycle` = '" . (int)$data['cycle'] . "', `status` = '" . (bool)$data['status'] . "', `sort_order` = '" . (int)$data['sort_order'] . "'");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan` SET `trial_frequency` = '" . $this->db->escape((string)$data['trial_frequency']) . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_status` = '" . (int)$data['trial_status'] . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `duration` = '" . (int)$data['duration'] . "', `cycle` = '" . (int)$data['cycle'] . "', `status` = '" . (bool)$data['status'] . "', `sort_order` = '" . (int)$data['sort_order'] . "', `price` = '" . (float)$data['price'] . "'");
 
 		$subscription_plan_id = $this->db->getLastId();
 
 		foreach ($data['subscription_plan_description'] as $language_id => $subscription_plan_description) {
 			$this->model_catalog_subscription_plan->addDescription($subscription_plan_id, $language_id, $subscription_plan_description);
+		}
+
+		// Images
+		if (isset($data['subscription_plan_image'])) {
+			foreach ($data['subscription_plan_image'] as $subscription_plan_image) {
+				$this->model_catalog_subscription_plan->addImage($subscription_plan_id, $subscription_plan_image);
+			}
 		}
 
 		return $subscription_plan_id;
@@ -76,12 +83,21 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 	 * $this->model_catalog_subscription_plan->editSubscriptionPlan($subscription_plan_id, $subscription_plan_data);
 	 */
 	public function editSubscriptionPlan(int $subscription_plan_id, array $data): void {
-		$this->db->query("UPDATE `" . DB_PREFIX . "subscription_plan` SET `trial_frequency` = '" . $this->db->escape((string)$data['trial_frequency']) . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_status` = '" . (int)$data['trial_status'] . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `duration` = '" . (int)$data['duration'] . "', `cycle` = '" . (int)$data['cycle'] . "', `status` = '" . (bool)$data['status'] . "', `sort_order` = '" . (int)$data['sort_order'] . "' WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
+		$this->db->query("UPDATE `" . DB_PREFIX . "subscription_plan` SET `trial_frequency` = '" . $this->db->escape((string)$data['trial_frequency']) . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_status` = '" . (int)$data['trial_status'] . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `duration` = '" . (int)$data['duration'] . "', `cycle` = '" . (int)$data['cycle'] . "', `status` = '" . (bool)$data['status'] . "', `sort_order` = '" . (int)$data['sort_order'] . "', `price` = '" . (float)$data['price'] . "' WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
 
 		$this->model_catalog_subscription_plan->deleteDescriptions($subscription_plan_id);
 
 		foreach ($data['subscription_plan_description'] as $language_id => $subscription_plan_description) {
 			$this->model_catalog_subscription_plan->addDescription($subscription_plan_id, $language_id, $subscription_plan_description);
+		}
+
+		// Images
+		$this->model_catalog_subscription_plan->deleteImages($subscription_plan_id);
+
+		if (isset($data['subscription_plan_image'])) {
+			foreach ($data['subscription_plan_image'] as $subscription_plan_image) {
+				$this->model_catalog_subscription_plan->addImage($subscription_plan_id, $subscription_plan_image);
+			}
 		}
 	}
 
@@ -121,6 +137,8 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "subscription_plan` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
 
 		$this->model_catalog_subscription_plan->deleteDescriptions($subscription_plan_id);
+
+		$this->model_catalog_subscription_plan->deleteImages($subscription_plan_id);
 
 		// Product
 		$this->load->model('catalog/product');
@@ -234,7 +252,7 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 	 * $this->model_catalog_subscription_plan->addDescription($subscription_plan_id, $language_id, $subscription_data);
 	 */
 	public function addDescription(int $subscription_plan_id, int $language_id, array $data): void {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan_description` SET `subscription_plan_id` = '" . (int)$subscription_plan_id . "', `language_id` = '" . (int)$language_id . "', `name` = '" . $this->db->escape($data['name']) . "'");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan_description` SET `subscription_plan_id` = '" . (int)$subscription_plan_id . "', `language_id` = '" . (int)$language_id . "', `name` = '" . $this->db->escape($data['name']) . "', description ='". $this->db->escape($data['description']) . "'" );
 	}
 
 	/**
@@ -340,5 +358,70 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "subscription_plan`");
 
 		return (int)$query->row['total'];
+	}
+
+	/**
+	 * Add Image
+	 *
+	 * Create a new subscription plan image record in the database.
+	 *
+	 * @param int                  $subscription_plan_id primary key of the subscription plan record
+	 * @param array<string, mixed> $data                 array of data
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $subscription_plan_image_data = [
+	 *     'image' => 'catalog/subscription/image.jpg',
+	 *     'sort_order' => 0
+	 * ];
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $this->model_catalog_subscription_plan->addImage($subscription_plan_id, $subscription_plan_image_data);
+	 */
+	public function addImage(int $subscription_plan_id, array $data): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan_image` SET `subscription_plan_id` = '" . (int)$subscription_plan_id . "', `image` = '" . $this->db->escape($data['image']) . "', `sort_order` = '" . (int)$data['sort_order'] . "'");
+	}
+
+	/**
+	 * Delete Images
+	 *
+	 * Delete subscription plan image records in the database.
+	 *
+	 * @param int $subscription_plan_id primary key of the subscription plan record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $this->model_catalog_subscription_plan->deleteImages($subscription_plan_id);
+	 */
+	public function deleteImages(int $subscription_plan_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "subscription_plan_image` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
+	}
+
+	/**
+	 * Get Images
+	 *
+	 * Get the record of the subscription plan image records in the database.
+	 *
+	 * @param int $subscription_plan_id primary key of the subscription plan record
+	 *
+	 * @return array<int, array<string, mixed>> image records that have subscription plan ID
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_images = $this->model_catalog_subscription_plan->getImages($subscription_plan_id);
+	 */
+	public function getImages(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_plan_image` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "' ORDER BY `sort_order` ASC");
+
+		return $query->rows;
 	}
 }

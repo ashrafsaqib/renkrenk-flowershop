@@ -172,6 +172,11 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 	 * @return void
 	 */
 	public function form(): void {
+
+
+		$this->document->addScript('view/javascript/ckeditor/ckeditor.js');
+		$this->document->addScript('view/javascript/ckeditor/adapters/jquery.js');
+		
 		$this->load->language('catalog/subscription_plan');
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -229,6 +234,51 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 		} else {
 			$data['subscription_plan_description'] = [];
 		}
+
+		// Price
+		if (!empty($subscription_info)) {
+			$data['price'] = $subscription_info['price'];
+		} else {
+			$data['price'] = 0;
+		}
+
+		// Images
+		$this->load->model('tool/image');
+
+		if (!empty($subscription_info)) {
+			$subscription_images = $this->model_catalog_subscription_plan->getImages($subscription_info['subscription_plan_id']);
+		} else {
+			$subscription_images = [];
+		}
+
+		$data['subscription_plan_images'] = [];
+
+		foreach ($subscription_images as $subscription_image) {
+			if ($subscription_image['image'] && is_file(DIR_IMAGE . html_entity_decode($subscription_image['image'], ENT_QUOTES, 'UTF-8'))) {
+				$image = $subscription_image['image'];
+				$thumb = $subscription_image['image'];
+			} else {
+				$image = '';
+				$thumb = $this->model_tool_image->resize('placeholder.png', 300, 300);
+			}
+
+			if (!empty($subscription_image['image'])) {
+				$thumb = $this->model_tool_image->resize($subscription_image['image'], 300, 300);
+			} else {
+				$thumb = $this->model_tool_image->resize('placeholder.png', 300, 300);
+			}
+
+			$data['subscription_plan_images'][] = [
+				'image' => $image,
+				'thumb' => $thumb,
+				'sort_order' => $subscription_image['sort_order']
+			];
+		}
+
+		$data['placeholder'] = $this->model_tool_image->resize('placeholder.png', 300, 300);
+
+		// CKEditor language
+		$data['ckeditor'] = 'en';
 
 		$data['frequencies'] = [];
 
@@ -344,7 +394,9 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 			'frequency'                     => 0,
 			'cycle'                         => 0,
 			'status'                        => 0,
-			'sort_order'                    => 0
+			'sort_order'                    => 0,
+			'price'                         => 0,
+			'subscription_plan_image'       => []
 		];
 
 		$post_info = $this->request->post + $required;

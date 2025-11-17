@@ -14,6 +14,9 @@ $_['text_week']              = 'Week';
 $_['text_semi_month']        = 'Semi Month';
 $_['text_month']             = 'Month';
 $_['text_year']              = 'Year';
+$_['text_description']       = 'Description';
+$_['text_image']             = 'Main Image';
+$_['text_image_additional']  = 'Additional Images';
 
 // Entry
 $_['entry_name']             = 'Subscription Plan Name';
@@ -26,6 +29,9 @@ $_['entry_cycle']            = 'Cycle';
 $_['entry_frequency']        = 'Frequency';
 $_['entry_status']           = 'Status';
 $_['entry_sort_order']       = 'Sort Order';
+$_['entry_price']            = 'Price';
+$_['entry_description']      = 'Description';
+$_['entry_image']            = 'Image';
 
 // Column
 $_['column_name']            = 'Subscription Plan Name';
