@@ -36,6 +36,59 @@
 </head>
 
 <body>
+   <div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    
+
+                    <!-- 1. Address Input (Priority/Top) -->
+                    <div id="autocompleteInputGroup" class="mb-4 border p-3 rounded-3 bg-light">
+                        <label for="districtInput" class="form-label fw-bold">Type Full Address (Google Suggestions)</label>
+                        <!-- Address input is now enabled by default -->
+                        <input type="text" class="form-control" id="districtInput" placeholder="Start typing your full address (e.g., Levent, Istanbul)...">
+                        <div class="form-text text-muted mt-2">Selecting a Google suggestion will automatically fill in the City and District below.</div>
+                    </div>
+
+                    <!-- 2. Manual Selection Dropdowns -->
+                    <div class="p-3 border rounded-3">
+                         <label class="form-label fw-bold mb-3"> OR Manual City / District Selection (Optional)</label>
+                        
+                        <!-- 2a. City Dropdown -->
+                        <div class="mb-3">
+    <label for="cityDropdown" class="form-label">İl (Şehir)</label>
+    <select class="form-select" id="cityDropdown">
+        <option selected value="">Bir İl Seçiniz...</option>
+        <option value="İstanbul">İstanbul</option>
+        <option value="Ankara">Ankara</option>
+        <option value="İzmir">İzmir</option>
+        <option value="Antalya">Antalya</option>
+        <option value="Bursa">Bursa</option>
+        <option value="Adana">Adana</option>
+        <option value="Gaziantep">Gaziantep</option>
+        <option value="Konya">Konya</option>
+    </select>
+</div>
+
+                        <!-- 2b. District Dropdown -->
+                        <div id="manualInputGroup" class="mb-3">
+                            <label for="manualDistrictDropdown" class="form-label">District (İlçe)</label>
+                            <select class="form-select" id="manualDistrictDropdown" disabled>
+                                <option selected value="">Select a District...</option>
+                            </select>
+                        </div>
+                    </div>
+                   
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="saveLocationBtn" disabled>Save Location</button>
+                </div>
+            </div>
+        </div>
+    </div>
+  
   <div id="container" class="d-flex flex-column min-vh-100">
     <div id="alert"></div>
     <nav id="top">
@@ -45,16 +98,9 @@
             <ul class="list-inline">
               <li class="list-inline-item">
                 <div class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-label="Select location">
+                  <a href="#" class="dropdown-toggle" data-bs-toggle="modal" data-bs-target="#locationModal" aria-label="Select location">
                     <i class="fa-solid fa-location-dot"></i> <span class="d-none d-lg-inline">Your Location</span>
                   </a>
-                  <ul class="dropdown-menu dropdown-menu-right">
-                    <li><a href="#" class="dropdown-item">Kadıköy</a></li>
-                    <li><a href="#" class="dropdown-item">Beşiktaş</a></li>
-                    <li><a href="#" class="dropdown-item">Şişli</a></li>
-                    <li><a href="#" class="dropdown-item">Fatih</a></li>
-                    <li><a href="#" class="dropdown-item">Üsküdar</a></li>
-                  </ul>
                 </div>
               </li>
               <li class="list-inline-item">{{ language }}</li>
@@ -135,4 +181,312 @@
                   }
                 });
               });
-              </script>
+             
+        // CRITICAL: Replace THIS_IS_YOUR_GOOGLE_MAPS_API_KEY with your actual API key
+        // Ensure the Google Maps API key has the 'Places API' enabled.
+        const GOOGLE_API_KEY = "AIzaSyDttvRoRvt_sA5CXZjqaPzDf_SUw1w8ONk"; 
+
+        // JSON list of cities and common districts for manual selection
+        const turkishCitiesAndDistricts = {
+            "İstanbul": [
+                "Adalar", "Arnavutköy", "Ataşehir", "Avcılar", "Bağcılar", 
+                "Bahçelievler", "Bakırköy", "Başakşehir", "Bayrampaşa", "Beşiktaş", 
+                "Beykoz", "Beylikdüzü", "Beyoğlu", "Büyükçekmece", "Çatalca", 
+                "Çekmeköy", "Esenler", "Esenyurt", "Eyüpsultan", "Fatih", 
+                "Gaziosmanpaşa", "Güngören", "Kadıköy", "Kağıthane", "Kartal", 
+                "Küçükçekmece", "Maltepe", "Pendik", "Sancaktepe", "Sarıyer", 
+                "Silivri", "Sultanbeyli", "Sultangazi", "Şile", "Şişli", 
+                "Tuzla", "Ümraniye", "Üsküdar", "Zeytinburnu"
+            ],
+            "Ankara": [
+                "Akyurt", "Altındağ", "Ayaş", "Balâ", "Beypazarı", "Çamlıdere", 
+                "Çankaya", "Çubuk", "Elmadağ", "Etimesgut", "Evren", "Gölbaşı", 
+                "Güdül", "Haymana", "Kahramankazan", "Kalecik", "Keçiören", 
+                "Kızılcahamam", "Mamak", "Nallıhan", "Polatlı", "Pursaklar", 
+                "Sincan", "Şereflikoçhisar", "Yenimahalle"
+            ],
+            "İzmir": [
+                "Aliağa", "Balçova", "Bayındır", "Bayraklı", "Bergama", "Beydağ", 
+                "Bornova", "Buca", "Çeşme", "Çiğli", "Dikili", "Foça", 
+                "Gaziemir", "Güzelbahçe", "Karabağlar", "Karaburun", "Karşıyaka", 
+                "Kemalpaşa", "Kınık", "Kiraz", "Konak", "Menderes", "Menemen", 
+                "Narlıdere", "Ödemiş", "Seferihisar", "Selçuk", "Tire", 
+                "Torbalı", "Urla"
+            ],
+            "Antalya": [
+                "Akseki", "Aksu", "Alanya", "Demre", "Döşemealtı", "Elmalı", 
+                "Finike", "Gazipaşa", "Gündoğmuş", "İbradı", "Kaş", "Kemer", 
+                "Kepez", "Konyaaltı", "Korkuteli", "Kumluca", "Manavgat", 
+                "Muratpaşa", "Serik"
+            ],
+            "Bursa": [
+                "Büyükorhan", "Gemlik", "Gürsu", "Harmancık", "İnegöl", "İznik", 
+                "Karacabey", "Keles", "Kestel", "Mudanya", "Mustafakemalpaşa", 
+                "Nilüfer", "Orhaneli", "Orhangazi", "Osmangazi", "Yenişehir", 
+                "Yıldırım"
+            ],
+            "Adana": [
+                "Aladağ", "Ceyhan", "Çukurova", "Feke", "İmamoğlu", "Karaisalı", 
+                "Karataş", "Kozan", "Pozantı", "Saimbeyli", "Sarıçam", "Seyhan", 
+                "Tufanbeyli", "Yumurtalık", "Yüreğir"
+            ],
+            "Gaziantep": [
+                "Araban", "İslahiye", "Karkamış", "Nizip", "Nurdağı", 
+                "Oğuzeli", "Şahinbey", "Şehitkamil", "Yavuzeli"
+            ],
+            "Konya": [
+                "Ahırlı", "Akören", "Akşehir", "Altınekin", "Beyşehir", "Bozkır", 
+                "Cihanbeyli", "Çeltik", "Çumra", "Derbent", "Derebucak", "Doğanhisar", 
+                "Emirgazi", "Ereğli", "Güneysınır", "Hadim", "Halkapınar", "Hüyük", 
+                "Ilgın", "Kadınhanı", "Karapınar", "Karatay", "Kulu", "Meram", 
+                "Sarayönü", "Selçuklu", "Seydişehir", "Taşkent", "Tuzlukçu", 
+                "Yalıhüyük", "Yunak"
+            ]
+        };
+        
+        let autocomplete;
+        let isAutocompleteValid = false; // Flag to track if a Google place was successfully selected
+        let isProgrammaticCityUpdate = false; // Flag to prevent clearing the address input on self-update
+
+        // This function dynamically loads the Google Maps script
+        function loadGoogleMapsScript() {
+            if (document.getElementById('googleMapsScript')) {
+                if (typeof google === 'object' && typeof google.maps === 'object') {
+                    window.initAutocomplete();
+                }
+                return; 
+            }
+            
+            const script = document.createElement('script');
+            script.id = 'googleMapsScript';
+            // Load the 'places' library for Autocomplete
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&callback=initAutocomplete`;
+            script.async = true;
+            document.head.appendChild(script);
+        }
+
+        // This function is called once the Google Maps script is fully loaded
+        window.initAutocomplete = function() {
+            const districtInput = document.getElementById('districtInput');
+            
+            // 3. Initialize Google Places Autocomplete
+            autocomplete = new google.maps.places.Autocomplete(districtInput, {
+                // Restrict results to Turkey
+                componentRestrictions: { country: ["tr"] },
+                // Suggest addresses (geocodes)
+                types: ['geocode'], 
+            });
+
+            // 4. Listen for the place selection event
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                const saveBtn = document.getElementById('saveLocationBtn');
+                const manualDropdown = document.getElementById('manualDistrictDropdown');
+                const cityDropdown = document.getElementById('cityDropdown');
+
+                if (place.geometry) {
+                    isAutocompleteValid = true;
+                    saveBtn.disabled = false;
+                    
+                    let districtName = null;
+                    let cityName = null;
+
+                    // 1. Extract City (administrative_area_level_1) and District (administrative_area_level_2)
+                    for (const component of place.address_components) {
+                        if (component.types.includes('administrative_area_level_1')) {
+                            cityName = component.long_name;
+                        }
+                        if (component.types.includes('administrative_area_level_2')) {
+                            districtName = component.long_name;
+                        }
+                    }
+                    console.log(cityName);
+
+                    console.log(districtName);
+                    
+                    // 2. Programmatically update the City Dropdown
+                    if (cityName && turkishCitiesAndDistricts[cityName]) {
+                        isProgrammaticCityUpdate = true; // Set flag
+                        cityDropdown.value = cityName;
+                        // Dispatch change event to populate the district dropdown
+                        cityDropdown.dispatchEvent(new Event('change'));
+                        isProgrammaticCityUpdate = false; // Clear flag
+                    } else {
+                        // Clear the city dropdown if city is not one of our hardcoded options
+                        cityDropdown.value = "";
+                        cityDropdown.dispatchEvent(new Event('change'));
+                    }
+
+                    // 3. Update the District Dropdown
+                    const currentCity = cityDropdown.value;
+                    if (districtName && currentCity && turkishCitiesAndDistricts[currentCity] && turkishCitiesAndDistricts[currentCity].includes(districtName)) {
+                        manualDropdown.value = districtName;
+                    } else {
+                        // Clear the manual selection if the extracted district isn't found
+                        manualDropdown.value = ""; 
+                    }
+
+                } else {
+                    // If user types and leaves without selecting a valid suggestion
+                    isAutocompleteValid = false;
+                    // Re-check if save button should be enabled based on manual selection
+                    saveBtn.disabled = !(cityDropdown.value && manualDropdown.value); 
+                }
+            });
+            
+            console.log("Google Places Autocomplete Initialized.");
+        }
+        
+        // --- Geolocation Function (Get User's Real Location Link) ---
+        function getUserLocationLink() {
+            const button = document.getElementById('openLocationModalBtn');
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                        
+                        // Update the button to be a link
+                        button.innerHTML = `📍 View Your Current Location`;
+                        button.classList.remove('btn-primary');
+                        button.classList.add('btn-info');
+                        button.setAttribute('onclick', `window.open('${mapLink}', '_blank')`);
+                        button.removeAttribute('data-bs-toggle');
+                        button.removeAttribute('data-bs-target');
+                        
+                        // Create a separate link to open the selection modal
+                        const container = document.querySelector('.container');
+                        let modalLink = container.querySelector('.modal-selection-link');
+                        if (!modalLink) {
+                            const p = document.createElement('p');
+                            p.className = 'mt-3 modal-selection-link';
+                            p.innerHTML = `<a href="#" class="text-secondary" data-bs-toggle="modal" data-bs-target="#locationModal">Or click here to manually select a city/district.</a>`;
+                            container.appendChild(p);
+                        }
+                        
+                    },
+                    (error) => {
+                        console.error("Geolocation failed:", error);
+                        button.innerHTML = `📍 Select Your Location`;
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            } else {
+                console.log("Geolocation is not supported by this browser.");
+            }
+        }
+        
+        // --- Populate Manual Dropdown ---
+        function populateManualDropdown(city) {
+            const dropdown = document.getElementById('manualDistrictDropdown');
+            dropdown.innerHTML = '<option selected value="">Select a District...</option>'; // Clear existing options
+            
+            if (!city || !turkishCitiesAndDistricts[city]) {
+                dropdown.disabled = true;
+                return;
+            }
+            
+            dropdown.disabled = false;
+            turkishCitiesAndDistricts[city].forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                dropdown.appendChild(option);
+            });
+        }
+
+        // --- Main Logic and Event Listeners ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const cityDropdown = document.getElementById('cityDropdown');
+            const districtInput = document.getElementById('districtInput');
+            const manualDistrictDropdown = document.getElementById('manualDistrictDropdown');
+            const saveLocationBtn = document.getElementById('saveLocationBtn');
+            const locationModal = document.getElementById('locationModal');
+            
+            // The address input is now enabled by default (removed the disabling line)
+            manualDistrictDropdown.disabled = true;
+            saveLocationBtn.disabled = true;
+
+            
+            
+            // Load Google Maps script when the modal is about to be shown
+            locationModal.addEventListener('show.bs.modal', loadGoogleMapsScript);
+
+            
+            // 5. Handle City Dropdown Change
+            cityDropdown.addEventListener('change', () => {
+                const city = cityDropdown.value;
+
+                // If the update was not triggered programmatically (i.e., user clicked the dropdown)
+                if (!isProgrammaticCityUpdate) {
+                    // 1. Clear autocomplete input and validation state when user manually changes city
+                    districtInput.value = '';
+                    isAutocompleteValid = false;
+                    
+                    
+                }
+                
+                // 3. Always update manual district dropdown based on selected city
+                populateManualDropdown(city);
+                
+                // 4. Clear district dropdown value and re-evaluate save button state
+                manualDistrictDropdown.value = '';
+                saveLocationBtn.disabled = true;
+            });
+            
+            // Listener for Manual District Dropdown change to enable save button
+            manualDistrictDropdown.addEventListener('change', () => {
+                const selectedCity = cityDropdown.value;
+                const selectedDistrict = manualDistrictDropdown.value;
+                // Enable if city and district are selected, REGARDLESS of autocomplete state
+                saveLocationBtn.disabled = !(selectedCity && selectedDistrict);
+            });
+            
+            // Listener for Autocomplete Input text entry (typing)
+            // Typing disables autocomplete validation, but keeps save button enabled if manual is valid.
+            districtInput.addEventListener('input', () => {
+                isAutocompleteValid = false;
+                // Only disable save button if neither autocomplete is valid nor manual is selected
+                const selectedCity = cityDropdown.value;
+                const selectedDistrict = manualDistrictDropdown.value;
+                saveLocationBtn.disabled = !(isAutocompleteValid || (selectedCity && selectedDistrict)); 
+            });
+
+
+            // 6. Handle Save Button Click
+            saveLocationBtn.addEventListener('click', () => {
+                const selectedCity = cityDropdown.value;
+                
+                let selectedLocation;
+                let source;
+
+                // Priority 1: Google Autocomplete (Full Address) - most specific
+                if (isAutocompleteValid) {
+                    selectedLocation = districtInput.value;
+                    source = "(Google Address)";
+                } 
+                // Priority 2: Manual Dropdown (District Name)
+                else if (manualDistrictDropdown.value) {
+                    selectedLocation = manualDistrictDropdown.value;
+                    source = "(Manual District)";
+                } else {
+                     selectedLocation = null;
+                }
+
+                if (selectedCity && selectedLocation) {
+                    const display = document.getElementById('currentLocationDisplay');
+                    display.innerHTML = `✅ **Selected Location:** **${selectedLocation}**, **${selectedCity}** ${source}`;
+                    
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(locationModal);
+                    modal.hide();
+                    
+                } 
+            });
+            
+            // 7. Initial Geolocation Call
+            getUserLocationLink();
+        });
+    </script>
