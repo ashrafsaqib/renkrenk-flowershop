@@ -104,6 +104,26 @@ class Header extends \Opencart\System\Engine\Controller {
 
 		$data['google_api_key'] = GOOGLE_API_KEY;
 
+
+		// JSON list of countries and zones from zone , country and zone_description tables in opencart database
+		$language_id = (int)$this->config->get('config_language_id');
+		// find active countries and loop and add their zones
+		$results = [];
+		$countries = $this->db->query("SELECT cd.country_id, cd.name FROM `" . DB_PREFIX . "country_description` cd LEFT JOIN `" . DB_PREFIX . "country` c ON cd.country_id = c.country_id WHERE c.status = '1' AND cd.language_id = " . (int)$language_id . " ORDER BY cd.name")->rows;
+
+		foreach ($countries as $country) {
+			$country_id = $country['country_id'];
+			$country_name = $country['name'];
+			$zones = $this->db->query("SELECT zd.zone_id, zd.name FROM `" . DB_PREFIX . "zone_description` zd LEFT JOIN `" . DB_PREFIX . "zone` z ON zd.zone_id = z.zone_id WHERE z.country_id = " . (int)$country_id . " AND z.status = '1' AND zd.language_id = " . (int)$language_id . " ORDER BY zd.name")->rows;
+			$zone_names = [];
+			foreach ($zones as $zone) {
+				$zone_names[] = $zone['name'];
+			}
+			$results[$country_name] = $zone_names;
+		}
+		$data['turkish_cities'] = $countries;
+		$data['turkish_cities_and_districts_json'] = json_encode($results);
+
 		return $this->load->view('common/header', $data);
 	}
 }

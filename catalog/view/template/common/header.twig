@@ -58,15 +58,10 @@
             <div class="mb-3">
               <label for="cityDropdown" class="form-label">İl (Şehir)</label>
               <select class="form-select" id="cityDropdown">
-                <option selected value="">Bir İl Seçiniz...</option>
-                <option value="İstanbul">İstanbul</option>
-                <option value="Ankara">Ankara</option>
-                <option value="İzmir">İzmir</option>
-                <option value="Antalya">Antalya</option>
-                <option value="Bursa">Bursa</option>
-                <option value="Adana">Adana</option>
-                <option value="Gaziantep">Gaziantep</option>
-                <option value="Konya">Konya</option>
+                <option selected value="">Select a City...</option>
+                {% for city in turkish_cities %}
+                  <option value="{{ city.name }}">{{ city.name }}</option>
+                {% endfor %}
               </select>
             </div>
 
@@ -193,62 +188,7 @@
         const GOOGLE_API_KEY = "{{ google_api_key }}";
 
         // JSON list of cities and common districts for manual selection
-        const turkishCitiesAndDistricts = {
-          "İstanbul": [
-            "Adalar", "Arnavutköy", "Ataşehir", "Avcılar", "Bağcılar",
-            "Bahçelievler", "Bakırköy", "Başakşehir", "Bayrampaşa", "Beşiktaş",
-            "Beykoz", "Beylikdüzü", "Beyoğlu", "Büyükçekmece", "Çatalca",
-            "Çekmeköy", "Esenler", "Esenyurt", "Eyüpsultan", "Fatih",
-            "Gaziosmanpaşa", "Güngören", "Kadıköy", "Kağıthane", "Kartal",
-            "Küçükçekmece", "Maltepe", "Pendik", "Sancaktepe", "Sarıyer",
-            "Silivri", "Sultanbeyli", "Sultangazi", "Şile", "Şişli",
-            "Tuzla", "Ümraniye", "Üsküdar", "Zeytinburnu"
-          ],
-          "Ankara": [
-            "Akyurt", "Altındağ", "Ayaş", "Balâ", "Beypazarı", "Çamlıdere",
-            "Çankaya", "Çubuk", "Elmadağ", "Etimesgut", "Evren", "Gölbaşı",
-            "Güdül", "Haymana", "Kahramankazan", "Kalecik", "Keçiören",
-            "Kızılcahamam", "Mamak", "Nallıhan", "Polatlı", "Pursaklar",
-            "Sincan", "Şereflikoçhisar", "Yenimahalle"
-          ],
-          "İzmir": [
-            "Aliağa", "Balçova", "Bayındır", "Bayraklı", "Bergama", "Beydağ",
-            "Bornova", "Buca", "Çeşme", "Çiğli", "Dikili", "Foça",
-            "Gaziemir", "Güzelbahçe", "Karabağlar", "Karaburun", "Karşıyaka",
-            "Kemalpaşa", "Kınık", "Kiraz", "Konak", "Menderes", "Menemen",
-            "Narlıdere", "Ödemiş", "Seferihisar", "Selçuk", "Tire",
-            "Torbalı", "Urla"
-          ],
-          "Antalya": [
-            "Akseki", "Aksu", "Alanya", "Demre", "Döşemealtı", "Elmalı",
-            "Finike", "Gazipaşa", "Gündoğmuş", "İbradı", "Kaş", "Kemer",
-            "Kepez", "Konyaaltı", "Korkuteli", "Kumluca", "Manavgat",
-            "Muratpaşa", "Serik"
-          ],
-          "Bursa": [
-            "Büyükorhan", "Gemlik", "Gürsu", "Harmancık", "İnegöl", "İznik",
-            "Karacabey", "Keles", "Kestel", "Mudanya", "Mustafakemalpaşa",
-            "Nilüfer", "Orhaneli", "Orhangazi", "Osmangazi", "Yenişehir",
-            "Yıldırım"
-          ],
-          "Adana": [
-            "Aladağ", "Ceyhan", "Çukurova", "Feke", "İmamoğlu", "Karaisalı",
-            "Karataş", "Kozan", "Pozantı", "Saimbeyli", "Sarıçam", "Seyhan",
-            "Tufanbeyli", "Yumurtalık", "Yüreğir"
-          ],
-          "Gaziantep": [
-            "Araban", "İslahiye", "Karkamış", "Nizip", "Nurdağı",
-            "Oğuzeli", "Şahinbey", "Şehitkamil", "Yavuzeli"
-          ],
-          "Konya": [
-            "Ahırlı", "Akören", "Akşehir", "Altınekin", "Beyşehir", "Bozkır",
-            "Cihanbeyli", "Çeltik", "Çumra", "Derbent", "Derebucak", "Doğanhisar",
-            "Emirgazi", "Ereğli", "Güneysınır", "Hadim", "Halkapınar", "Hüyük",
-            "Ilgın", "Kadınhanı", "Karapınar", "Karatay", "Kulu", "Meram",
-            "Sarayönü", "Selçuklu", "Seydişehir", "Taşkent", "Tuzlukçu",
-            "Yalıhüyük", "Yunak"
-          ]
-        };
+        const turkishCitiesAndDistricts = {{ turkish_cities_and_districts_json|raw }};
 
         let autocomplete;
         let isAutocompleteValid = false; // Flag to track if a Google place was successfully selected
