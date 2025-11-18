@@ -153,6 +153,12 @@
         </div>
       </div>
     </header>
+       <style>
+        /* CRITICAL FIX: Increased z-index significantly to ensure Google Autocomplete suggestions show on top of the Bootstrap modal (which uses z-index 1050). */
+        .pac-container {
+            z-index: 9999 !important; 
+        }
+        </style>
     <main class="flex-grow-1 mb-4">
       {{ menu }}
 
