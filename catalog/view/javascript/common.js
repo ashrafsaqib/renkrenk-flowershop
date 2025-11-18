@@ -23,8 +23,8 @@ function getURLVar(key) {
 }
 
 // Observe
-+function($) {
-    $.fn.observe = function(callback) {
++function ($) {
+    $.fn.observe = function (callback) {
         observer = new MutationObserver(callback);
 
         observer.observe($(this)[0], {
@@ -35,9 +35,9 @@ function getURLVar(key) {
     };
 }(jQuery);
 
-$(document).ready(function() {
+$(document).ready(function () {
     // Tooltip
-    var oc_tooltip = function() {
+    var oc_tooltip = function () {
         // Get tooltip instance
         tooltip = bootstrap.Tooltip.getInstance(this);
 
@@ -50,13 +50,13 @@ $(document).ready(function() {
 
     $(document).on('mouseenter', '[data-bs-toggle=\'tooltip\']', oc_tooltip);
 
-    $(document).on('click', 'button', function() {
+    $(document).on('click', 'button', function () {
         $('.tooltip').remove();
     });
 
-    $('#alert').observe(function() {
-        window.setTimeout(function() {
-            $('#alert .alert-dismissible').fadeTo(3000, 0, function() {
+    $('#alert').observe(function () {
+        window.setTimeout(function () {
+            $('#alert .alert-dismissible').fadeTo(3000, 0, function () {
                 $(this).remove();
             });
         }, 3000);
@@ -64,10 +64,10 @@ $(document).ready(function() {
 });
 
 // Button
-$(document).ready(function() {
-    +function($) {
-        $.fn.button = function(state) {
-            return this.each(function() {
+$(document).ready(function () {
+    +function ($) {
+        $.fn.button = function (state) {
+            return this.each(function () {
                 var element = this;
 
                 if (state == 'loading') {
@@ -177,7 +177,7 @@ $(document).on('submit', 'form', function (e) {
 });
 
 // Upload
-$(document).on('click', 'button[data-oc-toggle=\'upload\']', function() {
+$(document).on('click', 'button[data-oc-toggle=\'upload\']', function () {
     var element = this;
 
     if (!$(element).prop('disabled')) {
@@ -187,7 +187,7 @@ $(document).on('click', 'button[data-oc-toggle=\'upload\']', function() {
 
         $('#form-upload input[name=\'file\']').trigger('click');
 
-        $('#form-upload input[name=\'file\']').on('change', function(e) {
+        $('#form-upload input[name=\'file\']').on('change', function (e) {
             if ((this.files[0].size / 1024) > $(element).attr('data-oc-size-max')) {
                 alert($(element).attr('data-oc-size-error'));
 
@@ -199,7 +199,7 @@ $(document).on('click', 'button[data-oc-toggle=\'upload\']', function() {
             clearInterval(timer);
         }
 
-        var timer = setInterval(function() {
+        var timer = setInterval(function () {
             if ($('#form-upload input[name=\'file\']').val() != '') {
                 clearInterval(timer);
 
@@ -211,13 +211,13 @@ $(document).on('click', 'button[data-oc-toggle=\'upload\']', function() {
                     cache: false,
                     contentType: false,
                     processData: false,
-                    beforeSend: function() {
+                    beforeSend: function () {
                         $(element).button('loading');
                     },
-                    complete: function() {
+                    complete: function () {
                         $(element).button('reset');
                     },
-                    success: function(json) {
+                    success: function (json) {
                         console.log(json);
 
                         if (json['error']) {
@@ -232,7 +232,7 @@ $(document).on('click', 'button[data-oc-toggle=\'upload\']', function() {
                             $($(element).attr('data-oc-target')).attr('value', json['code']);
                         }
                     },
-                    error: function(xhr, ajaxOptions, thrownError) {
+                    error: function (xhr, ajaxOptions, thrownError) {
                         console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
                     }
                 });
@@ -264,7 +264,7 @@ class Chain {
 
             var jqxhr = call();
 
-            jqxhr.done(function() {
+            jqxhr.done(function () {
                 chain.execute();
             });
         } else {
@@ -276,9 +276,9 @@ class Chain {
 var chain = new Chain();
 
 // Autocomplete
-+function($) {
-    $.fn.autocomplete = function(option) {
-        return this.each(function() {
++function ($) {
+    $.fn.autocomplete = function (option) {
+        return this.each(function () {
             var element = this;
             var $dropdown = $('#' + $(element).attr('data-oc-target'));
 
@@ -288,24 +288,24 @@ var chain = new Chain();
             $.extend(this, option);
 
             // Focus in
-            $(element).on('focusin', function() {
+            $(element).on('focusin', function () {
                 element.request();
             });
 
             // Focus out
-            $(element).on('focusout', function(e) {
+            $(element).on('focusout', function (e) {
                 if (!e.relatedTarget || !$(e.relatedTarget).hasClass('dropdown-item')) {
                     $dropdown.removeClass('show');
                 }
             });
 
             // Input
-            $(element).on('input', function(e) {
+            $(element).on('input', function (e) {
                 element.request();
             });
 
             // Click
-            $dropdown.on('click', 'a', function(e) {
+            $dropdown.on('click', 'a', function (e) {
                 e.preventDefault();
 
                 var value = $(this).attr('href');
@@ -318,7 +318,7 @@ var chain = new Chain();
             });
 
             // Request
-            this.request = function() {
+            this.request = function () {
                 clearTimeout(this.timer);
 
                 $('#autocomplete-loading').remove();
@@ -326,13 +326,13 @@ var chain = new Chain();
                 $dropdown.prepend('<li id="autocomplete-loading"><span class="dropdown-item text-center disabled"><i class="fa-solid fa-circle-notch fa-spin"></i></span></li>');
                 $dropdown.addClass('show');
 
-                this.timer = setTimeout(function(object) {
+                this.timer = setTimeout(function (object) {
                     object.source($(object).val(), $.proxy(object.response, object));
                 }, 150, this);
             }
 
             // Response
-            this.response = function(json) {
+            this.response = function (json) {
                 var html = '';
                 var category = {};
                 var name;
@@ -373,9 +373,9 @@ var chain = new Chain();
     }
 }(jQuery);
 
-$(document).ready(function() {
+$(document).ready(function () {
     // Currency
-    $('#form-currency .dropdown-item').on('click', function(e) {
+    $('#form-currency .dropdown-item').on('click', function (e) {
         e.preventDefault();
 
         $('#form-currency input[name=\'code\']').val($(this).attr('href'));
@@ -384,7 +384,7 @@ $(document).ready(function() {
     });
 
     // Language
-    $('#form-language .dropdown-item').on('click', function(e) {
+    $('#form-language .dropdown-item').on('click', function (e) {
         e.preventDefault();
 
         $('#form-language input[name=\'code\']').val($(this).attr('href'));
@@ -393,7 +393,7 @@ $(document).ready(function() {
     });
 
     // Product List
-    $('#button-list').on('click', function() {
+    $('#button-list').on('click', function () {
         var element = this;
 
         $('#product-list').attr('class', 'row row-cols-1 product-list');
@@ -405,7 +405,7 @@ $(document).ready(function() {
     });
 
     // Product Grid
-    $('#button-grid').on('click', function() {
+    $('#button-grid').on('click', function () {
         var element = this;
 
         // What a shame bootstrap does not take into account dynamically loaded columns
@@ -427,7 +427,7 @@ $(document).ready(function() {
     }
 
     /* Agree to Terms */
-    $('body').on('click', '.modal-link', function(e) {
+    $('body').on('click', '.modal-link', function (e) {
         e.preventDefault();
 
         var element = this;
@@ -437,7 +437,7 @@ $(document).ready(function() {
         $.ajax({
             url: $(element).attr('href'),
             dataType: 'html',
-            success: function(html) {
+            success: function (html) {
                 $('body').append(html);
 
                 $('#modal-information').modal('show');
@@ -446,29 +446,54 @@ $(document).ready(function() {
     });
 
     // Cookie Policy
-    $('#cookie button').on('click', function() {
+    $('#cookie button').on('click', function () {
         var element = this;
 
         $.ajax({
             url: $(this).val(),
             type: 'get',
             dataType: 'json',
-            beforeSend: function() {
+            beforeSend: function () {
                 $(element).button('loading');
             },
-            complete: function() {
+            complete: function () {
                 $(element).button('reset');
             },
-            success: function(json) {
+            success: function (json) {
                 if (json['success']) {
-                    $('#cookie').fadeOut(400, function() {
+                    $('#cookie').fadeOut(400, function () {
                         $('#cookie').remove();
                     });
                 }
             },
-            error: function(xhr, ajaxOptions, thrownError) {
+            error: function (xhr, ajaxOptions, thrownError) {
                 console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
             }
         });
+    });
+});
+// header search icon search toggle
+document.addEventListener('DOMContentLoaded', function () {
+    var toggle = document.getElementById('toggle-search');
+    var searchContainer = document.querySelector('header .container .row .col');
+
+    if (!toggle || !searchContainer) return;
+
+    // Hide search bar by default
+    searchContainer.style.display = 'none';
+
+    toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        var isHidden = getComputedStyle(searchContainer).display === 'none';
+
+        if (isHidden) {
+            searchContainer.style.display = 'block';
+            // focus the first input in the search block if present
+            var input = searchContainer.querySelector('input[type="search"], input[type="text"], input');
+            if (input) input.focus();
+        } else {
+            searchContainer.style.display = 'none';
+        }
     });
 });
