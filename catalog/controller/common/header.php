@@ -8,6 +8,8 @@ namespace Opencart\Catalog\Controller\Common;
  * @package Opencart\Catalog\Controller\Common
  */
 class Header extends \Opencart\System\Engine\Controller {
+
+
 	/**
 	 * Index
 	 *
@@ -123,6 +125,10 @@ class Header extends \Opencart\System\Engine\Controller {
 		}
 		$data['turkish_cities'] = $countries;
 		$data['turkish_cities_and_districts_json'] = json_encode($results);
+
+		// pass session district city to header
+		$data['user_city'] = isset($this->session->data['user_city']) ? $this->session->data['user_city'] : '';
+		$data['user_district'] = isset($this->session->data['user_district']) ? $this->session->data['user_district'] : '';
 
 		return $this->load->view('common/header', $data);
 	}

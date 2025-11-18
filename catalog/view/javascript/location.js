@@ -78,10 +78,17 @@ window.initAutocomplete = function () {
             const currentCity = cityDropdown.value;
             if (districtName && currentCity && turkishCitiesAndDistricts[currentCity] && turkishCitiesAndDistricts[currentCity].includes(districtName)) {
                 manualDropdown.value = districtName;
+                // Ensure change listeners run so the save button state updates
+                manualDropdown.dispatchEvent(new Event('change'));
             } else {
                 // Clear the manual selection if the extracted district isn't found
                 manualDropdown.value = "";
+                manualDropdown.dispatchEvent(new Event('change'));
             }
+
+            // Ensure the save button correctly reflects the new state after programmatic updates
+            // Enable if there's a city and either a valid autocomplete selection or a manual district value
+            saveBtn.disabled = !(cityDropdown.value && (isAutocompleteValid || manualDropdown.value));
 
         } else {
             // If user types and leaves without selecting a valid suggestion

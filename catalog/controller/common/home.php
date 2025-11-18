@@ -8,6 +8,23 @@ namespace Opencart\Catalog\Controller\Common;
  * @package Opencart\Catalog\Controller\Common
  */
 class Home extends \Opencart\System\Engine\Controller {
+		/**
+	 * Save user location (city and district) from AJAX request to session
+	 */
+	public function location(): void {
+		$city = isset($this->request->post['city']) ? $this->request->post['city'] : '';
+		$district = isset($this->request->post['district']) ? $this->request->post['district'] : '';
+
+		$this->session->data['user_city'] = $city;
+		$this->session->data['user_district'] = $district;
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode([
+			'success' => true,
+			'city' => $city,
+			'district' => $district
+		]));
+	}
 	/**
 	 * Index
 	 *

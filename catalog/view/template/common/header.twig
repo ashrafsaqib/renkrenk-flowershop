@@ -85,6 +85,59 @@
       </div>
     </div>
   </div>
+  <script>
+    (function($){
+      $(function(){
+        $('#saveLocationBtn').on('click', function(){
+          var $btn = $(this);
+          var city = $('#cityDropdown').val() ? $('#cityDropdown').val().trim() : '';
+          var district = $('#manualDistrictDropdown').val() ? $('#manualDistrictDropdown').val().trim() : '';
+
+          // If manual district empty, fallback to the free-text autocomplete input
+          if (!district) {
+            district = $('#districtInput').val() ? $('#districtInput').val().trim() : '';
+          }
+
+          if (!city && !district) {
+            alert('Please select a city or enter an address/district.');
+            return;
+          }
+
+          $btn.prop('disabled', true).text('Saving...');
+
+          $.ajax({
+            url: 'index.php?route=common/home.location',
+            type: 'POST',
+            data: { city: city, district: district },
+            dataType: 'json'
+          }).done(function(json){
+            if (json && json.success) {
+              // Update the visible location label (the modal trigger)
+              var label = city ? city + (district ? ', ' + district : '') : district;
+              var $trigger = $('[data-bs-target="#locationModal"]').first();
+              if ($trigger.length) {
+                $trigger.find('span').first().text(label);
+              }
+
+              // Hide the modal (Bootstrap 5)
+              var modalEl = document.getElementById('locationModal');
+              if (modalEl) {
+                var modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modalInstance.hide();
+              }
+            } else {
+              var msg = (json && json.error) ? json.error : 'Unable to save location.';
+              alert(msg);
+            }
+          }).fail(function(){
+            alert('An error occurred while saving the location.');
+          }).always(function(){
+            $btn.prop('disabled', false).text('Save Location');
+          });
+        });
+      });
+    })(jQuery);
+  </script>
 
   <div id="container" class="d-flex flex-column min-vh-100">
     <div id="alert"></div>
@@ -96,7 +149,14 @@
               <li class="list-inline-item">
                 <div class="dropdown">
                   <a href="#" class="dropdown-toggle" data-bs-toggle="modal" data-bs-target="#locationModal" aria-label="Select location">
-                    <i class="fa-solid fa-location-dot"></i> <span class="d-none d-lg-inline">Your Location</span>
+                    {% if user_city or user_district %}
+                      <i class="fa-solid fa-location-dot"></i>
+                      <span class="d-none d-lg-inline">
+                        {{ user_city ? user_city : '' }}{% if user_city and user_district %}, {% endif %}{{ user_district ? user_district : '' }}
+                      </span>
+                    {% else %}
+                      <i class="fa-solid fa-location-dot"></i> <span class="d-none d-lg-inline">Your Location</span>
+                    {% endif %}
                   </a>
                 </div>
               </li>
