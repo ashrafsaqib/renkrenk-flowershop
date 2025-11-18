@@ -6,6 +6,86 @@ namespace Opencart\Admin\Controller\Localisation;
  * @package Opencart\Admin\Controller\Localisation
  */
 class Zone extends \Opencart\System\Engine\Controller {
+	
+	public function seed(): void {
+
+		$turkishCitiesAndDistricts = [
+          259 => [
+            "Adalar", "Arnavutköy", "Ataşehir", "Avcılar", "Bağcılar",
+            "Bahçelievler", "Bakırköy", "Başakşehir", "Bayrampaşa", "Beşiktaş",
+            "Beykoz", "Beylikdüzü", "Beyoğlu", "Büyükçekmece", "Çatalca",
+            "Çekmeköy", "Esenler", "Esenyurt", "Eyüpsultan", "Fatih",
+            "Gaziosmanpaşa", "Güngören", "Kadıköy", "Kağıthane", "Kartal",
+            "Küçükçekmece", "Maltepe", "Pendik", "Sancaktepe", "Sarıyer",
+            "Silivri", "Sultanbeyli", "Sultangazi", "Şile", "Şişli",
+            "Tuzla", "Ümraniye", "Üsküdar", "Zeytinburnu"
+          ],
+          260 => [
+            "Akyurt", "Altındağ", "Ayaş", "Balâ", "Beypazarı", "Çamlıdere",
+            "Çankaya", "Çubuk", "Elmadağ", "Etimesgut", "Evren", "Gölbaşı",
+            "Güdül", "Haymana", "Kahramankazan", "Kalecik", "Keçiören",
+            "Kızılcahamam", "Mamak", "Nallıhan", "Polatlı", "Pursaklar",
+            "Sincan", "Şereflikoçhisar", "Yenimahalle"
+          ],
+          261 => [
+            "Aliağa", "Balçova", "Bayındır", "Bayraklı", "Bergama", "Beydağ",
+            "Bornova", "Buca", "Çeşme", "Çiğli", "Dikili", "Foça",
+            "Gaziemir", "Güzelbahçe", "Karabağlar", "Karaburun", "Karşıyaka",
+            "Kemalpaşa", "Kınık", "Kiraz", "Konak", "Menderes", "Menemen",
+            "Narlıdere", "Ödemiş", "Seferihisar", "Selçuk", "Tire",
+            "Torbalı", "Urla"
+          ],
+          262 => [
+            "Akseki", "Aksu", "Alanya", "Demre", "Döşemealtı", "Elmalı",
+            "Finike", "Gazipaşa", "Gündoğmuş", "İbradı", "Kaş", "Kemer",
+            "Kepez", "Konyaaltı", "Korkuteli", "Kumluca", "Manavgat",
+            "Muratpaşa", "Serik"
+          ],
+          263 => [
+            "Büyükorhan", "Gemlik", "Gürsu", "Harmancık", "İnegöl", "İznik",
+            "Karacabey", "Keles", "Kestel", "Mudanya", "Mustafakemalpaşa",
+            "Nilüfer", "Orhaneli", "Orhangazi", "Osmangazi", "Yenişehir",
+            "Yıldırım"
+          ],
+          264 => [
+            "Aladağ", "Ceyhan", "Çukurova", "Feke", "İmamoğlu", "Karaisalı",
+            "Karataş", "Kozan", "Pozantı", "Saimbeyli", "Sarıçam", "Seyhan",
+            "Tufanbeyli", "Yumurtalık", "Yüreğir"
+          ],
+          265 => [
+            "Araban", "İslahiye", "Karkamış", "Nizip", "Nurdağı",
+            "Oğuzeli", "Şahinbey", "Şehitkamil", "Yavuzeli"
+          ],
+          266 => [
+            "Ahırlı", "Akören", "Akşehir", "Altınekin", "Beyşehir", "Bozkır",
+            "Cihanbeyli", "Çeltik", "Çumra", "Derbent", "Derebucak", "Doğanhisar",
+            "Emirgazi", "Ereğli", "Güneysınır", "Hadim", "Halkapınar", "Hüyük",
+            "Ilgın", "Kadınhanı", "Karapınar", "Karatay", "Kulu", "Meram",
+            "Sarayönü", "Selçuklu", "Seydişehir", "Taşkent", "Tuzlukçu",
+            "Yalıhüyük", "Yunak"
+          ]
+		  ];
+// empty zone and description table 
+$this->db->query("DELETE FROM `" . DB_PREFIX . "zone_description`");
+$this->db->query("DELETE FROM `" . DB_PREFIX . "zone`");	
+		$this->load->model('localisation/zone');
+		foreach ($turkishCitiesAndDistricts as $city_id => $districts) {
+			foreach ($districts as $district_name) {
+				$zone_data = [
+					'country_id' => $city_id,
+					'code'       => '',
+					'status'     => '1',
+					'zone_description' => [
+						1 => [ // Assuming '1' is the language ID for English
+							'name' => $district_name
+						]
+					]
+				];
+
+				$this->model_localisation_zone->addZone($zone_data);
+			}
+		}
+	}
 	/**
 	 * Index
 	 *

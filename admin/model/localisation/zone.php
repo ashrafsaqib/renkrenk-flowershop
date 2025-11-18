@@ -149,20 +149,20 @@ class Zone extends \Opencart\System\Engine\Model {
 	 * $results = $this->model_localisation_zone->getZones($filter_data);
 	 */
 	public function getZones(array $data = []): array {
-		$sql = "SELECT *, `cd`.`name` AS `country` FROM `" . DB_PREFIX . "zone` `z` LEFT JOIN `" . DB_PREFIX . "zone_description` `zd` ON (`z`.`zone_id` = `zd`.`zone_id` AND `zd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "') LEFT JOIN `" . DB_PREFIX . "country_description` `cd` ON (`z`.`country_id` = `cd`.`country_id` AND `cd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "')";
+		$sql = "SELECT *, `cd`.`name` AS `country`,`zd`.`name` AS `name` FROM `" . DB_PREFIX . "zone` `z` LEFT JOIN `" . DB_PREFIX . "zone_description` `zd` ON (`z`.`zone_id` = `zd`.`zone_id` AND `zd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "') LEFT JOIN `" . DB_PREFIX . "country_description` `cd` ON (`z`.`country_id` = `cd`.`country_id` AND `cd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "')";
 
 		$implode = [];
 
 		if (!empty($data['filter_name'])) {
-			$implode[] = "LCASE(`zd`.`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_name']) . '%') . "'";
+			$implode[] = "`zd`.`name` LIKE '" . $this->db->escape($data['filter_name'] . '%') . "'";
 		}
 
 		if (!empty($data['filter_country'])) {
-			$implode[] = "`cd`.`name` LIKE '" . $this->db->escape(oc_strtolower($data['filter_country']) . '%') . "'";
+			$implode[] = "`cd`.`name` LIKE '" . $this->db->escape($data['filter_country'] . '%') . "'";
 		}
 
 		if (!empty($data['filter_code'])) {
-			$implode[] = "LCASE(`z`.`code`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_code']) . '%') . "'";
+			$implode[] = "`z`.`code` LIKE '" . $this->db->escape($data['filter_code'] . '%') . "'";
 		}
 
 		if ($implode) {
@@ -198,7 +198,6 @@ class Zone extends \Opencart\System\Engine\Model {
 
 			$sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
 		}
-
 		$query = $this->db->query($sql);
 
 		return $query->rows;
@@ -387,15 +386,15 @@ class Zone extends \Opencart\System\Engine\Model {
 		$implode = [];
 
 		if (!empty($data['filter_name'])) {
-			$implode[] = "LCASE(`zd`.`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_name']) . '%') . "'";
+			$implode[] = "`zd`.`name` LIKE '" . $this->db->escape($data['filter_name'] . '%') . "'";
 		}
 
 		if (!empty($data['filter_country'])) {
-			$implode[] = "LCASE(`cd`.`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_country']) . '%') . "'";
+			$implode[] = "`cd`.`name` LIKE '" . $this->db->escape($data['filter_country'] . '%') . "'";
 		}
 
 		if (!empty($data['filter_code'])) {
-			$implode[] = "LCASE(`z`.`code`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_code']) . '%') . "'";
+			$implode[] = "`z`.`code` LIKE '" . $this->db->escape($data['filter_code'] . '%') . "'";
 		}
 
 		if ($implode) {

@@ -200,7 +200,7 @@ class Country extends \Opencart\System\Engine\Model {
 		$implode = [];
 
 		if (!empty($data['filter_name'])) {
-			$implode[] = "LCASE(`cd`.`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_name']) . '%') . "'";
+			$implode[] = "`cd`.`name` LIKE '" . $this->db->escape($data['filter_name'] . '%') . "'";
 		}
 
 		if (!empty($data['filter_iso_code_2'])) {
