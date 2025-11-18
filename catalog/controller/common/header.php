@@ -102,6 +102,8 @@ class Header extends \Opencart\System\Engine\Controller {
 		$data['cart'] = $this->load->controller('common/cart');
 		$data['menu'] = $this->load->controller('common/menu');
 
+		$data['google_api_key'] = GOOGLE_API_KEY;
+
 		return $this->load->view('common/header', $data);
 	}
 }
