@@ -323,35 +323,6 @@ class Country extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!empty($country_info)) {
-			$data['iso_code_2'] = $country_info['iso_code_2'];
-		} else {
-			$data['iso_code_2'] = '';
-		}
-
-		if (!empty($country_info)) {
-			$data['iso_code_3'] = $country_info['iso_code_3'];
-		} else {
-			$data['iso_code_3'] = '';
-		}
-
-		// Address Format
-		$this->load->model('localisation/address_format');
-
-		$data['address_formats'] = $this->model_localisation_address_format->getAddressFormats();
-
-		if (!empty($country_info)) {
-			$data['address_format_id'] = $country_info['address_format_id'];
-		} else {
-			$data['address_format_id'] = '';
-		}
-
-		if (!empty($country_info)) {
-			$data['postcode_required'] = $country_info['postcode_required'];
-		} else {
-			$data['postcode_required'] = 0;
-		}
-
-		if (!empty($country_info)) {
 			$data['status'] = $country_info['status'];
 		} else {
 			$data['status'] = '1';
@@ -393,13 +364,6 @@ class Country extends \Opencart\System\Engine\Controller {
 			}
 		}
 
-		if (oc_strlen($post_info['iso_code_2']) != 2) {
-			$json['error']['iso_code_2'] = $this->language->get('error_iso_code_2');
-		}
-
-		if (oc_strlen($post_info['iso_code_3']) != 3) {
-			$json['error']['iso_code_3'] = $this->language->get('error_iso_code_3');
-		}
 
 		if (!$json) {
 			$this->load->model('localisation/country');

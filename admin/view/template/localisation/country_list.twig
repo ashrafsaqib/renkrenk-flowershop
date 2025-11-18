@@ -5,8 +5,7 @@
         <tr>
           <th class="text-center" style="width: 1px;"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', $(this).prop('checked'));" class="form-check-input"/></th>
           <th><a href="{{ sort_name }}"{% if sort == 'name' %} class="{{ order|lower }}"{% endif %}>{{ column_name }}</a></th>
-          <th><a href="{{ sort_iso_code_2 }}"{% if sort == 'iso_code_2' %} class="{{ order|lower }}"{% endif %}>{{ column_iso_code_2 }}</a></th>
-          <th><a href="{{ sort_iso_code_3 }}"{% if sort == 'iso_code_3' %} class="{{ order|lower }}"{% endif %}>{{ column_iso_code_3 }}</a></th>
+          <th>Status</th>
           <th class="text-end">{{ column_action }}</th>
         </tr>
       </thead>
@@ -16,8 +15,7 @@
             <tr{% if not country.status %} class="table-active opacity-50"{% endif %}>
               <td class="text-center"><input type="checkbox" name="selected[]" value="{{ country.country_id }}" class="form-check-input"/></td>
               <td>{{ country.name }}</td>
-              <td>{{ country.iso_code_2 }}</td>
-              <td>{{ country.iso_code_3 }}</td>
+              <td>{{ country.status }}</td>
               <td class="text-end"><a href="{{ country.edit }}" data-bs-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa-solid fa-pencil"></i></a></td>
             </tr>
           {% endfor %}
