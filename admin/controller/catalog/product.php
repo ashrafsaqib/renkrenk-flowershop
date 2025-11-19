@@ -1149,6 +1149,29 @@ class Product extends \Opencart\System\Engine\Controller {
 			$data['product_layout'] = [];
 		}
 
+		// Location - Countries and Zones
+		$this->load->model('localisation/country');
+		$this->load->model('localisation/zone');
+
+		$data['countries'] = $this->model_localisation_country->getCountries();
+
+		if ($product_id) {
+			$data['product_country'] = $this->model_catalog_product->getCountries($product_id);
+			$product_zones = $this->model_catalog_product->getZones($product_id);
+		} else {
+			$data['product_country'] = [];
+			$product_zones = [];
+		}
+
+		// Format zones for template
+		$data['product_zone'] = [];
+		foreach ($product_zones as $zone) {
+			if (!isset($data['product_zone'][$zone['country_id']])) {
+				$data['product_zone'][$zone['country_id']] = [];
+			}
+			$data['product_zone'][$zone['country_id']][] = $zone['zone_id'];
+		}
+
 		$data['report'] = $this->getReport();
 
 		$data['user_token'] = $this->session->data['user_token'];
@@ -1558,6 +1581,31 @@ class Product extends \Opencart\System\Engine\Controller {
 				'subscription' => $subscription_plan_data,
 				'price'        => $result['price']
 			];
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Get zones for a country
+	 *
+	 * @return void
+	 */
+	public function zone(): void {
+		$json = [];
+
+		if (isset($this->request->get['country_id'])) {
+			$this->load->model('localisation/zone');
+
+			$results = $this->model_localisation_zone->getZonesByCountryId($this->request->get['country_id']);
+
+			foreach ($results as $result) {
+				$json[] = [
+					'zone_id' => $result['zone_id'],
+					'name'    => $result['name']
+				];
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');

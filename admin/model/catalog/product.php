@@ -185,6 +185,27 @@ class Product extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		// Countries
+		if (isset($data['product_country'])) {
+			foreach ($data['product_country'] as $country_id) {
+				$this->model_catalog_product->addCountry($product_id, $country_id);
+			}
+		}
+
+		// Zones
+		if (isset($data['product_zone']) && isset($data['product_zone_data'])) {
+			foreach ($data['product_zone'] as $country_id => $zones) {
+				foreach ($zones as $zone_id => $checked) {
+					if ($checked && isset($data['product_zone_data'][$country_id][$zone_id])) {
+						$zone_data = $data['product_zone_data'][$country_id][$zone_id];
+						if (isset($zone_data['country_id']) && isset($zone_data['zone_id'])) {
+							$this->model_catalog_product->addZone($product_id, (int)$zone_data['country_id'], (int)$zone_data['zone_id']);
+						}
+					}
+				}
+			}
+		}
+
 		$this->cache->delete('product');
 
 		return $product_id;
@@ -388,6 +409,31 @@ class Product extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		// Countries
+		$this->model_catalog_product->deleteCountries($product_id);
+
+		if (isset($data['product_country'])) {
+			foreach ($data['product_country'] as $country_id) {
+				$this->model_catalog_product->addCountry($product_id, $country_id);
+			}
+		}
+
+		// Zones
+		$this->model_catalog_product->deleteZones($product_id);
+
+		if (isset($data['product_zone']) && isset($data['product_zone_data'])) {
+			foreach ($data['product_zone'] as $country_id => $zones) {
+				foreach ($zones as $zone_id => $checked) {
+					if ($checked && isset($data['product_zone_data'][$country_id][$zone_id])) {
+						$zone_data = $data['product_zone_data'][$country_id][$zone_id];
+						if (isset($zone_data['country_id']) && isset($zone_data['zone_id'])) {
+							$this->model_catalog_product->addZone($product_id, (int)$zone_data['country_id'], (int)$zone_data['zone_id']);
+						}
+					}
+				}
+			}
+		}
+
 		$this->cache->delete('product');
 	}
 
@@ -481,6 +527,8 @@ class Product extends \Opencart\System\Engine\Model {
 		$this->model_catalog_product->deleteRewards($product_id);
 		$this->model_catalog_product->deleteStores($product_id);
 		$this->model_catalog_product->deleteSubscriptions($product_id);
+		$this->model_catalog_product->deleteCountries($product_id);
+		$this->model_catalog_product->deleteZones($product_id);
 
 		// Review
 		$this->load->model('catalog/review');
@@ -2961,5 +3009,141 @@ class Product extends \Opencart\System\Engine\Model {
 		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "product_report` WHERE `product_id` = '" . (int)$product_id . "'");
 
 		return (int)$query->row['total'];
+	}
+
+	/**
+	 * Add Country
+	 *
+	 * Create a new product to country record in the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 * @param int $country_id primary key of the country record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $this->model_catalog_product->addCountry($product_id, $country_id);
+	 */
+	public function addCountry(int $product_id, int $country_id): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "product_to_country` SET `product_id` = '" . (int)$product_id . "', `country_id` = '" . (int)$country_id . "'");
+	}
+
+	/**
+	 * Delete Countries
+	 *
+	 * Delete product to country records in the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $this->model_catalog_product->deleteCountries($product_id);
+	 */
+	public function deleteCountries(int $product_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "product_to_country` WHERE `product_id` = '" . (int)$product_id . "'");
+	}
+
+	/**
+	 * Get Countries
+	 *
+	 * Get the record of the product to country records in the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return array<int, int> country IDs that have product ID
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $product_countries = $this->model_catalog_product->getCountries($product_id);
+	 */
+	public function getCountries(int $product_id): array {
+		$product_country_data = [];
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_to_country` WHERE `product_id` = '" . (int)$product_id . "'");
+
+		foreach ($query->rows as $result) {
+			$product_country_data[] = $result['country_id'];
+		}
+
+		return $product_country_data;
+	}
+
+	/**
+	 * Add Zone
+	 *
+	 * Create a new product to zone record in the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 * @param int $country_id primary key of the country record
+	 * @param int $zone_id    primary key of the zone record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $this->model_catalog_product->addZone($product_id, $country_id, $zone_id);
+	 */
+	public function addZone(int $product_id, int $country_id, int $zone_id): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "product_to_zone` SET `product_id` = '" . (int)$product_id . "', `country_id` = '" . (int)$country_id . "', `zone_id` = '" . (int)$zone_id . "'");
+	}
+
+	/**
+	 * Delete Zones
+	 *
+	 * Delete product to zone records in the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $this->model_catalog_product->deleteZones($product_id);
+	 */
+	public function deleteZones(int $product_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "product_to_zone` WHERE `product_id` = '" . (int)$product_id . "'");
+	}
+
+	/**
+	 * Get Zones
+	 *
+	 * Get the record of the product to zone records in the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return array<int, array<string, int>> zone records that have product ID
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $product_zones = $this->model_catalog_product->getZones($product_id);
+	 */
+	public function getZones(int $product_id): array {
+		$product_zone_data = [];
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_to_zone` WHERE `product_id` = '" . (int)$product_id . "'");
+
+		foreach ($query->rows as $result) {
+			$product_zone_data[] = [
+				'country_id' => $result['country_id'],
+				'zone_id'    => $result['zone_id']
+			];
+		}
+
+		return $product_zone_data;
 	}
 }

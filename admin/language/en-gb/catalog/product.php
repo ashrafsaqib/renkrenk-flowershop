@@ -112,6 +112,8 @@ $_['entry_tag']                  = 'Product Tags';
 $_['entry_reward']               = 'Reward Points';
 $_['entry_layout']               = 'Layout Override';
 $_['entry_subscription']         = 'Subscription Plan';
+$_['entry_country']              = 'City';
+$_['entry_zone']                 = 'District';
 
 // Help
 $_['help_tag']                   = 'Comma separated';
@@ -124,6 +126,18 @@ $_['help_download']              = '(Autocomplete)';
 $_['help_related']               = '(Autocomplete)';
 $_['help_option']                = '(Autocomplete)';
 $_['help_points']                = 'Number of points needed to buy this item. If you don\'t want this product to be purchased with points leave as 0.';
+$_['help_location']              = 'Select countries and zones where this product is available for sale';
+
+// Button
+$_['button_load_zones']          = 'Load Zones';
+
+// Tab
+$_['tab_location']               = 'Location';
+
+// Text
+$_['text_location']              = 'Product Availability Locations';
+$_['text_loading']               = 'Loading zones...';
+$_['text_no_zones']              = 'No zones available for this country';
 
 // Error
 $_['error_warning']              = 'Warning: Please check the form carefully for errors!';
@@ -135,3 +149,4 @@ $_['error_keyword']              = 'SEO URL must be between 1 and 64 characters!
 $_['error_keyword_exists']       = 'SEO URL must be unique!';
 $_['error_keyword_character']    = 'Keyword can only use characters a-z, 0-9, - and _!';
 $_['error_required']             = '%s required!';
+$_['error_zone_load']            = 'Error loading zones for the selected country!';
