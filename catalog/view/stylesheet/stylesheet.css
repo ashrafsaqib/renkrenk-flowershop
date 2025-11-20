@@ -10703,9 +10703,12 @@ button:focus {
   border-bottom: 1px solid var(--bs-border-color);
   margin-bottom: 20px;
   position: relative;
-  line-height: 78px;
   padding-bottom: 5px;
 }
+#top .text-end{
+  line-height: 78px;
+}
+
 #top ul.list-inline {
   margin-bottom: 0;
 }
@@ -11111,4 +11114,9 @@ footer h5, footer .h5 {
 }
 .carousel-indicators .active {
   opacity: 0.9;
+}
+#top-left a{
+  font-size: 1.2em;
+  text-transform: uppercase;
+  font-weight: 300;
 }

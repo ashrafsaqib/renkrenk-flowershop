@@ -89,27 +89,33 @@
   <div id="container" class="d-flex flex-column min-vh-100">
     <div id="alert"></div>
     <nav id="top">
-      <div class="container">
+      <div class="container-fluid">
         <div class="row">
-          <div class="col-4" id="top-left">
-            <ul class="list-inline">
-              <li class="list-inline-item">
-                <div class="dropdown">
-                  <a id="openLocationModalBtn" {% if user_city AND user_district %} data-location-set="true" {% endif %} href="#" class="dropdown-toggle" data-bs-toggle="modal" data-bs-target="#locationModal" aria-label="Select location">
-                    {% if user_city AND user_district %}
-                      <i class="fa-solid fa-location-dot"></i>
-                      <span class="d-none d-lg-inline">
-                        {{ user_city ? user_city : '' }}, {{ user_district ? user_district : '' }}
-                      </span>
-                    {% else %}
-                      <i class="fa-solid fa-location-dot"></i> <span class="d-none d-lg-inline">Your Location</span>
-                    {% endif %}
+          <div class="col-4 pt-1 pl-2" id="top-left">
+                 <a id="openLocationModalBtn" {% if user_city and user_district %} data-location-set="true" {% endif %} href="#" class="dropdown-toggle" data-bs-toggle="modal" data-bs-target="#locationModal" aria-label="Select location">
+                    <i class="fa-solid fa-location-dot"></i>
+                  {% if user_city and user_district %}
+                    <span class="d-none d-lg-inline">
+                    {{ user_district }}
+                    </span>
+                  {% else %}
+                    <span class="d-none d-lg-inline">Your Location</span>
+                  {% endif %}
                   </a>
+                  <br/>
+                <div class="dropdown">
+                  
+                  <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-label="Select shipping city">
+                     <span class="d-none d-lg-inline">Ships to {% if user_city %}{{ user_city }}{% else %}Select City{% endif %}</span><i class="fa-solid fa-caret-down"></i>
+                  </a>
+                  <ul class="dropdown-menu">
+                    {% for city in turkish_cities %}
+                    <li><a href="#" class="dropdown-item ship-to-city" data-city="{{ city.name }}">{{ city.name }}</a></li>
+                    {% endfor %}
+                  </ul>
+                 
                 </div>
-              </li>
-              <li class="list-inline-item">{{ language }}</li>
-              <li class="list-inline-item"><a href="{{ contact }}"><i class="fa-solid fa-phone"></i> <span class="d-none d-lg-inline">{{ telephone }}</span></a></li>
-            </ul>
+
           </div>
           <div class="col-12 col-md-4 d-flex justify-content-center align-items-center">
             <a href="{{ home }}" class="d-inline-block text-center">
@@ -117,7 +123,7 @@
             </a>
           </div>
 
-          <div class="col-4 text-end">
+          <div class="col-2 text-end">
             <ul class="list-inline">
               <li class="list-inline-item">
                 <a href="#" id="toggle-search" aria-label="Toggle search"><i class="fa-solid fa-search"></i></a>
@@ -146,6 +152,7 @@
               <li class="list-inline-item"><a href="{{ shopping_cart }}" title="{{ text_shopping_cart }}"><i class="fa-solid fa-cart-shopping"></i> <span class="d-none d-lg-inline"></span></a></li>
             </ul>
           </div>
+          
         </div>
       </div>
     </nav>
