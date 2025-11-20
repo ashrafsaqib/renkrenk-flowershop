@@ -34,7 +34,18 @@ function loadGoogleMapsScript() {
 // Callback when Google Maps is loaded
 window.onGoogleMapsLoaded = function() {
     window.initAutocomplete();
-    // Auto-location disabled - user must manually open location slider
+    // Attempt auto-location on initial load only if location not already set
+    if (!window.autoLocationAttempted) {
+        window.autoLocationAttempted = true;
+        const locationBtn = document.getElementById('openLocationModalBtn');
+        const cityModal = document.getElementById('citySelectionModal');
+        const isCityModalVisible = cityModal && bootstrap.Modal.getInstance(cityModal);
+        
+        // Only attempt auto-location if user hasn't set location yet and city modal is not shown
+        if (!isCityModalVisible && (!locationBtn || !locationBtn.hasAttribute('data-location-set'))) {
+            attemptAutoLocation();
+        }
+    }
 }
 
 // Helper function to show location offcanvas
@@ -48,10 +59,6 @@ function showLocationModal() {
 
 // Helper function to perform reverse geocoding
 function performReverseGeocode(lat, lon) {
-    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-        showLocationModal();
-        return;
-    }
 
     const geocoder = new google.maps.Geocoder();
     const latlng = { lat: lat, lng: lon };
@@ -89,14 +96,8 @@ function performReverseGeocode(lat, lon) {
 
                 // Auto-save the location
                 saveLocationBtn.click();
-            } else {
-                // If city/district not found or invalid, show the modal
-                showLocationModal();
             }
-        } else {
-            // Geocoding failed, show modal
-            showLocationModal();
-        }
+        } 
     });
 }
 
@@ -109,19 +110,12 @@ function attemptAutoLocation() {
                 const lon = position.coords.longitude;
                 performReverseGeocode(lat, lon);
             },
-            function (error) {
-                // Geolocation permission denied or error, show modal
-                showLocationModal();
-            },
             {
                 enableHighAccuracy: true,
                 timeout: 10000,
                 maximumAge: 0
             }
         );
-    } else {
-        // Browser doesn't support geolocation, show modal
-        showLocationModal();
     }
 }
 
