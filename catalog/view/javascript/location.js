@@ -20,6 +20,96 @@ function loadGoogleMapsScript() {
     document.head.appendChild(script);
 }
 
+// Helper function to show location modal
+function showLocationModal() {
+    const locationModal = document.getElementById('locationModal');
+    if (locationModal) {
+        const modal = new bootstrap.Modal(locationModal);
+        modal.show();
+    }
+}
+
+// Helper function to perform reverse geocoding
+function performReverseGeocode(lat, lon) {
+    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+        console.error('Google Maps not loaded yet');
+        showLocationModal();
+        return;
+    }
+
+    const geocoder = new google.maps.Geocoder();
+    const latlng = { lat: lat, lng: lon };
+
+    geocoder.geocode({ location: latlng }, function (results, status) {
+        if (status === 'OK' && results[0]) {
+            let cityName = null;
+            let districtName = null;
+
+            // Extract city and district from geocoding results
+            for (const component of results[0].address_components) {
+                if (component.types.includes('administrative_area_level_1')) {
+                    cityName = component.long_name;
+                }
+                if (component.types.includes('administrative_area_level_2')) {
+                    districtName = component.long_name;
+                }
+            }
+
+            // Get DOM elements
+            const cityDropdown = document.getElementById('cityDropdown');
+            const manualDistrictDropdown = document.getElementById('manualDistrictDropdown');
+            const saveLocationBtn = document.getElementById('saveLocationBtn');
+
+            // Check if we have valid city and district
+            if (cityName && districtName && turkishCitiesAndDistricts[cityName] && turkishCitiesAndDistricts[cityName].includes(districtName)) {
+                // Set the city and district
+                isProgrammaticCityUpdate = true;
+                cityDropdown.value = cityName;
+                cityDropdown.dispatchEvent(new Event('change'));
+                isProgrammaticCityUpdate = false;
+
+                manualDistrictDropdown.value = districtName;
+                manualDistrictDropdown.dispatchEvent(new Event('change'));
+
+                // Auto-save the location
+                saveLocationBtn.click();
+            } else {
+                // If city/district not found or invalid, show the modal
+                showLocationModal();
+            }
+        } else {
+            // Geocoding failed, show modal
+            showLocationModal();
+        }
+    });
+}
+
+// Attempt auto-location using browser geolocation
+function attemptAutoLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                performReverseGeocode(lat, lon);
+            },
+            function (error) {
+                // Geolocation permission denied or error, show modal
+                console.log('Geolocation error:', error.message);
+                showLocationModal();
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        // Browser doesn't support geolocation, show modal
+        showLocationModal();
+    }
+}
+
 // This function is called once the Google Maps script is fully loaded
 window.initAutocomplete = function () {
     const districtInput = document.getElementById('districtInput');
@@ -99,6 +189,8 @@ window.initAutocomplete = function () {
     });
 
     console.log("Google Places Autocomplete Initialized.");
+    attemptAutoLocation();
+
 }
 
 
@@ -212,76 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 7. Initial Geolocation - Get user's location automatically
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                
-                // Reverse geocode to get city and district
-                const geocoder = new google.maps.Geocoder();
-                const latlng = { lat: lat, lng: lon };
-                
-                geocoder.geocode({ location: latlng }, function(results, status) {
-                    if (status === 'OK' && results[0]) {
-                        let cityName = null;
-                        let districtName = null;
-                        
-                        // Extract city and district from geocoding results
-                        for (const component of results[0].address_components) {
-                            if (component.types.includes('administrative_area_level_1')) {
-                                cityName = component.long_name;
-                            }
-                            if (component.types.includes('administrative_area_level_2')) {
-                                districtName = component.long_name;
-                            }
-                        }
-                        
-                        // Check if we have valid city and district
-                        if (cityName && districtName && turkishCitiesAndDistricts[cityName] && turkishCitiesAndDistricts[cityName].includes(districtName)) {
-                            // Set the city and district
-                            isProgrammaticCityUpdate = true;
-                            cityDropdown.value = cityName;
-                            cityDropdown.dispatchEvent(new Event('change'));
-                            isProgrammaticCityUpdate = false;
-                            
-                            manualDistrictDropdown.value = districtName;
-                            manualDistrictDropdown.dispatchEvent(new Event('change'));
-                            
-                            // Auto-save the location
-                            saveLocationBtn.click();
-                        } else {
-                            // If city/district not found or invalid, show the modal
-                            const modal = new bootstrap.Modal(locationModal);
-                            modal.show();
-                        }
-                    } else {
-                        // Geocoding failed, show modal
-                        const modal = new bootstrap.Modal(locationModal);
-                        modal.show();
-                    }
-                });
-            },
-            function(error) {
-                // Geolocation permission denied or error, show modal
-                console.log('Geolocation error:', error.message);
-                const modal = new bootstrap.Modal(locationModal);
-                modal.show();
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            }
-        );
-    } else {
-        // Browser doesn't support geolocation, show modal
-        const modal = new bootstrap.Modal(locationModal);
-        modal.show();
-    }
-    
-    
 });
 
 $(function () {
