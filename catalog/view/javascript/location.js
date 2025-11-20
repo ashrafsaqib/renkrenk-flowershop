@@ -314,7 +314,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+// Shared function to save location via AJAX
+function saveLocation(city, district, callback) {
+    $.ajax({
+        url: 'index.php?route=common/home.location',
+        type: 'POST',
+        data: { city: city, district: district },
+        dataType: 'json'
+    }).done(function (json) {
+        if (json && json.success) {
+            // Update the visible location label (the modal trigger)
+            var label = city ? city + (district ? ', ' + district : '') : district;
+            var $trigger = $('[data-bs-target="#locationModal"]').first();
+            if ($trigger.length) {
+                $trigger.find('span').first().text(label);
+            }
+
+            // Update the data-location-set attribute
+            var $locationBtn = $('#openLocationModalBtn');
+            if ($locationBtn.length) {
+                $locationBtn.attr('data-location-set', 'true');
+            }
+
+            // Hide the modal (Bootstrap 5)
+            var modalEl = document.getElementById('locationModal');
+            if (modalEl) {
+                var modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modalInstance.hide();
+            }
+
+            if (callback) callback(null, json);
+        } else {
+            var msg = (json && json.error) ? json.error : 'Unable to save location.';
+            if (callback) callback(msg);
+            else alert(msg);
+        }
+    }).fail(function () {
+        var msg = 'An error occurred while saving the location.';
+        if (callback) callback(msg);
+        else alert(msg);
+    });
+}
+
 $(function () {
+    // Handle Save Location Button Click
     $('#saveLocationBtn').on('click', function () {
         var $btn = $(this);
         var city = $('#cityDropdown').val() ? $('#cityDropdown').val().trim() : '';
@@ -332,34 +375,21 @@ $(function () {
 
         $btn.prop('disabled', true).text('Saving...');
 
-        $.ajax({
-            url: 'index.php?route=common/home.location',
-            type: 'POST',
-            data: { city: city, district: district },
-            dataType: 'json'
-        }).done(function (json) {
-            if (json && json.success) {
-                // Update the visible location label (the modal trigger)
-                var label = city ? city + (district ? ', ' + district : '') : district;
-                var $trigger = $('[data-bs-target="#locationModal"]').first();
-                if ($trigger.length) {
-                    $trigger.find('span').first().text(label);
-                }
-
-                // Hide the modal (Bootstrap 5)
-                var modalEl = document.getElementById('locationModal');
-                if (modalEl) {
-                    var modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                    modalInstance.hide();
-                }
-            } else {
-                var msg = (json && json.error) ? json.error : 'Unable to save location.';
-                alert(msg);
-            }
-        }).fail(function () {
-            alert('An error occurred while saving the location.');
-        }).always(function () {
+        saveLocation(city, district, function(error) {
             $btn.prop('disabled', false).text('Save Location');
+            if (error) alert(error);
         });
     });
 });
+
+// Global function to set ship-to city from dropdown
+window.setShipToCity = function(cityName) {
+    if (!cityName) return;
+    
+    saveLocation(cityName, '', function(error) {
+        if (error) {
+            alert(error);
+        }
+        window.location.reload();   
+    });
+};

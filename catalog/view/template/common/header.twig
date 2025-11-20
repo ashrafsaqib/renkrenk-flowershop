@@ -62,7 +62,7 @@
               <select class="form-select" id="cityDropdown">
                 <option selected value="">Select a City...</option>
                 {% for city in turkish_cities %}
-                <option value="{{ city.name }}">{{ city.name }}</option>
+                <option value="{{ city.name }}" {% if user_city == city.name %}selected{% endif %}>{{ city.name }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -110,7 +110,7 @@
                   </a>
                   <ul class="dropdown-menu">
                     {% for city in turkish_cities %}
-                    <li><a href="#" class="dropdown-item ship-to-city" data-city="{{ city.name }}">{{ city.name }}</a></li>
+                    <li><a href="#" class="dropdown-item ship-to-city" data-city="{{ city.name }}" onclick="event.preventDefault(); setShipToCity('{{ city.name }}');">{{ city.name }}</a></li>
                     {% endfor %}
                   </ul>
                  
