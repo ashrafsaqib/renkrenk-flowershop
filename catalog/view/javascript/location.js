@@ -101,48 +101,7 @@ window.initAutocomplete = function () {
     console.log("Google Places Autocomplete Initialized.");
 }
 
-// --- Geolocation Function (Get User's Real Location Link) ---
-function getUserLocationLink() {
-    const button = document.getElementById('openLocationModalBtn');
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 
-                // Update the button to be a link
-                button.innerHTML = `📍 Set Your Location`;
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-info');
-                button.setAttribute('onclick', `window.open('${mapLink}', '_blank')`);
-                button.removeAttribute('data-bs-toggle');
-                button.removeAttribute('data-bs-target');
-
-                // Create a separate link to open the selection modal
-                const container = document.querySelector('.container');
-                let modalLink = container.querySelector('.modal-selection-link');
-                if (!modalLink) {
-                    const p = document.createElement('p');
-                    p.className = 'mt-3 modal-selection-link';
-                    p.innerHTML = `<a href="#" class="text-secondary" data-bs-toggle="modal" data-bs-target="#locationModal">Or click here to manually select a city/district.</a>`;
-                    container.appendChild(p);
-                }
-
-            },
-            (error) => {
-                console.error("Geolocation failed:", error);
-                button.innerHTML = `📍 Select Your Location`;
-            }, {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
-        }
-        );
-    } else {
-        console.log("Geolocation is not supported by this browser.");
-    }
-}
 
 // --- Populate Manual Dropdown ---
 function populateManualDropdown(city) {
@@ -253,8 +212,76 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 7. Initial Geolocation Call
-    getUserLocationLink();
+    // 7. Initial Geolocation - Get user's location automatically
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                // Reverse geocode to get city and district
+                const geocoder = new google.maps.Geocoder();
+                const latlng = { lat: lat, lng: lon };
+                
+                geocoder.geocode({ location: latlng }, function(results, status) {
+                    if (status === 'OK' && results[0]) {
+                        let cityName = null;
+                        let districtName = null;
+                        
+                        // Extract city and district from geocoding results
+                        for (const component of results[0].address_components) {
+                            if (component.types.includes('administrative_area_level_1')) {
+                                cityName = component.long_name;
+                            }
+                            if (component.types.includes('administrative_area_level_2')) {
+                                districtName = component.long_name;
+                            }
+                        }
+                        
+                        // Check if we have valid city and district
+                        if (cityName && districtName && turkishCitiesAndDistricts[cityName] && turkishCitiesAndDistricts[cityName].includes(districtName)) {
+                            // Set the city and district
+                            isProgrammaticCityUpdate = true;
+                            cityDropdown.value = cityName;
+                            cityDropdown.dispatchEvent(new Event('change'));
+                            isProgrammaticCityUpdate = false;
+                            
+                            manualDistrictDropdown.value = districtName;
+                            manualDistrictDropdown.dispatchEvent(new Event('change'));
+                            
+                            // Auto-save the location
+                            saveLocationBtn.click();
+                        } else {
+                            // If city/district not found or invalid, show the modal
+                            const modal = new bootstrap.Modal(locationModal);
+                            modal.show();
+                        }
+                    } else {
+                        // Geocoding failed, show modal
+                        const modal = new bootstrap.Modal(locationModal);
+                        modal.show();
+                    }
+                });
+            },
+            function(error) {
+                // Geolocation permission denied or error, show modal
+                console.log('Geolocation error:', error.message);
+                const modal = new bootstrap.Modal(locationModal);
+                modal.show();
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        // Browser doesn't support geolocation, show modal
+        const modal = new bootstrap.Modal(locationModal);
+        modal.show();
+    }
+    
+    
 });
 
 $(function () {
