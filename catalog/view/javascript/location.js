@@ -7,10 +7,13 @@ function loadGoogleMapsScript() {
     if (document.getElementById('googleMapsScript')) {
         if (typeof google === 'object' && typeof google.maps === 'object') {
             window.initAutocomplete();
-            // Attempt auto-location if not already attempted
+            // Attempt auto-location if not already attempted and location not set
             if (!window.autoLocationAttempted) {
                 window.autoLocationAttempted = true;
-                attemptAutoLocation();
+                const locationBtn = document.getElementById('openLocationModalBtn');
+                if (!locationBtn || !locationBtn.hasAttribute('data-location-set')) {
+                    attemptAutoLocation();
+                }
             }
         }
         return;
@@ -27,10 +30,14 @@ function loadGoogleMapsScript() {
 // Callback when Google Maps is loaded
 window.onGoogleMapsLoaded = function() {
     window.initAutocomplete();
-    // Attempt auto-location on initial load
+    // Attempt auto-location on initial load only if location not already set
     if (!window.autoLocationAttempted) {
         window.autoLocationAttempted = true;
-        attemptAutoLocation();
+        const locationBtn = document.getElementById('openLocationModalBtn');
+        // Only attempt auto-location if user hasn't set location yet
+        if (!locationBtn || !locationBtn.hasAttribute('data-location-set')) {
+            attemptAutoLocation();
+        }
     }
 }
 
