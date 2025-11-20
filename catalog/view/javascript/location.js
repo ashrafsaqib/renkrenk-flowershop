@@ -2,22 +2,36 @@
 let autocomplete;
 let isAutocompleteValid = false; // Flag to track if a Google place was successfully selected
 let isProgrammaticCityUpdate = false; // Flag to prevent clearing the address input on self-update
-
 // This function dynamically loads the Google Maps script
 function loadGoogleMapsScript() {
     if (document.getElementById('googleMapsScript')) {
         if (typeof google === 'object' && typeof google.maps === 'object') {
             window.initAutocomplete();
+            // Attempt auto-location if not already attempted
+            if (!window.autoLocationAttempted) {
+                window.autoLocationAttempted = true;
+                attemptAutoLocation();
+            }
         }
         return;
     }
 
     const script = document.createElement('script');
     script.id = 'googleMapsScript';
-    // Load the 'places' library for Autocomplete
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&callback=initAutocomplete`;
+    // Load the 'places' library for Geocoder
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&callback=onGoogleMapsLoaded`;
     script.async = true;
     document.head.appendChild(script);
+}
+
+// Callback when Google Maps is loaded
+window.onGoogleMapsLoaded = function() {
+    window.initAutocomplete();
+    // Attempt auto-location on initial load
+    if (!window.autoLocationAttempted) {
+        window.autoLocationAttempted = true;
+        attemptAutoLocation();
+    }
 }
 
 // Helper function to show location modal
@@ -32,7 +46,6 @@ function showLocationModal() {
 // Helper function to perform reverse geocoding
 function performReverseGeocode(lat, lon) {
     if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-        console.error('Google Maps not loaded yet');
         showLocationModal();
         return;
     }
@@ -95,7 +108,6 @@ function attemptAutoLocation() {
             },
             function (error) {
                 // Geolocation permission denied or error, show modal
-                console.log('Geolocation error:', error.message);
                 showLocationModal();
             },
             {
@@ -147,9 +159,7 @@ window.initAutocomplete = function () {
                     districtName = component.long_name;
                 }
             }
-            console.log(cityName);
 
-            console.log(districtName);
 
             // 2. Programmatically update the City Dropdown
             if (cityName && turkishCitiesAndDistricts[cityName]) {
@@ -188,8 +198,6 @@ window.initAutocomplete = function () {
         }
     });
 
-    console.log("Google Places Autocomplete Initialized.");
-    attemptAutoLocation();
 
 }
 
@@ -227,10 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
     manualDistrictDropdown.disabled = true;
     saveLocationBtn.disabled = true;
 
-
-
-    // Load Google Maps script when the modal is about to be shown
-    locationModal.addEventListener('show.bs.modal', loadGoogleMapsScript);
+    // Load Google Maps script immediately on page load for auto-location
+    loadGoogleMapsScript();
 
 
     // 5. Handle City Dropdown Change
@@ -294,13 +300,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (selectedCity && selectedLocation) {
-            const display = document.getElementById('currentLocationDisplay');
-            display.innerHTML = `✅ **Selected Location:** **${selectedLocation}**, **${selectedCity}** ${source}`;
-
-            // Close the modal
             const modal = bootstrap.Modal.getInstance(locationModal);
             modal.hide();
-
         }
     });
 
