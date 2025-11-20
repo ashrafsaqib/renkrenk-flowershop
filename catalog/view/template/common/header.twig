@@ -38,6 +38,30 @@
 </head>
 
 <body>
+  <!-- City Selection Popup (Loads on page load) -->
+  <div class="modal fade" id="citySelectionModal" tabindex="-1" aria-labelledby="citySelectionModalLabel" aria-hidden="true" {% if user_city %}data-user-city-set="true"{% endif %}>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-body p-5 text-center">
+          <h3 class="fw-bold mb-3">Choose Your Location</h3>
+          <p class="text-muted mb-4">Select your shipping country to view your local currency, delivery times, and costs.</p>
+          
+          <!-- City Dropdown -->
+          <select class="form-select form-select-lg mb-4" id="citySelectionDropdown">
+            {% for city in turkish_cities %}
+            <option value="{{ city.name }}" {% if loop.first %}selected{% endif %}>{{ city.name }}</option>
+            {% endfor %}
+          </select>
+          
+          <!-- Confirm Button -->
+          <button type="button" class="btn btn-dark btn-lg w-100 py-3" id="confirmCitySelection">
+            Confirm Your Selection
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Offcanvas Slider for Location (Left Side) -->
   <div class="offcanvas offcanvas-start" tabindex="-1" id="locationModal" aria-labelledby="locationModalLabel">
     <div class="offcanvas-header">
@@ -46,15 +70,14 @@
     </div>
     <div class="offcanvas-body">
       <!-- 1. Address Input (Priority/Top) -->
-      <div id="autocompleteInputGroup" class="mb-4 border p-3 rounded-3 bg-light">
-        <label for="districtInput" class="form-label fw-bold">Type Full Address</label>
+      <div id="autocompleteInputGroup" class="mb-4 text-center">
+        <label for="districtInput" class="form-label fw-bold">Enter Your Address</label>
         <!-- Address input is now enabled by default -->
         <input type="text" class="form-control" id="districtInput" placeholder="Start typing your full address (e.g., Levent, Istanbul)...">
-        <div class="form-text text-muted mt-2">Selecting a Google suggestion will automatically fill in the City and District below.</div>
       </div>
 
       <!-- 2. Manual Selection Dropdowns -->
-        <button type="button" onclick="$('#manualFieldsContainer').toggle();" class="btn btn-outline-secondary mb-3 w-100" id="toggleManualFieldsBtn">
+        <button type="button" onclick="$('#manualFieldsContainer').toggle();" class="btn btn-outline-none mb-3 w-100" id="toggleManualFieldsBtn">
           <i class="fa-solid fa-edit"></i> Manual City / District Selection
         </button>
         <div id="manualFieldsContainer" style="display: none;">

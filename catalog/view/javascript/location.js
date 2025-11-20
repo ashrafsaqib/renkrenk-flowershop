@@ -11,7 +11,11 @@ function loadGoogleMapsScript() {
             if (!window.autoLocationAttempted) {
                 window.autoLocationAttempted = true;
                 const locationBtn = document.getElementById('openLocationModalBtn');
-                if (!locationBtn || !locationBtn.hasAttribute('data-location-set')) {
+                const cityModal = document.getElementById('citySelectionModal');
+                const isCityModalVisible = cityModal && bootstrap.Modal.getInstance(cityModal);
+                
+                // Only attempt auto-location if city modal is not shown
+                if (!isCityModalVisible && (!locationBtn || !locationBtn.hasAttribute('data-location-set'))) {
                     attemptAutoLocation();
                 }
             }
@@ -30,15 +34,7 @@ function loadGoogleMapsScript() {
 // Callback when Google Maps is loaded
 window.onGoogleMapsLoaded = function() {
     window.initAutocomplete();
-    // Attempt auto-location on initial load only if location not already set
-    if (!window.autoLocationAttempted) {
-        window.autoLocationAttempted = true;
-        const locationBtn = document.getElementById('openLocationModalBtn');
-        // Only attempt auto-location if user hasn't set location yet
-        if (!locationBtn || !locationBtn.hasAttribute('data-location-set')) {
-            attemptAutoLocation();
-        }
-    }
+    // Auto-location disabled - user must manually open location slider
 }
 
 // Helper function to show location offcanvas
@@ -387,6 +383,28 @@ $(function () {
             $btn.prop('disabled', false).text('Save Location');
             if (error) alert(error);
         });
+    });
+
+    // Handle City Selection Modal
+    var $citySelectionModal = $('#citySelectionModal');
+    var $citySelectionDropdown = $('#citySelectionDropdown');
+    var $confirmCitySelection = $('#confirmCitySelection');
+    
+    // Show modal on page load if user_city is not set
+    var userCitySet = $citySelectionModal.attr('data-user-city-set') === 'true';
+    
+    if (!userCitySet) {
+        var cityModal = new bootstrap.Modal(document.getElementById('citySelectionModal'));
+        cityModal.show();
+    }
+    
+    // Handle confirm button click
+    $confirmCitySelection.on('click', function() {
+        var selectedCity = $citySelectionDropdown.val();
+        if (selectedCity) {
+            $(this).prop('disabled', true).text('Confirming...');
+            setShipToCity(selectedCity);
+        }
     });
 });
 
