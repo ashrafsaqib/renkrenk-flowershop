@@ -112,7 +112,7 @@ function getUserLocationLink() {
                 const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 
                 // Update the button to be a link
-                button.innerHTML = `📍 View Your Current Location`;
+                button.innerHTML = `📍 Set Your Location`;
                 button.classList.remove('btn-primary');
                 button.classList.add('btn-info');
                 button.setAttribute('onclick', `window.open('${mapLink}', '_blank')`);
