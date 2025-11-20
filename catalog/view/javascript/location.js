@@ -41,12 +41,12 @@ window.onGoogleMapsLoaded = function() {
     }
 }
 
-// Helper function to show location modal
+// Helper function to show location offcanvas
 function showLocationModal() {
     const locationModal = document.getElementById('locationModal');
     if (locationModal) {
-        const modal = new bootstrap.Modal(locationModal);
-        modal.show();
+        const offcanvas = new bootstrap.Offcanvas(locationModal);
+        offcanvas.show();
     }
 }
 
@@ -245,6 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load Google Maps script immediately on page load for auto-location
     loadGoogleMapsScript();
 
+    // Load Google Maps script when the offcanvas is about to be shown
+    locationModal.addEventListener('show.bs.offcanvas', loadGoogleMapsScript);
+
+ 
 
     // 5. Handle City Dropdown Change
     cityDropdown.addEventListener('change', () => {
@@ -266,6 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
         manualDistrictDropdown.value = '';
         saveLocationBtn.disabled = true;
     });
+       // Trigger change event if city is already selected (to populate districts)
+    if (cityDropdown.value) {
+        cityDropdown.dispatchEvent(new Event('change'));
+    }
 
     // Listener for Manual District Dropdown change to enable save button
     manualDistrictDropdown.addEventListener('change', () => {
@@ -307,8 +315,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (selectedCity && selectedLocation) {
-            const modal = bootstrap.Modal.getInstance(locationModal);
-            modal.hide();
+            const offcanvas = bootstrap.Offcanvas.getInstance(locationModal);
+            if (offcanvas) offcanvas.hide();
         }
     });
 
@@ -324,7 +332,7 @@ function saveLocation(city, district, callback) {
     }).done(function (json) {
         if (json && json.success) {
             // Update the visible location label (the modal trigger)
-            var label = city ? city + (district ? ', ' + district : '') : district;
+            var label = district;
             var $trigger = $('[data-bs-target="#locationModal"]').first();
             if ($trigger.length) {
                 $trigger.find('span').first().text(label);
@@ -336,11 +344,11 @@ function saveLocation(city, district, callback) {
                 $locationBtn.attr('data-location-set', 'true');
             }
 
-            // Hide the modal (Bootstrap 5)
+            // Hide the offcanvas (Bootstrap 5)
             var modalEl = document.getElementById('locationModal');
             if (modalEl) {
-                var modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                modalInstance.hide();
+                var offcanvasInstance = bootstrap.Offcanvas.getInstance(modalEl) || new bootstrap.Offcanvas(modalEl);
+                offcanvasInstance.hide();
             }
 
             if (callback) callback(null, json);

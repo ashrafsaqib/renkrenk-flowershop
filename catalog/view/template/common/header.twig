@@ -16,9 +16,9 @@
   <script src="{{ jquery }}" type="text/javascript"></script>
   <link href="{{ bootstrap }}" type="text/css" rel="stylesheet" media="screen" />
   <link href="{{ icons }}" rel="stylesheet" type="text/css" />
-  <link href="{{ stylesheet }}" type="text/css" rel="stylesheet" />
+  <link href="{{ stylesheet }}?v=1" type="text/css" rel="stylesheet" />
   <script src="catalog/view/javascript/common.js" type="text/javascript"></script>
-  <script src="catalog/view/javascript/location.js" type="text/javascript"></script>
+  <script src="catalog/view/javascript/location.js?v=1" type="text/javascript"></script>
 
   {% if icon %}
   <link rel="icon" href="{{ icon }}" type="image/png">
@@ -38,50 +38,50 @@
 </head>
 
 <body>
-  <div class="modal fade" id="locationModal" tabindex="-1" aria-labelledby="locationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-body">
+  <!-- Offcanvas Slider for Location (Left Side) -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="locationModal" aria-labelledby="locationModalLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="locationModalLabel">Select Your Location</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <!-- 1. Address Input (Priority/Top) -->
+      <div id="autocompleteInputGroup" class="mb-4 border p-3 rounded-3 bg-light">
+        <label for="districtInput" class="form-label fw-bold">Type Full Address</label>
+        <!-- Address input is now enabled by default -->
+        <input type="text" class="form-control" id="districtInput" placeholder="Start typing your full address (e.g., Levent, Istanbul)...">
+        <div class="form-text text-muted mt-2">Selecting a Google suggestion will automatically fill in the City and District below.</div>
+      </div>
 
+      <!-- 2. Manual Selection Dropdowns -->
+        <button type="button" onclick="$('#manualFieldsContainer').toggle();" class="btn btn-outline-secondary mb-3 w-100" id="toggleManualFieldsBtn">
+          <i class="fa-solid fa-edit"></i> Manual City / District Selection
+        </button>
+        <div id="manualFieldsContainer" style="display: none;">
 
-          <!-- 1. Address Input (Priority/Top) -->
-          <div id="autocompleteInputGroup" class="mb-4 border p-3 rounded-3 bg-light">
-            <label for="districtInput" class="form-label fw-bold">Type Full Address</label>
-            <!-- Address input is now enabled by default -->
-            <input type="text" class="form-control" id="districtInput" placeholder="Start typing your full address (e.g., Levent, Istanbul)...">
-            <div class="form-text text-muted mt-2">Selecting a Google suggestion will automatically fill in the City and District below.</div>
-          </div>
-
-          <!-- 2. Manual Selection Dropdowns -->
-          <div class="p-3 border rounded-3">
-            <label class="form-label fw-bold mb-3"> OR Manual City / District Selection</label>
-
-            <!-- 2a. City Dropdown -->
-            <div class="mb-3">
-              <label for="cityDropdown" class="form-label">İl (Şehir)</label>
-              <select class="form-select" id="cityDropdown">
-                <option selected value="">Select a City...</option>
-                {% for city in turkish_cities %}
-                <option value="{{ city.name }}" {% if user_city == city.name %}selected{% endif %}>{{ city.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <!-- 2b. District Dropdown -->
-            <div id="manualInputGroup" class="mb-3">
-              <label for="manualDistrictDropdown" class="form-label">District (İlçe)</label>
-              <select class="form-select" id="manualDistrictDropdown" disabled>
-                <option selected value="">Select a District...</option>
-              </select>
-            </div>
-          </div>
-
-
+        <!-- 2a. City Dropdown -->
+        <div class="mb-3">
+          <label for="cityDropdown" class="form-label">İl (Şehir)</label>
+          <select class="form-select" id="cityDropdown">
+            <option selected value="">Select a City...</option>
+            {% for city in turkish_cities %}
+            <option value="{{ city.name }}" {% if user_city == city.name %}selected{% endif %}>{{ city.name }}</option>
+            {% endfor %}
+          </select>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-success" id="saveLocationBtn" disabled>Save Location</button>
+
+        <!-- 2b. District Dropdown -->
+        <div id="manualInputGroup" class="mb-3">
+          <label for="manualDistrictDropdown" class="form-label">District (İlçe)</label>
+          <select class="form-select" id="manualDistrictDropdown" disabled>
+            <option selected value="">Select a District...</option>
+          </select>
         </div>
+      </div>
+
+      <!-- Save Button -->
+      <div class="mt-4">
+        <button type="button" class="btn btn-success w-100" id="saveLocationBtn" disabled>Save Location</button>
       </div>
     </div>
   </div>
@@ -92,7 +92,7 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-4 pt-1 pl-2" id="top-left">
-                 <a id="openLocationModalBtn" {% if user_city and user_district %} data-location-set="true" {% endif %} href="#" class="dropdown-toggle" data-bs-toggle="modal" data-bs-target="#locationModal" aria-label="Select location">
+                 <a id="openLocationModalBtn" {% if user_city and user_district %} data-location-set="true" {% endif %} href="#" class="dropdown-toggle" data-bs-toggle="offcanvas" data-bs-target="#locationModal" aria-label="Select location">
                     <i class="fa-solid fa-location-dot"></i>
                   {% if user_city and user_district %}
                     <span class="d-none d-lg-inline">
