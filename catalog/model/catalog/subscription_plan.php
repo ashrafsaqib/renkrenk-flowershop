@@ -47,6 +47,10 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 	public function getSubscriptionPlans(array $data = []): array {
 		$sql = "SELECT * FROM `" . DB_PREFIX . "subscription_plan` `sp` LEFT JOIN `" . DB_PREFIX . "subscription_plan_description` `spd` ON (`sp`.`subscription_plan_id` = `spd`.`subscription_plan_id`) WHERE `spd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'";
 
+		if (isset($data['filter_status'])) {
+			$sql .= " AND `sp`.`status` = '" . (int)$data['filter_status'] . "'";
+		}
+
 		if (!empty($data['filter_name'])) {
 			$sql .= " AND `spd`.`name` LIKE '" . $this->db->escape($data['filter_name'] . '%') . "'";
 		}
@@ -102,5 +106,26 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "subscription_plan`");
 
 		return (int)$query->row['total'];
+	}
+
+	/**
+	 * Get Subscription Plan Images
+	 *
+	 * Get the subscription plan images from the database.
+	 *
+	 * @param int $subscription_plan_id primary key of the subscription plan record
+	 *
+	 * @return array<int, array<string, mixed>> subscription plan image records
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_images = $this->model_catalog_subscription_plan->getImages($subscription_plan_id);
+	 */
+	public function getImages(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_plan_image` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "' ORDER BY `sort_order` ASC");
+
+		return $query->rows;
 	}
 }

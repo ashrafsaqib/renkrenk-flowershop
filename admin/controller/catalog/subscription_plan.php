@@ -245,6 +245,15 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 		// Images
 		$this->load->model('tool/image');
 
+		// Main Image
+		if (!empty($subscription_info) && isset($subscription_info['image']) && $subscription_info['image']) {
+			$data['image'] = $subscription_info['image'];
+			$data['thumb'] = $this->model_tool_image->resize($subscription_info['image'], 100, 100);
+		} else {
+			$data['image'] = '';
+			$data['thumb'] = $this->model_tool_image->resize('placeholder.png', 100, 100);
+		}
+
 		if (!empty($subscription_info)) {
 			$subscription_images = $this->model_catalog_subscription_plan->getImages($subscription_info['subscription_plan_id']);
 		} else {
@@ -396,6 +405,7 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 			'status'                        => 0,
 			'sort_order'                    => 0,
 			'price'                         => 0,
+			'image'                         => '',
 			'subscription_plan_image'       => []
 		];
 

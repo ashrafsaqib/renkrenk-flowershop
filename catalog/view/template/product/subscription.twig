@@ -1,0 +1,99 @@
+{{ header }}
+<div id="subscription-info" class="container">
+  <div class="row">{{ column_left }}
+    <div id="content" class="col">
+      {{ content_top }}
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+      
+      <div class="row mb-3">
+        {% if thumb or images %}
+          <div class="col-sm-6">
+            <div class="image magnific-popup">
+              {% if thumb %}
+                <a href="{{ image }}" title="{{ heading_title }}"><img src="{{ thumb }}" title="{{ heading_title }}" alt="{{ heading_title }}" class="img-thumbnail mb-3"/></a>
+              {% endif %}
+              {% if images %}
+                <div>
+                  {% for image in images %}
+                    <a href="{{ image.popup }}" title="{{ heading_title }}"><img src="{{ image.thumb }}" title="{{ heading_title }}" alt="{{ heading_title }}" class="img-thumbnail"/></a>&nbsp;
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+        
+        <div class="col-sm-6">
+          <h1>{{ heading_title }}</h1>
+          
+          {% if price_formatted %}
+            <ul class="list-unstyled">
+              <li><h2><span class="price-new">{{ price_formatted }}</span></h2></li>
+            </ul>
+          {% endif %}
+          
+          <ul class="list-unstyled">
+            <li><strong>{{ text_payment_frequency }}:</strong> {{ duration_text }}</li>
+          </ul>
+          
+          <br/>
+          <div id="subscription">
+            <button type="button" id="button-subscribe" class="btn btn-primary btn-lg btn-block">
+              <i class="fa-solid fa-check-circle"></i> {{ button_subscribe }}
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {% if description %}
+        <ul class="nav nav-tabs">
+          <li class="nav-item"><a href="#tab-description" data-bs-toggle="tab" class="nav-link active">{{ tab_description }}</a></li>
+        </ul>
+        <div class="tab-content">
+          <div id="tab-description" class="tab-pane active">{{ description }}</div>
+        </div>
+      {% endif %}
+      
+      {{ content_bottom }}
+    </div>
+    {{ column_right }}
+  </div>
+</div>
+
+<script type="text/javascript"><!--
+$('#button-subscribe').on('click', function() {
+    // Add subscription to cart or redirect to checkout
+    $.ajax({
+        url: 'index.php?route=checkout/cart.add&language={{ config_language }}',
+        type: 'post',
+        data: {
+            subscription_plan_id: {{ subscription_plan_id }}
+        },
+        dataType: 'json',
+        success: function(json) {
+            if (json['success']) {
+                $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                
+                $('#header-cart').load('index.php?route=common/cart.info&language={{ config_language }}');
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+
+$('.image').magnificPopup({
+    type: 'image',
+    delegate: 'a',
+    gallery: {
+        enabled: true
+    }
+});
+//--></script>
+
+{{ footer }}

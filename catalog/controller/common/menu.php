@@ -22,6 +22,9 @@ class Menu extends \Opencart\System\Engine\Controller {
 		// Product
 		$this->load->model('catalog/product');
 
+		// Subscription Plan
+		$this->load->model('catalog/subscription_plan');
+
 		$data['categories'] = [];
 
 		$categories = $this->model_catalog_category->getCategories(0);
@@ -49,6 +52,19 @@ class Menu extends \Opencart\System\Engine\Controller {
 				'children' => $children_data,
 				'href'     => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=' . $category['category_id'])
 			] + $category;
+		}
+
+		// Subscriptions
+		$data['subscriptions'] = [];
+
+		$subscription_plans = $this->model_catalog_subscription_plan->getSubscriptionPlans(['filter_status' => 1]);
+
+		foreach ($subscription_plans as $subscription_plan) {
+			$data['subscriptions'][] = [
+				'subscription_plan_id' => $subscription_plan['subscription_plan_id'],
+				'name'                 => $subscription_plan['name'],
+				'href'                 => $this->url->link('product/subscription', 'language=' . $this->config->get('config_language') . '&subscription_plan_id=' . $subscription_plan['subscription_plan_id'])
+			];
 		}
 
 		return $this->load->view('common/menu', $data);

@@ -36,7 +36,7 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 	 * $subscription_plan_id = $this->model_catalog_subscription_plan->addSubscriptionPlan($subscription_data);
 	 */
 	public function addSubscriptionPlan(array $data): int {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan` SET `trial_frequency` = '" . $this->db->escape((string)$data['trial_frequency']) . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_status` = '" . (int)$data['trial_status'] . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `duration` = '" . (int)$data['duration'] . "', `cycle` = '" . (int)$data['cycle'] . "', `status` = '" . (bool)$data['status'] . "', `sort_order` = '" . (int)$data['sort_order'] . "', `price` = '" . (float)$data['price'] . "'");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan` SET `trial_frequency` = '" . $this->db->escape((string)$data['trial_frequency']) . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_status` = '" . (int)$data['trial_status'] . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `duration` = '" . (int)$data['duration'] . "', `cycle` = '" . (int)$data['cycle'] . "', `status` = '" . (bool)$data['status'] . "', `sort_order` = '" . (int)$data['sort_order'] . "', `price` = '" . (float)$data['price'] . "', `image` = '" . $this->db->escape((string)$data['image']) . "'");
 
 		$subscription_plan_id = $this->db->getLastId();
 
@@ -83,7 +83,7 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 	 * $this->model_catalog_subscription_plan->editSubscriptionPlan($subscription_plan_id, $subscription_plan_data);
 	 */
 	public function editSubscriptionPlan(int $subscription_plan_id, array $data): void {
-		$this->db->query("UPDATE `" . DB_PREFIX . "subscription_plan` SET `trial_frequency` = '" . $this->db->escape((string)$data['trial_frequency']) . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_status` = '" . (int)$data['trial_status'] . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `duration` = '" . (int)$data['duration'] . "', `cycle` = '" . (int)$data['cycle'] . "', `status` = '" . (bool)$data['status'] . "', `sort_order` = '" . (int)$data['sort_order'] . "', `price` = '" . (float)$data['price'] . "' WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
+		$this->db->query("UPDATE `" . DB_PREFIX . "subscription_plan` SET `trial_frequency` = '" . $this->db->escape((string)$data['trial_frequency']) . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_status` = '" . (int)$data['trial_status'] . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `duration` = '" . (int)$data['duration'] . "', `cycle` = '" . (int)$data['cycle'] . "', `status` = '" . (bool)$data['status'] . "', `sort_order` = '" . (int)$data['sort_order'] . "', `price` = '" . (float)$data['price'] . "', `image` = '" . $this->db->escape((string)$data['image']) . "' WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
 
 		$this->model_catalog_subscription_plan->deleteDescriptions($subscription_plan_id);
 

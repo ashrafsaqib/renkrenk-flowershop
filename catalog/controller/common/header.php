@@ -129,6 +129,7 @@ class Header extends \Opencart\System\Engine\Controller {
 		// pass session district city to header
 		$data['user_city'] = isset($this->session->data['user_city']) ? $this->session->data['user_city'] : '';
 		$data['user_district'] = isset($this->session->data['user_district']) ? $this->session->data['user_district'] : '';
+		
 
 		return $this->load->view('common/header', $data);
 	}
