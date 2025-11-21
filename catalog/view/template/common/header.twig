@@ -64,21 +64,23 @@
 
   <!-- Offcanvas Slider for Location (Left Side) -->
   <div class="offcanvas offcanvas-start" tabindex="-1" id="locationModal" aria-labelledby="locationModalLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="locationModalLabel">Select Your Location</h5>
+    <div class="offcanvas-header pt-4">
+      <div class="w-100 d-flex justify-content-center">
+        <h5 class="offcanvas-title text-bold mb-0" id="locationModalLabel">CHANGE DELIVERY ADDRESS</h5>
+      </div>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body">
+    <div class="offcanvas-body mx-auto w-50 d-flex flex-column" >
       <!-- 1. Address Input (Priority/Top) -->
-      <div id="autocompleteInputGroup" class="mb-4 text-center">
-        <label for="districtInput" class="form-label fw-bold">Enter Your Address</label>
+      <div id="autocompleteInputGroup" class="mt-4 pt-4 mb-4 text-center">
+        <label for="districtInput" class="form-label fw-bold">Enter your delivery address</label>
         <!-- Address input is now enabled by default -->
         <input type="text" class="form-control" id="districtInput" placeholder="Start typing your full address (e.g., Levent, Istanbul)...">
       </div>
 
       <!-- 2. Manual Selection Dropdowns -->
         <button type="button" onclick="$('#manualFieldsContainer').toggle();" class="btn btn-outline-none mb-3 w-100" id="toggleManualFieldsBtn">
-          <i class="fa-solid fa-edit"></i> Manual City / District Selection
+          <i class="fa-solid fa-chevron-right"></i> ADD ADDRESS MANUALLY
         </button>
         <div id="manualFieldsContainer" style="display: none;">
 
@@ -104,7 +106,7 @@
 
       <!-- Save Button -->
       <div class="mt-4">
-        <button type="button" class="btn btn-success w-100" id="saveLocationBtn" disabled>Save Location</button>
+        <button type="button" class="btn btn-primary w-100" id="saveLocationBtn" disabled>SET MY ADDRESS</button>
       </div>
     </div>
   </div>

@@ -5508,7 +5508,7 @@ textarea.form-control-lg {
 }
 .offcanvas-sm, .offcanvas-md, .offcanvas-lg, .offcanvas-xl, .offcanvas-xxl, .offcanvas {
   --bs-offcanvas-zindex: 1045;
-  --bs-offcanvas-width: 400px;
+  --bs-offcanvas-width: 600px;
   --bs-offcanvas-height: 30vh;
   --bs-offcanvas-padding-x: 1rem;
   --bs-offcanvas-padding-y: 1rem;
