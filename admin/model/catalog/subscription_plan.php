@@ -51,6 +51,13 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		// Frequencies
+		if (isset($data['subscription_plan_frequency'])) {
+			foreach ($data['subscription_plan_frequency'] as $frequency) {
+				$this->model_catalog_subscription_plan->addFrequency($subscription_plan_id, $frequency);
+			}
+		}
+
 		return $subscription_plan_id;
 	}
 
@@ -97,6 +104,15 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 		if (isset($data['subscription_plan_image'])) {
 			foreach ($data['subscription_plan_image'] as $subscription_plan_image) {
 				$this->model_catalog_subscription_plan->addImage($subscription_plan_id, $subscription_plan_image);
+			}
+		}
+
+		// Frequencies
+		$this->model_catalog_subscription_plan->deleteFrequencies($subscription_plan_id);
+
+		if (isset($data['subscription_plan_frequency'])) {
+			foreach ($data['subscription_plan_frequency'] as $frequency) {
+				$this->model_catalog_subscription_plan->addFrequency($subscription_plan_id, $frequency);
 			}
 		}
 	}
@@ -423,5 +439,41 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_plan_image` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "' ORDER BY `sort_order` ASC");
 
 		return $query->rows;
+	}
+
+	/**
+	 * Get Frequencies
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_frequencies = $this->model_catalog_subscription_plan->getFrequencies($subscription_plan_id);
+	 */
+	public function getFrequencies(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_plan_frequency` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "' ORDER BY `subscription_plan_frequency_id` ASC");
+
+		return $query->rows;
+	}
+
+	/**
+	 * Add Frequency
+	 *
+	 * @param int   $subscription_plan_id
+	 * @param array $data
+	 *
+	 * @return void
+	 */
+	public function addFrequency(int $subscription_plan_id, array $data): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan_frequency` SET `subscription_plan_id` = '" . (int)$subscription_plan_id . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `cycle` = '" . (int)$data['cycle'] . "', `duration` = '" . (int)$data['duration'] . "', `price` = '" . (float)$data['price'] . "'");
+	}
+
+	/**
+	 * Delete Frequencies
+	 *
+	 * @param int $subscription_plan_id
+	 *
+	 * @return void
+	 */
+	public function deleteFrequencies(int $subscription_plan_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "subscription_plan_frequency` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
 	}
 }

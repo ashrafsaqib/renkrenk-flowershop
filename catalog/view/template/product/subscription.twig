@@ -3,11 +3,7 @@
   <div class="row">{{ column_left }}
     <div id="content" class="col">
       {{ content_top }}
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
+
       
       <div class="row mb-3">
         {% if thumb or images %}
@@ -28,6 +24,11 @@
         {% endif %}
         
         <div class="col-sm-6">
+                <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
           <h1>{{ heading_title }}</h1>
           
           {% if price_formatted %}
@@ -35,12 +36,84 @@
               <li><h2><span class="price-new">{{ price_formatted }}</span></h2></li>
             </ul>
           {% endif %}
+
+          <div class="mb-2">
+            {% set current_name = null %}
+            {% for subscription in subscriptions %}
+              {% if subscription.subscription_plan_id == subscription_plan_id or subscription.id == subscription_plan_id %}
+                {% set current_name = subscription.name %}
+              {% endif %}
+            {% endfor %}
+            <label class="form-label">Select your subscription: <small class="text-muted">{{ current_name|default('none selected') }}</small></label>
+          </div>
+
+            <div class="mb-3">
+            <div class="d-flex flex-wrap gap-2" role="group" aria-label="Subscription plans">
+              {% for subscription in subscriptions %}
+              <button type="button"
+                  class="btn-subscription btn btn-outline-dark btn-lg {% if subscription.subscription_plan_id == subscription_plan_id or subscription.id == subscription_plan_id %}active{% endif %}"
+                  data-id="{{ subscription.subscription_plan_id|default(subscription.id) }}"
+                  aria-pressed="{% if subscription.subscription_plan_id == subscription_plan_id or subscription.id == subscription_plan_id %}true{% else %}false{% endif %}">
+                {{ subscription.name }}{% if subscription.price_formatted %} — {{ subscription.price_formatted }}{% endif %}
+              </button>
+              {% endfor %}
+            </div>
+            </div>
+
+          <script type="text/javascript">
+            (function(){
+              document.querySelectorAll('.btn-subscription').forEach(function(btn){
+                btn.addEventListener('click', function(){
+                  var id = this.getAttribute('data-id');
+                  var url = new URL(window.location.href);
+                  url.searchParams.set('subscription_plan_id', id);
+                  window.location = url.toString();
+                });
+              });
+            })();
+          </script>
+
           
           <ul class="list-unstyled">
             <li><strong>{{ text_payment_frequency }}:</strong> {{ duration_text }}</li>
           </ul>
+
+          <div class="mb-3">
+            <div class="mb-2">
+              {% set current_freq_name = null %}
+              {% for frequency in frequencies %}
+                {% if frequency.frequency_id == frequency_id or frequency.id == frequency_id %}
+                  {% set current_freq_name = frequency.name %}
+                {% endif %}
+              {% endfor %}
+              <label class="form-label">Select payment frequency: <small id="selectedFrequency" class="text-muted"></small></label>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2" role="group" aria-label="Payment frequencies">
+              {% for frequency in frequencies %}
+                <button type="button"
+                        class="btn-frequency btn btn-outline-dark btn-lg {% if loop.first %}active{% endif %}"
+                        data-id="{{ frequency.frequency_id|default(frequency.id) }}"
+                        aria-pressed="{% if loop.first %}true{% else %}false{% endif %}">
+                  {{ frequency.name }}
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <script type="text/javascript">
+          (function(){
+            document.querySelectorAll('.btn-frequency').forEach(function(btn){
+              btn.addEventListener('click', function(){
+                // update selectedFrequency text
+                document.getElementById('selectedFrequency').textContent = this.textContent;
+              });
+            });
+          })();
+          </script>
           
           <br/>
+
           <div id="subscription">
             <button type="button" id="button-subscribe" class="btn btn-primary btn-lg btn-block">
               <i class="fa-solid fa-check-circle"></i> {{ button_subscribe }}

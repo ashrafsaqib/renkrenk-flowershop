@@ -21,6 +21,7 @@
           <ul class="nav nav-tabs">
             <li class="nav-item"><a href="#tab-general" data-bs-toggle="tab" class="nav-link active">{{ tab_general }}</a></li>
             <li class="nav-item"><a href="#tab-description" data-bs-toggle="tab" class="nav-link">{{ text_description }}</a></li>
+            <li class="nav-item"><a href="#tab-frequency" data-bs-toggle="tab" class="nav-link">Frequency</a></li>
             <li class="nav-item"><a href="#tab-image" data-bs-toggle="tab" class="nav-link">{{ text_image_additional }}</a></li>
           </ul>
           <div class="tab-content">
@@ -45,7 +46,7 @@
                   </div>
                 </div>
               </div>
-              <fieldset>
+              <fieldset class="d-none">
                 <legend>{{ text_trial }}</legend>
                 <div class="row mb-3">
                   <label for="input-trial-duration" class="col-sm-2 col-form-label">{{ entry_trial_duration }}</label>
@@ -85,21 +86,21 @@
               </fieldset>
               <fieldset>
                 <legend>{{ text_subscription }}</legend>
-                <div class="row mb-3">
+                <div class="d-none row mb-3">
                   <label for="input-duration" class="col-sm-2 col-form-label">{{ entry_duration }}</label>
                   <div class="col-sm-10">
                     <input type="text" name="duration" value="{{ duration }}" placeholder="{{ entry_duration }}" id="input-duration" class="form-control"/>
                     <div class="form-text">{{ help_duration }}</div>
                   </div>
                 </div>
-                <div class="row mb-3">
+                <div class="d-none row mb-3">
                   <label for="input-cycle" class="col-sm-2 col-form-label">{{ entry_cycle }}</label>
                   <div class="col-sm-10">
                     <input type="text" name="cycle" value="{{ cycle }}" placeholder="{{ entry_cycle }}" id="input-cycle" class="form-control"/>
                     <div class="form-text">{{ help_cycle }}</div>
                   </div>
                 </div>
-                <div class="row mb-3">
+                <div class="d-none row mb-3">
                   <label for="input-frequency" class="col-sm-2 col-form-label">{{ entry_frequency }}</label>
                   <div class="col-sm-10">
                     <select name="frequency" id="input-frequency" class="form-select">
@@ -159,6 +160,59 @@
               </div>
             </div>
 
+            <!-- Frequency Tab -->
+            <div class="tab-pane" id="tab-frequency">
+              <fieldset>
+                <legend>Subscription Frequencies</legend>
+                <div class="table-responsive">
+                  <table id="subscription-plan-frequency" class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <th>Frequency</th>
+                        <th>Cycle</th>
+                        <th>Duration</th>
+                        <th>Price</th>
+                        <th class="text-end"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% set frequency_row = 0 %}
+                      {% for frequency_item in subscription_plan_frequencies %}
+                        <tr id="frequency-row-{{ frequency_row }}">
+                          <td>
+                            <select name="subscription_plan_frequency[{{ frequency_row }}][frequency]" class="form-select">
+                              {% for frequency_option in frequencies %}
+                                <option value="{{ frequency_option.value }}"{% if frequency_item.frequency == frequency_option.value %} selected{% endif %}>{{ frequency_option.text }}</option>
+                              {% endfor %}
+                            </select>
+                          </td>
+                          <td>
+                            <input type="number" name="subscription_plan_frequency[{{ frequency_row }}][cycle]" value="{{ frequency_item.cycle }}" placeholder="Cycle" class="form-control" min="1"/>
+                          </td>
+                          <td>
+                            <input type="number" name="subscription_plan_frequency[{{ frequency_row }}][duration]" value="{{ frequency_item.duration }}" placeholder="Duration (0 = unlimited)" class="form-control" min="0"/>
+                          </td>
+                          <td>
+                            <input type="text" name="subscription_plan_frequency[{{ frequency_row }}][price]" value="{{ frequency_item.price }}" placeholder="Price" class="form-control"/>
+                          </td>
+                          <td class="text-end">
+                            <button type="button" onclick="$('#frequency-row-{{ frequency_row }}').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button>
+                          </td>
+                        </tr>
+                        {% set frequency_row = frequency_row + 1 %}
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colspan="4"></td>
+                        <td class="text-end"><button type="button" id="button-frequency" data-bs-toggle="tooltip" title="Add Frequency" class="btn btn-primary"><i class="fa-solid fa-plus-circle"></i></button></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </fieldset>
+            </div>
+
             <!-- Images Tab -->
             <div class="tab-pane" id="tab-image">
               <fieldset>
@@ -214,6 +268,34 @@
 // Initialize CKEditor for textareas
 $('textarea[data-oc-toggle=\'ckeditor\']').ckeditor({
     language: '{{ ckeditor }}'
+});
+
+var frequency_row = {{ subscription_plan_frequencies|length }};
+
+$('#button-frequency').on('click', function() {
+    var html = '';
+
+    html += '<tr id="frequency-row-' + frequency_row + '">';
+    html += '  <td>';
+    html += '    <select name="subscription_plan_frequency[' + frequency_row + '][frequency]" class="form-select">';
+    {% for frequency_option in frequencies %}
+    html += '      <option value="{{ frequency_option.value }}">{{ frequency_option.text }}</option>';
+    {% endfor %}
+    html += '    </select>';
+    html += '  </td>';
+    html += '  <td><input type="number" name="subscription_plan_frequency[' + frequency_row + '][cycle]" value="1" placeholder="Cycle" class="form-control" min="1"/></td>';
+    html += '  <td><input type="number" name="subscription_plan_frequency[' + frequency_row + '][duration]" value="0" placeholder="Duration (0 = unlimited)" class="form-control" min="0"/></td>';
+    html += '  <td><input type="text" name="subscription_plan_frequency[' + frequency_row + '][price]" value="" placeholder="Price" class="form-control"/></td>';
+    html += '  <td class="text-end"><button type="button" onclick="$(\'#frequency-row-' + frequency_row + '\').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+    html += '</tr>';
+
+    $('#subscription-plan-frequency tbody').append(html);
+
+    if (typeof $('[data-bs-toggle="tooltip"]').tooltip === 'function') {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    }
+
+    frequency_row++;
 });
 
 var image_row = {{ subscription_plan_images|length }};

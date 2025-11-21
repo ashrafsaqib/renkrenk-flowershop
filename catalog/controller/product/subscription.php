@@ -90,10 +90,47 @@ class Subscription extends \Opencart\System\Engine\Controller {
 				];
 			}
 
-			$data['subscription_plan_id'] = $subscription_plan_id;
+		$data['subscription_plan_id'] = $subscription_plan_id;
 
-			$data['column_left'] = $this->load->controller('common/column_left');
-			$data['column_right'] = $this->load->controller('common/column_right');
+		// Load frequencies for current subscription plan
+		$data['frequencies'] = [];
+		$frequencies = $this->model_catalog_subscription_plan->getFrequencies($subscription_plan_id);
+		
+		foreach ($frequencies as $freq) {
+			$price_formatted = false;
+			if ((float)$freq['price']) {
+				$price_formatted = $this->currency->format($this->tax->calculate($freq['price'], $this->config->get('config_tax'), $this->config->get('config_tax')), $this->config->get('config_currency'));
+			}
+			
+			$data['frequencies'][] = [
+				'frequency' => $this->language->get('text_' . $freq['frequency']),
+				'cycle' => $freq['cycle'],
+				'duration' => $freq['duration'],
+				'name' => 'Every '. $freq['cycle']. ' '.strtoupper($freq['frequency']),
+				'price' => $freq['price'],
+				'price_formatted' => $price_formatted
+			];
+		}
+
+		// Load all subscription plans for selection buttons
+		$data['subscriptions'] = [];
+		$subscription_plans = $this->model_catalog_subscription_plan->getSubscriptionPlans(['filter_status' => 1]);
+		
+		foreach ($subscription_plans as $plan) {
+			$price_formatted = false;
+			if ((float)$plan['price']) {
+				$price_formatted = $this->currency->format($this->tax->calculate($plan['price'], $this->config->get('config_tax'), $this->config->get('config_tax')), $this->config->get('config_currency'));
+			}
+			
+			$data['subscriptions'][] = [
+				'subscription_plan_id' => $plan['subscription_plan_id'],
+				'name' => $plan['name'],
+				'price_formatted' => $price_formatted
+			];
+		}
+
+		$data['column_left'] = $this->load->controller('common/column_left');
+		$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');
 			$data['content_bottom'] = $this->load->controller('common/content_bottom');
 			$data['footer'] = $this->load->controller('common/footer');

@@ -286,6 +286,13 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 
 		$data['placeholder'] = $this->model_tool_image->resize('placeholder.png', 300, 300);
 
+		// Subscription Plan Frequencies
+		if (!empty($subscription_info)) {
+			$data['subscription_plan_frequencies'] = $this->model_catalog_subscription_plan->getFrequencies($subscription_info['subscription_plan_id']);
+		} else {
+			$data['subscription_plan_frequencies'] = [];
+		}
+
 		// CKEditor language
 		$data['ckeditor'] = 'en';
 
@@ -406,7 +413,8 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 			'sort_order'                    => 0,
 			'price'                         => 0,
 			'image'                         => '',
-			'subscription_plan_image'       => []
+			'subscription_plan_image'       => [],
+			'subscription_plan_frequency'   => []
 		];
 
 		$post_info = $this->request->post + $required;

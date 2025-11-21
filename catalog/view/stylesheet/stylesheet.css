@@ -11120,3 +11120,7 @@ footer h5, footer .h5 {
   text-transform: uppercase;
   font-weight: 300;
 }
+
+.image.magnific-popup div {
+  text-align:center;
+}

@@ -128,4 +128,17 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 
 		return $query->rows;
 	}
+
+	/**
+	 * Get Frequencies
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_frequencies = $this->model_catalog_subscription_plan->getFrequencies($subscription_plan_id);
+	 */
+	public function getFrequencies(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_plan_frequency` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "' ORDER BY `subscription_plan_frequency_id` ASC");
+
+		return $query->rows;
+	}
 }
