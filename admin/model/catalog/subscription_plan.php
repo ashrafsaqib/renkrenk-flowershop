@@ -58,6 +58,27 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		// Durations
+		if (isset($data['subscription_plan_duration'])) {
+			foreach ($data['subscription_plan_duration'] as $duration) {
+				$this->model_catalog_subscription_plan->addDuration($subscription_plan_id, $duration);
+			}
+		}
+
+		// Gifts
+		if (isset($data['subscription_plan_gift'])) {
+			foreach ($data['subscription_plan_gift'] as $product_id) {
+				$this->model_catalog_subscription_plan->addGift($subscription_plan_id, (int)$product_id);
+			}
+		}
+
+		// Vases
+		if (isset($data['subscription_plan_vase'])) {
+			foreach ($data['subscription_plan_vase'] as $product_id) {
+				$this->model_catalog_subscription_plan->addVase($subscription_plan_id, (int)$product_id);
+			}
+		}
+
 		return $subscription_plan_id;
 	}
 
@@ -113,6 +134,33 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 		if (isset($data['subscription_plan_frequency'])) {
 			foreach ($data['subscription_plan_frequency'] as $frequency) {
 				$this->model_catalog_subscription_plan->addFrequency($subscription_plan_id, $frequency);
+			}
+		}
+
+		// Durations
+		$this->model_catalog_subscription_plan->deleteDurations($subscription_plan_id);
+
+		if (isset($data['subscription_plan_duration'])) {
+			foreach ($data['subscription_plan_duration'] as $duration) {
+				$this->model_catalog_subscription_plan->addDuration($subscription_plan_id, $duration);
+			}
+		}
+
+		// Gifts
+		$this->model_catalog_subscription_plan->deleteGifts($subscription_plan_id);
+
+		if (isset($data['subscription_plan_gift'])) {
+			foreach ($data['subscription_plan_gift'] as $product_id) {
+				$this->model_catalog_subscription_plan->addGift($subscription_plan_id, (int)$product_id);
+			}
+		}
+
+		// Vases
+		$this->model_catalog_subscription_plan->deleteVases($subscription_plan_id);
+
+		if (isset($data['subscription_plan_vase'])) {
+			foreach ($data['subscription_plan_vase'] as $product_id) {
+				$this->model_catalog_subscription_plan->addVase($subscription_plan_id, (int)$product_id);
 			}
 		}
 	}
@@ -475,5 +523,113 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 	 */
 	public function deleteFrequencies(int $subscription_plan_id): void {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "subscription_plan_frequency` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
+	}
+
+	/**
+	 * Get Durations
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_durations = $this->model_catalog_subscription_plan->getDurations($subscription_plan_id);
+	 */
+	public function getDurations(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_plan_duration` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "' ORDER BY `subscription_plan_duration_id` ASC");
+
+		return $query->rows;
+	}
+
+	/**
+	 * Add Duration
+	 *
+	 * @param int   $subscription_plan_id
+	 * @param array $data
+	 *
+	 * @return void
+	 */
+	public function addDuration(int $subscription_plan_id, array $data): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan_duration` SET `subscription_plan_id` = '" . (int)$subscription_plan_id . "', `duration` = '" . (int)$data['duration'] . "', `label` = '" . $this->db->escape((string)$data['label']) . "', `price` = '" . (float)$data['price'] . "'");
+	}
+
+	/**
+	 * Delete Durations
+	 *
+	 * @param int $subscription_plan_id
+	 *
+	 * @return void
+	 */
+	public function deleteDurations(int $subscription_plan_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "subscription_plan_duration` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
+	}
+
+	/**
+	 * Get Gifts
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_gifts = $this->model_catalog_subscription_plan->getGifts($subscription_plan_id);
+	 */
+	public function getGifts(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT spg.product_id, pd.name FROM `" . DB_PREFIX . "subscription_plan_gift` spg LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (spg.product_id = pd.product_id) WHERE spg.subscription_plan_id = '" . (int)$subscription_plan_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY pd.name ASC");
+
+		return $query->rows;
+	}
+
+	/**
+	 * Add Gift
+	 *
+	 * @param int $subscription_plan_id
+	 * @param int $product_id
+	 *
+	 * @return void
+	 */
+	public function addGift(int $subscription_plan_id, int $product_id): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan_gift` SET `subscription_plan_id` = '" . (int)$subscription_plan_id . "', `product_id` = '" . (int)$product_id . "'");
+	}
+
+	/**
+	 * Delete Gifts
+	 *
+	 * @param int $subscription_plan_id
+	 *
+	 * @return void
+	 */
+	public function deleteGifts(int $subscription_plan_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "subscription_plan_gift` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
+	}
+
+	/**
+	 * Get Vases
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_vases = $this->model_catalog_subscription_plan->getVases($subscription_plan_id);
+	 */
+	public function getVases(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT spv.product_id, pd.name FROM `" . DB_PREFIX . "subscription_plan_vase` spv LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (spv.product_id = pd.product_id) WHERE spv.subscription_plan_id = '" . (int)$subscription_plan_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY pd.name ASC");
+
+		return $query->rows;
+	}
+
+	/**
+	 * Add Vase
+	 *
+	 * @param int $subscription_plan_id
+	 * @param int $product_id
+	 *
+	 * @return void
+	 */
+	public function addVase(int $subscription_plan_id, int $product_id): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan_vase` SET `subscription_plan_id` = '" . (int)$subscription_plan_id . "', `product_id` = '" . (int)$product_id . "'");
+	}
+
+	/**
+	 * Delete Vases
+	 *
+	 * @param int $subscription_plan_id
+	 *
+	 * @return void
+	 */
+	public function deleteVases(int $subscription_plan_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "subscription_plan_vase` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
 	}
 }

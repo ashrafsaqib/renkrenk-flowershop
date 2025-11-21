@@ -22,6 +22,9 @@
             <li class="nav-item"><a href="#tab-general" data-bs-toggle="tab" class="nav-link active">{{ tab_general }}</a></li>
             <li class="nav-item"><a href="#tab-description" data-bs-toggle="tab" class="nav-link">{{ text_description }}</a></li>
             <li class="nav-item"><a href="#tab-frequency" data-bs-toggle="tab" class="nav-link">Frequency</a></li>
+            <li class="nav-item"><a href="#tab-duration" data-bs-toggle="tab" class="nav-link">Duration</a></li>
+            <li class="nav-item"><a href="#tab-gifts" data-bs-toggle="tab" class="nav-link">Gifts</a></li>
+            <li class="nav-item"><a href="#tab-vase" data-bs-toggle="tab" class="nav-link">Vase</a></li>
             <li class="nav-item"><a href="#tab-image" data-bs-toggle="tab" class="nav-link">{{ text_image_additional }}</a></li>
           </ul>
           <div class="tab-content">
@@ -213,6 +216,115 @@
               </fieldset>
             </div>
 
+            <!-- Duration Tab -->
+            <div class="tab-pane" id="tab-duration">
+              <fieldset>
+                <legend>Subscription Durations</legend>
+                <div class="table-responsive">
+                  <table id="subscription-plan-duration" class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <th>Duration (Months)</th>
+                        <th>Duration Label</th>
+                        <th>Price</th>
+                        <th class="text-end"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% set duration_row = 0 %}
+                      {% for duration_item in subscription_plan_durations %}
+                        <tr id="duration-row-{{ duration_row }}">
+                          <td>
+                            <input type="number" name="subscription_plan_duration[{{ duration_row }}][duration]" value="{{ duration_item.duration }}" placeholder="Duration in months (0 = unlimited)" class="form-control" min="0"/>
+                          </td>
+                          <td>
+                            <input type="text" name="subscription_plan_duration[{{ duration_row }}][label]" value="{{ duration_item.label }}" placeholder="e.g., 1 Month, 6 Months, 1 Year" class="form-control"/>
+                          </td>
+                          <td>
+                            <input type="text" name="subscription_plan_duration[{{ duration_row }}][price]" value="{{ duration_item.price }}" placeholder="Price" class="form-control"/>
+                          </td>
+                          <td class="text-end">
+                            <button type="button" onclick="$('#duration-row-{{ duration_row }}').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button>
+                          </td>
+                        </tr>
+                        {% set duration_row = duration_row + 1 %}
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colspan="3"></td>
+                        <td class="text-end"><button type="button" id="button-duration" data-bs-toggle="tooltip" title="Add Duration" class="btn btn-primary"><i class="fa-solid fa-plus-circle"></i></button></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </fieldset>
+            </div>
+
+            <!-- Gifts Tab -->
+            <div class="tab-pane" id="tab-gifts">
+              <fieldset>
+                <legend>Gift Products</legend>
+                <div class="row mb-3">
+                  <label class="col-sm-2 col-form-label">Add Gift Product</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="product" value="" placeholder="Enter product name" id="input-gift-product" data-oc-target="autocomplete-gift-product" class="form-control" autocomplete="off"/>
+                    <ul id="autocomplete-gift-product" class="dropdown-menu"></ul>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table id="subscription-plan-gift" class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <th>Product Name</th>
+                        <th class="text-end"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for gift_product in subscription_plan_gifts %}
+                        <tr id="gift-product-{{ gift_product.product_id }}">
+                          <td>{{ gift_product.name }}<input type="hidden" name="subscription_plan_gift[]" value="{{ gift_product.product_id }}"/></td>
+                          <td class="text-end"><button type="button" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </fieldset>
+            </div>
+
+            <!-- Vase Tab -->
+            <div class="tab-pane" id="tab-vase">
+              <fieldset>
+                <legend>Vase Products</legend>
+                <div class="row mb-3">
+                  <label class="col-sm-2 col-form-label">Add Vase Product</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="product" value="" placeholder="Enter product name" id="input-vase-product" data-oc-target="autocomplete-vase-product" class="form-control" autocomplete="off"/>
+                    <ul id="autocomplete-vase-product" class="dropdown-menu"></ul>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table id="subscription-plan-vase" class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <th>Product Name</th>
+                        <th class="text-end"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for vase_product in subscription_plan_vases %}
+                        <tr id="vase-product-{{ vase_product.product_id }}">
+                          <td>{{ vase_product.name }}<input type="hidden" name="subscription_plan_vase[]" value="{{ vase_product.product_id }}"/></td>
+                          <td class="text-end"><button type="button" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </fieldset>
+            </div>
+
             <!-- Images Tab -->
             <div class="tab-pane" id="tab-image">
               <fieldset>
@@ -271,6 +383,7 @@ $('textarea[data-oc-toggle=\'ckeditor\']').ckeditor({
 });
 
 var frequency_row = {{ subscription_plan_frequencies|length }};
+var duration_row = {{ subscription_plan_durations|length }};
 
 $('#button-frequency').on('click', function() {
     var html = '';
@@ -296,6 +409,25 @@ $('#button-frequency').on('click', function() {
     }
 
     frequency_row++;
+});
+
+$('#button-duration').on('click', function() {
+    var html = '';
+
+    html += '<tr id="duration-row-' + duration_row + '">';
+    html += '  <td><input type="number" name="subscription_plan_duration[' + duration_row + '][duration]" value="0" placeholder="Duration in months (0 = unlimited)" class="form-control" min="0"/></td>';
+    html += '  <td><input type="text" name="subscription_plan_duration[' + duration_row + '][label]" value="" placeholder="e.g., 1 Month, 6 Months, 1 Year" class="form-control"/></td>';
+    html += '  <td><input type="text" name="subscription_plan_duration[' + duration_row + '][price]" value="" placeholder="Price" class="form-control"/></td>';
+    html += '  <td class="text-end"><button type="button" onclick="$(\'#duration-row-' + duration_row + '\').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+    html += '</tr>';
+
+    $('#subscription-plan-duration tbody').append(html);
+
+    if (typeof $('[data-bs-toggle="tooltip"]').tooltip === 'function') {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    }
+
+    duration_row++;
 });
 
 var image_row = {{ subscription_plan_images|length }};
@@ -330,6 +462,74 @@ $('#button-image').on('click', function() {
 // Handle image removal by row
 $(document).on('click', '#subscription-plan-image tbody button.btn-danger', function() {
     $(this).closest('tr').remove();
+});
+
+// Gift Products
+$('#input-gift-product').autocomplete({
+    'source': function(request, response) {
+        $.ajax({
+            url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function(json) {
+                response($.map(json, function(item) {
+                    return {
+                        label: item['name'],
+                        value: item['product_id']
+                    }
+                }));
+            }
+        });
+    },
+    'select': function(item) {
+        $('#input-gift-product').val('');
+
+        $('#gift-product-' + item['value']).remove();
+
+        html = '<tr id="gift-product-' + item['value'] + '">';
+        html += '  <td>' + item['label'] + '<input type="hidden" name="subscription_plan_gift[]" value="' + item['value'] + '"/></td>';
+        html += '  <td class="text-end"><button type="button" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+        html += '</tr>';
+
+        $('#subscription-plan-gift tbody').append(html);
+    }
+});
+
+$('#subscription-plan-gift').on('click', '.btn', function() {
+    $(this).parent().parent().remove();
+});
+
+// Vase Products
+$('#input-vase-product').autocomplete({
+    'source': function(request, response) {
+        $.ajax({
+            url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function(json) {
+                response($.map(json, function(item) {
+                    return {
+                        label: item['name'],
+                        value: item['product_id']
+                    }
+                }));
+            }
+        });
+    },
+    'select': function(item) {
+        $('#input-vase-product').val('');
+
+        $('#vase-product-' + item['value']).remove();
+
+        html = '<tr id="vase-product-' + item['value'] + '">';
+        html += '  <td>' + item['label'] + '<input type="hidden" name="subscription_plan_vase[]" value="' + item['value'] + '"/></td>';
+        html += '  <td class="text-end"><button type="button" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+        html += '</tr>';
+
+        $('#subscription-plan-vase tbody').append(html);
+    }
+});
+
+$('#subscription-plan-vase').on('click', '.btn', function() {
+    $(this).parent().parent().remove();
 });
 //-->
 </script>

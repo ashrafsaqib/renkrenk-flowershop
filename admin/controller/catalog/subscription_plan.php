@@ -293,6 +293,27 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 			$data['subscription_plan_frequencies'] = [];
 		}
 
+		// Subscription Plan Durations
+		if (!empty($subscription_info)) {
+			$data['subscription_plan_durations'] = $this->model_catalog_subscription_plan->getDurations($subscription_info['subscription_plan_id']);
+		} else {
+			$data['subscription_plan_durations'] = [];
+		}
+
+		// Subscription Plan Gifts
+		if (!empty($subscription_info)) {
+			$data['subscription_plan_gifts'] = $this->model_catalog_subscription_plan->getGifts($subscription_info['subscription_plan_id']);
+		} else {
+			$data['subscription_plan_gifts'] = [];
+		}
+
+		// Subscription Plan Vases
+		if (!empty($subscription_info)) {
+			$data['subscription_plan_vases'] = $this->model_catalog_subscription_plan->getVases($subscription_info['subscription_plan_id']);
+		} else {
+			$data['subscription_plan_vases'] = [];
+		}
+
 		// CKEditor language
 		$data['ckeditor'] = 'en';
 
@@ -414,7 +435,10 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 			'price'                         => 0,
 			'image'                         => '',
 			'subscription_plan_image'       => [],
-			'subscription_plan_frequency'   => []
+			'subscription_plan_frequency'   => [],
+			'subscription_plan_duration'    => [],
+			'subscription_plan_gift'        => [],
+			'subscription_plan_vase'        => []
 		];
 
 		$post_info = $this->request->post + $required;
