@@ -11124,3 +11124,6 @@ footer h5, footer .h5 {
 .image.magnific-popup div {
   text-align:center;
 }
+.image-btns .active {
+  border-width: 2px;
+}

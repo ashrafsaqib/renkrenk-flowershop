@@ -110,6 +110,183 @@
           
           <br/>
 
+          <div class="mb-3">
+            <div class="mb-2">
+              <label class="form-label">Is this a Gift?</label>
+            </div>
+
+            <div class="d-flex gap-2" role="group" aria-label="Gift option">
+              <button type="button" class="btn-gift-option btn btn-outline-dark btn-lg active" data-value="no" aria-pressed="true">
+                No
+              </button>
+              <button type="button" class="btn-gift-option btn btn-outline-dark btn-lg" data-value="yes" aria-pressed="false">
+                Yes
+              </button>
+            </div>
+
+            <input type="hidden" id="is_gift" name="is_gift" value="no" />
+          </div>
+
+
+
+          <div class="mb-3 duration-section" style="display: none;">
+            <div class="mb-2">
+              {% set current_duration_name = null %}
+              {% for duration in durations %}
+                {% if duration.duration_id == duration_id or duration.id == duration_id %}
+                  {% set current_duration_name = duration.name %}
+                {% endif %}
+              {% endfor %}
+              <label class="form-label">Select duration: <small id="selectedDuration" class="text-muted">{{ current_duration_name|default('none selected') }}</small></label>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2" role="group" aria-label="Durations">
+              {% for duration in durations %}
+                <button type="button"
+                        class="btn-duration btn btn-outline-dark btn-lg {% if loop.first %}active{% endif %}"
+                        data-id="{{ duration.duration_id|default(duration.id) }}"
+                        aria-pressed="{% if loop.first %} true{% else %}false{% endif %}">
+                  {{ duration.label }}
+                </button>
+              {% endfor %}
+            </div>
+
+            <input type="hidden" id="duration_id" name="duration_id" value="{{ duration_id|default('') }}" />
+          </div>
+
+        
+
+          {% if gifts %}
+          <div class="mb-3 gifts-section" style="display: none;">
+            <div class="mb-2">
+              {% set current_gift_name = null %}
+              {% for gift in gifts %}
+                {% if gift.product_id == gift_id or gift.id == gift_id %}
+                  {% set current_gift_name = gift.name %}
+                {% endif %}
+              {% endfor %}
+              <label class="form-label">Select gift: <small id="selectedGift" class="text-muted">{{ current_gift_name|default('none selected') }}</small></label>
+            </div>
+
+            <div class="d-flex flex-wrap image-btns" role="group" aria-label="Gifts">
+              {% for gift in gifts %}
+                <label
+                  class="btn-gift btn {% if loop.first %}active{% endif %}"
+                  data-id="{{ gift.product_id|default(gift.id) }}"
+                  data-name="{{ gift.name }}"
+                  aria-pressed="{% if loop.first %}true{% else %}false{% endif %}"
+                  title="{{ gift.name }}"
+                >
+                  <input type="radio"
+                         name="gift_option"
+                         class="d-none"
+                         value="{{ gift.product_id|default(gift.id) }}"
+                         {% if loop.first %}checked{% endif %}/>
+                  <img src="{{ gift.image }}" alt="{{ gift.name }}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;" />
+                </label>
+              {% endfor %}
+            </div>
+
+            <input type="hidden" id="gift_id" name="gift_id" value="{{ gift_id|default('') }}" />
+          </div>
+
+          <script type="text/javascript">
+          (function(){
+            var label = document.getElementById('selectedGift');
+            var hidden = document.getElementById('gift_id');
+
+            // initialize label with active or first button
+            if (label && !label.textContent.trim()) {
+              var init = document.querySelector('.btn-gift.active') || document.querySelector('.btn-gift');
+              if (init) label.textContent = init.getAttribute('data-name') || init.getAttribute('title');
+            }
+
+            document.querySelectorAll('.btn-gift').forEach(function(btn){
+              btn.addEventListener('click', function(){
+                // toggle active state
+                document.querySelectorAll('.btn-gift').forEach(function(b){
+                  b.classList.remove('active');
+                  b.setAttribute('aria-pressed','false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-pressed','true');
+
+                // update display and hidden value
+                if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
+                if (hidden) hidden.value = this.getAttribute('data-id');
+              });
+            });
+          })();
+          </script>
+          {% endif %}
+
+          {% if vases %}
+          <div class="mb-3 vases-section">
+            <div class="mb-2">
+              {% set current_vase_name = null %}
+              {% for vase in vases %}
+                {% if vase.product_id == vase_id or vase.id == vase_id %}
+                  {% set current_vase_name = vase.name %}
+                {% endif %}
+              {% endfor %}
+              <label class="form-label">Select vase: <small id="selectedVase" class="text-muted">{{ current_vase_name|default('none selected') }}</small></label>
+            </div>
+
+            <div class="d-flex flex-wrap image-btns" role="group" aria-label="Vases">
+              {% for vase in vases %}
+                <label
+                  class="btn-vase btn {% if loop.first %}active{% endif %}"
+                  data-id="{{ vase.product_id|default(vase.id) }}"
+                  data-name="{{ vase.name }}"
+                  aria-pressed="{% if loop.first %}true{% else %}false{% endif %}"
+                  title="{{ vase.name }}"
+                >
+                  <input type="radio"
+                         name="vase_option"
+                         class="d-none"
+                         value="{{ vase.product_id|default(vase.id) }}"
+                         {% if loop.first %}checked{% endif %}/>
+                  <img src="{{ vase.image }}" alt="{{ vase.name }}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;" />
+                </label>
+              {% endfor %}
+            </div>
+
+            <input type="hidden" id="vase_id" name="vase_id" value="{{ vase_id|default('') }}" />
+          </div>
+
+          <script type="text/javascript">
+          (function(){
+            var label = document.getElementById('selectedVase');
+            var hidden = document.getElementById('vase_id');
+
+            // initialize label with active or first button
+            if (label && !label.textContent.trim()) {
+              var init = document.querySelector('.btn-vase.active') || document.querySelector('.btn-vase');
+              if (init) label.textContent = init.getAttribute('data-name') || init.getAttribute('title');
+            }
+
+            document.querySelectorAll('.btn-vase').forEach(function(btn){
+              btn.addEventListener('click', function(){
+                // toggle active state
+                document.querySelectorAll('.btn-vase').forEach(function(b){
+                  b.classList.remove('active');
+                  b.setAttribute('aria-pressed','false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-pressed','true');
+
+                // update display and hidden value
+                if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
+                if (hidden) hidden.value = this.getAttribute('data-id');
+
+                // update the radio button
+                this.querySelector('input[type="radio"]').checked = true;
+              });
+            });
+          })();
+          </script>
+          {% endif %}
+
           <div id="subscription">
             <button type="button" id="button-subscribe" class="btn btn-primary btn-lg btn-block">
               <i class="fa-solid fa-check-circle"></i> {{ button_subscribe }}
@@ -163,6 +340,69 @@ $('.image').magnificPopup({
         enabled: true
     }
 });
+
+// Gift option toggle
+(function(){
+  var hidden = document.getElementById('is_gift');
+  var durationSection = document.querySelector('.duration-section');
+  var giftsSection = document.querySelector('.gifts-section');
+  var vasesSection = document.querySelector('.vases-section');
+
+  document.querySelectorAll('.btn-gift-option').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      // toggle active state
+      document.querySelectorAll('.btn-gift-option').forEach(function(b){
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed','false');
+      });
+      this.classList.add('active');
+      this.setAttribute('aria-pressed','true');
+
+      // update hidden value
+      var value = this.getAttribute('data-value');
+      if (hidden) hidden.value = value;
+
+      // show/hide duration, gifts and vases sections
+      if (value === 'yes') {
+        if (durationSection) durationSection.style.display = 'block';
+        if (giftsSection) giftsSection.style.display = 'block';
+        if (vasesSection) vasesSection.style.display = 'none';
+      } else {
+        if (durationSection) durationSection.style.display = 'none';
+        if (giftsSection) giftsSection.style.display = 'none';
+        if (vasesSection) vasesSection.style.display = 'block';
+      }
+    });
+  });
+})();
+
+// Duration selection
+(function(){
+  var label = document.getElementById('selectedDuration');
+  var hidden = document.getElementById('duration_id');
+
+            // initialize label with active or first button
+            if (label && !label.textContent.trim()) {
+              var init = document.querySelector('.btn-duration.active') || document.querySelector('.btn-duration');
+              if (init) label.textContent = init.textContent.trim();
+            }
+
+            document.querySelectorAll('.btn-duration').forEach(function(btn){
+              btn.addEventListener('click', function(){
+                // toggle active state
+                document.querySelectorAll('.btn-duration').forEach(function(b){
+                  b.classList.remove('active');
+                  b.setAttribute('aria-pressed','false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-pressed','true');
+
+                // update display and hidden value
+                if (label) label.textContent = this.textContent.trim();
+                if (hidden) hidden.value = this.getAttribute('data-id');
+              });
+            });
+})();
 //--></script>
 
 {{ footer }}

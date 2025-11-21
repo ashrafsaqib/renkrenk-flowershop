@@ -14,6 +14,10 @@ class Subscription extends \Opencart\System\Engine\Controller {
 	public function index(): ?\Opencart\System\Engine\Action {
 		$this->load->language('product/subscription');
 
+
+			$this->document->addScript('catalog/view/javascript/jquery/magnific/jquery.magnific-popup.min.js');
+			$this->document->addStyle('catalog/view/javascript/jquery/magnific/magnific-popup.css');
+
 		if (isset($this->request->get['subscription_plan_id'])) {
 			$subscription_plan_id = (int)$this->request->get['subscription_plan_id'];
 		} else {
@@ -105,11 +109,74 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			$data['frequencies'][] = [
 				'frequency' => $this->language->get('text_' . $freq['frequency']),
 				'cycle' => $freq['cycle'],
-				'duration' => $freq['duration'],
 				'name' => 'Every '. $freq['cycle']. ' '.strtoupper($freq['frequency']),
 				'price' => $freq['price'],
 				'price_formatted' => $price_formatted
 			];
+		}
+
+		// Load durations for current subscription plan
+		$data['durations'] = [];
+		$durations = $this->model_catalog_subscription_plan->getDurations($subscription_plan_id);
+		
+		foreach ($durations as $dur) {
+			$price_formatted = false;
+			if ((float)$dur['price']) {
+				$price_formatted = $this->currency->format($this->tax->calculate($dur['price'], $this->config->get('config_tax'), $this->config->get('config_tax')), $this->config->get('config_currency'));
+			}
+			
+			$data['durations'][] = [
+				'duration' => $dur['duration'],
+				'label' => $dur['label'],
+				'price' => $dur['price'],
+				'price_formatted' => $price_formatted
+			];
+		}
+
+		// Load gifts for current subscription plan
+		$data['gifts'] = [];
+		$gifts = $this->model_catalog_subscription_plan->getGifts($subscription_plan_id);
+		
+		$this->load->model('catalog/product');
+		
+		foreach ($gifts as $gift) {
+			$product_info = $this->model_catalog_product->getProduct($gift['product_id']);
+			
+			if ($product_info) {
+				if ($product_info['image']) {
+					$image = $this->model_tool_image->resize($product_info['image'], 100, 100);
+				} else {
+					$image = $this->model_tool_image->resize('placeholder.png', 100, 100);
+				}
+				
+				$data['gifts'][] = [
+					'product_id' => $gift['product_id'],
+					'name' => $gift['name'],
+					'image' => $image
+				];
+			}
+		}
+
+		// Load vases for current subscription plan
+		$data['vases'] = [];
+		$vases = $this->model_catalog_subscription_plan->getVases($subscription_plan_id);
+		
+		foreach ($vases as $vase) {
+			$product_info = $this->model_catalog_product->getProduct($vase['product_id']);
+			
+			if ($product_info) {
+				if ($product_info['image']) {
+					$image = $this->model_tool_image->resize($product_info['image'], 100, 100);
+				} else {
+					$image = $this->model_tool_image->resize('placeholder.png', 100, 100);
+				}
+				
+				$data['vases'][] = [
+					'product_id' => $vase['product_id'],
+					'name' => $vase['name'],
+					'image' => $image
+				];
+			}
 		}
 
 		// Load all subscription plans for selection buttons

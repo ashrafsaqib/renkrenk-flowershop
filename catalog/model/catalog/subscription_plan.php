@@ -154,4 +154,30 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 
 		return $query->rows;
 	}
+
+	/**
+	 * Get Gifts
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_gifts = $this->model_catalog_subscription_plan->getGifts($subscription_plan_id);
+	 */
+	public function getGifts(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT spg.product_id, pd.name FROM `" . DB_PREFIX . "subscription_plan_gift` spg LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (spg.product_id = pd.product_id) WHERE spg.subscription_plan_id = '" . (int)$subscription_plan_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY pd.name ASC");
+
+		return $query->rows;
+	}
+
+	/**
+	 * Get Vases
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_vases = $this->model_catalog_subscription_plan->getVases($subscription_plan_id);
+	 */
+	public function getVases(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT spv.product_id, pd.name FROM `" . DB_PREFIX . "subscription_plan_vase` spv LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (spv.product_id = pd.product_id) WHERE spv.subscription_plan_id = '" . (int)$subscription_plan_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY pd.name ASC");
+
+		return $query->rows;
+	}
 }
