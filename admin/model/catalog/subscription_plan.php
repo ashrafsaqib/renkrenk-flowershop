@@ -511,7 +511,7 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 	 * @return void
 	 */
 	public function addFrequency(int $subscription_plan_id, array $data): void {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan_frequency` SET `subscription_plan_id` = '" . (int)$subscription_plan_id . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `cycle` = '" . (int)$data['cycle'] . "', `duration` = '" . (int)$data['duration'] . "', `price` = '" . (float)$data['price'] . "'");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan_frequency` SET `subscription_plan_id` = '" . (int)$subscription_plan_id . "', `frequency` = '" . $this->db->escape((string)$data['frequency']) . "', `cycle` = '" . (int)$data['cycle'] . "', `price` = '" . (float)$data['price'] . "'");
 	}
 
 	/**

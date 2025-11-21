@@ -173,7 +173,6 @@
                       <tr>
                         <th>Frequency</th>
                         <th>Cycle</th>
-                        <th>Duration</th>
                         <th>Price</th>
                         <th class="text-end"></th>
                       </tr>
@@ -193,9 +192,6 @@
                             <input type="number" name="subscription_plan_frequency[{{ frequency_row }}][cycle]" value="{{ frequency_item.cycle }}" placeholder="Cycle" class="form-control" min="1"/>
                           </td>
                           <td>
-                            <input type="number" name="subscription_plan_frequency[{{ frequency_row }}][duration]" value="{{ frequency_item.duration }}" placeholder="Duration (0 = unlimited)" class="form-control" min="0"/>
-                          </td>
-                          <td>
                             <input type="text" name="subscription_plan_frequency[{{ frequency_row }}][price]" value="{{ frequency_item.price }}" placeholder="Price" class="form-control"/>
                           </td>
                           <td class="text-end">
@@ -207,7 +203,7 @@
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colspan="4"></td>
+                        <td colspan="3"></td>
                         <td class="text-end"><button type="button" id="button-frequency" data-bs-toggle="tooltip" title="Add Frequency" class="btn btn-primary"><i class="fa-solid fa-plus-circle"></i></button></td>
                       </tr>
                     </tfoot>
@@ -397,9 +393,8 @@ $('#button-frequency').on('click', function() {
     html += '    </select>';
     html += '  </td>';
     html += '  <td><input type="number" name="subscription_plan_frequency[' + frequency_row + '][cycle]" value="1" placeholder="Cycle" class="form-control" min="1"/></td>';
-    html += '  <td><input type="number" name="subscription_plan_frequency[' + frequency_row + '][duration]" value="0" placeholder="Duration (0 = unlimited)" class="form-control" min="0"/></td>';
     html += '  <td><input type="text" name="subscription_plan_frequency[' + frequency_row + '][price]" value="" placeholder="Price" class="form-control"/></td>';
-    html += '  <td class="text-end"><button type="button" onclick="$(\'#frequency-row-' + frequency_row + '\').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+    html += '  <td class="text-end"><button type="button" onclick="$(\'#frequency-row-' + frequency_row + '\').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>'
     html += '</tr>';
 
     $('#subscription-plan-frequency tbody').append(html);
