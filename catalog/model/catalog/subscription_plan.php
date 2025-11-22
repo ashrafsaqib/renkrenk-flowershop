@@ -180,4 +180,17 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 
 		return $query->rows;
 	}
+
+	/**
+	 * Get Related Products
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_related = $this->model_catalog_subscription_plan->getRelatedProducts($subscription_plan_id);
+	 */
+	public function getRelatedProducts(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT spr.product_id, pd.name FROM `" . DB_PREFIX . "subscription_plan_related` spr LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (spr.product_id = pd.product_id) WHERE spr.subscription_plan_id = '" . (int)$subscription_plan_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY pd.name ASC");
+
+		return $query->rows;
+	}
 }

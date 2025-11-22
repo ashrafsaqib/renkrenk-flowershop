@@ -25,6 +25,7 @@
             <li class="nav-item"><a href="#tab-duration" data-bs-toggle="tab" class="nav-link">Duration</a></li>
             <li class="nav-item"><a href="#tab-gifts" data-bs-toggle="tab" class="nav-link">Gifts</a></li>
             <li class="nav-item"><a href="#tab-vase" data-bs-toggle="tab" class="nav-link">Vase</a></li>
+            <li class="nav-item"><a href="#tab-related" data-bs-toggle="tab" class="nav-link">Related Products</a></li>
             <li class="nav-item"><a href="#tab-image" data-bs-toggle="tab" class="nav-link">{{ text_image_additional }}</a></li>
           </ul>
           <div class="tab-content">
@@ -289,6 +290,38 @@
               </fieldset>
             </div>
 
+            <!-- Related Products Tab -->
+            <div class="tab-pane" id="tab-related">
+              <fieldset>
+                <legend>Related Products</legend>
+                <div class="row mb-3">
+                  <label class="col-sm-2 col-form-label">Add Related Product</label>
+                  <div class="col-sm-10">
+                    <input type="text" name="product" value="" placeholder="Enter product name" id="input-related-product" data-oc-target="autocomplete-related-product" class="form-control" autocomplete="off"/>
+                    <ul id="autocomplete-related-product" class="dropdown-menu"></ul>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table id="subscription-plan-related" class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <th>Product Name</th>
+                        <th class="text-end"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for related_product in subscription_plan_related %}
+                        <tr id="related-product-{{ related_product.product_id }}">
+                          <td>{{ related_product.name }}<input type="hidden" name="subscription_plan_related[]" value="{{ related_product.product_id }}"/></td>
+                          <td class="text-end"><button type="button" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </fieldset>
+            </div>
+
             <!-- Vase Tab -->
             <div class="tab-pane" id="tab-vase">
               <fieldset>
@@ -524,6 +557,40 @@ $('#input-vase-product').autocomplete({
 });
 
 $('#subscription-plan-vase').on('click', '.btn', function() {
+    $(this).parent().parent().remove();
+});
+
+// Related Products
+$('#input-related-product').autocomplete({
+    'source': function(request, response) {
+        $.ajax({
+            url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function(json) {
+                response($.map(json, function(item) {
+                    return {
+                        label: item['name'],
+                        value: item['product_id']
+                    }
+                }));
+            }
+        });
+    },
+    'select': function(item) {
+        $('#input-related-product').val('');
+
+        $('#related-product-' + item['value']).remove();
+
+        html = '<tr id="related-product-' + item['value'] + '">';
+        html += '  <td>' + item['label'] + '<input type="hidden" name="subscription_plan_related[]" value="' + item['value'] + '"/></td>';
+        html += '  <td class="text-end"><button type="button" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+        html += '</tr>';
+
+        $('#subscription-plan-related tbody').append(html);
+    }
+});
+
+$('#subscription-plan-related').on('click', '.btn', function() {
     $(this).parent().parent().remove();
 });
 //-->

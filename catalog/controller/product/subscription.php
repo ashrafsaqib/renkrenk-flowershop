@@ -179,6 +179,43 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			}
 		}
 
+		// Load related products for current subscription plan
+		$data['related_products'] = [];
+		$related = $this->model_catalog_subscription_plan->getRelatedProducts($subscription_plan_id);
+		
+		foreach ($related as $related_product) {
+			$product_info = $this->model_catalog_product->getProduct($related_product['product_id']);
+			
+			if ($product_info) {
+				if ($product_info['image']) {
+					$thumb = $this->model_tool_image->resize($product_info['image'], $this->config->get('config_image_product_width'), $this->config->get('config_image_product_height'));
+				} else {
+					$thumb = $this->model_tool_image->resize('placeholder.png', $this->config->get('config_image_product_width'), $this->config->get('config_image_product_height'));
+				}
+
+				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+					$price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				} else {
+					$price = false;
+				}
+
+				if ((float)$product_info['special']) {
+					$special = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				} else {
+					$special = false;
+				}
+				
+				$data['related_products'][] = [
+					'product_id' => $product_info['product_id'],
+					'name' => $product_info['name'],
+					'thumb' => $thumb,
+					'price' => $price,
+					'special' => $special,
+					'href' => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_info['product_id'])
+				];
+			}
+		}
+
 		// Load all subscription plans for selection buttons
 		$data['subscriptions'] = [];
 		$subscription_plans = $this->model_catalog_subscription_plan->getSubscriptionPlans(['filter_status' => 1]);

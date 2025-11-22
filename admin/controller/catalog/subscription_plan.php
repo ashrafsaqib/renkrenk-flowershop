@@ -314,6 +314,13 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 			$data['subscription_plan_vases'] = [];
 		}
 
+		// Subscription Plan Related Products
+		if (!empty($subscription_info)) {
+			$data['subscription_plan_related'] = $this->model_catalog_subscription_plan->getRelatedProducts($subscription_info['subscription_plan_id']);
+		} else {
+			$data['subscription_plan_related'] = [];
+		}
+
 		// CKEditor language
 		$data['ckeditor'] = 'en';
 
@@ -438,7 +445,8 @@ class SubscriptionPlan extends \Opencart\System\Engine\Controller {
 			'subscription_plan_frequency'   => [],
 			'subscription_plan_duration'    => [],
 			'subscription_plan_gift'        => [],
-			'subscription_plan_vase'        => []
+			'subscription_plan_vase'        => [],
+			'subscription_plan_related'     => []
 		];
 
 		$post_info = $this->request->post + $required;

@@ -79,6 +79,13 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		// Related Products
+		if (isset($data['subscription_plan_related'])) {
+			foreach ($data['subscription_plan_related'] as $product_id) {
+				$this->model_catalog_subscription_plan->addRelatedProduct($subscription_plan_id, (int)$product_id);
+			}
+		}
+
 		return $subscription_plan_id;
 	}
 
@@ -161,6 +168,15 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 		if (isset($data['subscription_plan_vase'])) {
 			foreach ($data['subscription_plan_vase'] as $product_id) {
 				$this->model_catalog_subscription_plan->addVase($subscription_plan_id, (int)$product_id);
+			}
+		}
+
+		// Related Products
+		$this->model_catalog_subscription_plan->deleteRelatedProducts($subscription_plan_id);
+
+		if (isset($data['subscription_plan_related'])) {
+			foreach ($data['subscription_plan_related'] as $product_id) {
+				$this->model_catalog_subscription_plan->addRelatedProduct($subscription_plan_id, (int)$product_id);
 			}
 		}
 	}
@@ -631,5 +647,41 @@ class SubscriptionPlan extends \Opencart\System\Engine\Model {
 	 */
 	public function deleteVases(int $subscription_plan_id): void {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "subscription_plan_vase` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
+	}
+
+	/**
+	 * Get Related Products
+	 *
+	 * $this->load->model('catalog/subscription_plan');
+	 *
+	 * $subscription_plan_related = $this->model_catalog_subscription_plan->getRelatedProducts($subscription_plan_id);
+	 */
+	public function getRelatedProducts(int $subscription_plan_id): array {
+		$query = $this->db->query("SELECT spr.product_id, pd.name FROM `" . DB_PREFIX . "subscription_plan_related` spr LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (spr.product_id = pd.product_id) WHERE spr.subscription_plan_id = '" . (int)$subscription_plan_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY pd.name ASC");
+
+		return $query->rows;
+	}
+
+	/**
+	 * Add Related Product
+	 *
+	 * @param int $subscription_plan_id
+	 * @param int $product_id
+	 *
+	 * @return void
+	 */
+	public function addRelatedProduct(int $subscription_plan_id, int $product_id): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_plan_related` SET `subscription_plan_id` = '" . (int)$subscription_plan_id . "', `product_id` = '" . (int)$product_id . "'");
+	}
+
+	/**
+	 * Delete Related Products
+	 *
+	 * @param int $subscription_plan_id
+	 *
+	 * @return void
+	 */
+	public function deleteRelatedProducts(int $subscription_plan_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "subscription_plan_related` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "'");
 	}
 }

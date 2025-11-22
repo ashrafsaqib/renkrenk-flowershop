@@ -11127,3 +11127,6 @@ footer h5, footer .h5 {
 .image-btns .active {
   border-width: 2px;
 }
+.product-card {
+  border:none !important;
+}
