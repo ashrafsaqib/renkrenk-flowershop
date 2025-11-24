@@ -328,8 +328,241 @@
 
           <div id="subscription">
             <button type="button" id="button-subscribe" class="btn btn-primary btn-lg btn-block">
-              <i class="fa-solid fa-check-circle"></i> {{ button_subscribe }}
+              <span class="priceFinal">{{ price_formatted }}</span> PER DELIVERY - SELECT YOUR DELIVERY DATE
             </button>
+
+            <!-- Date Selection Modal/Section -->
+            <div id="date-selection-container" style="display: none;" class="mt-3 col-7">
+              <div class="card">
+              <div class="card-body">
+                <h5 class="card-title mb-4">When would you like them delivered?</h5>
+                <div class="mb-3">
+                  <div id="delivery-calendar"></div>
+                  <input type="hidden" id="delivery-date" />
+                </div>
+                <button type="button" id="button-add-to-cart" class="mt-4 btn btn-primary btn-lg w-100">
+                <span class="priceFinal">{{ price_formatted }}</span>  PER DELIVERY - SET DELIVERY DATE
+                </button>
+              </div>
+              </div>
+            </div>
+
+            <style>
+              #button-add-to-cart {
+                font-size: small;
+              }
+            #delivery-calendar {
+              max-width: 100%;
+              margin: 0 auto;
+              background-color: #f8f9fa;
+            }
+            .calendar-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 1rem;
+              padding: 0.5rem;
+              background-color: #f8f9fa;
+              border-radius: 0.25rem;
+            }
+            .calendar-header button {
+              background: none;
+              border: none;
+              font-size: 1.2rem;
+              cursor: pointer;
+              padding: 0.25rem 0.75rem;
+            }
+            .calendar-header h6 {
+              margin: 0;
+              font-weight: 600;
+            }
+            .calendar-grid {
+              display: grid;
+              grid-template-columns: repeat(7, 1fr);
+              gap: 0.5rem;
+            }
+            .calendar-day-header {
+              text-align: center;
+              font-weight: 600;
+              font-size: 0.875rem;
+              color: #6c757d;
+            }
+            .calendar-day {
+              aspect-ratio: 1;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              transition: all 0.2s;
+              background-color: #fff;
+              font-size: 0.875rem;
+            }
+            .calendar-day:hover:not(.disabled):not(.other-month) {
+              background-color: #e9ecef;
+              border-color: #020202ff;
+            }
+            .calendar-day.selected {
+              background-color: #000000ff;
+              color: white;
+              border-color: #000000ff;
+              font-weight: 600;
+            }
+            .calendar-day.disabled {
+              background-color: #f8f9fa;
+              color: #adb5bd;
+              cursor: not-allowed;
+            }
+            .calendar-day.other-month {
+              color: #ced4da;
+            }
+            .calendar-day.today {
+              border: 2px solid #010101ff;
+              font-weight: 600;
+            }
+            #date-selection-container .card {
+              border: none !important;
+            }
+            #date-selection-container .card-title {
+              text-transform: uppercase;
+            }
+            </style>
+
+            <script type="text/javascript">
+            (function(){
+              var subscribeBtn = document.getElementById('button-subscribe');
+              var dateContainer = document.getElementById('date-selection-container');
+              var addToCartBtn = document.getElementById('button-add-to-cart');
+              var deliveryDateInput = document.getElementById('delivery-date');
+              var selectedDate = null;
+
+              // Calendar functionality
+              var currentMonth = new Date().getMonth();
+              var currentYear = new Date().getFullYear();
+              var today = new Date();
+              today.setHours(0, 0, 0, 0);
+
+              var monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+              var dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+              function renderCalendar(month, year) {
+                var calendarDiv = document.getElementById('delivery-calendar');
+                var firstDay = new Date(year, month, 1).getDay();
+                var daysInMonth = new Date(year, month + 1, 0).getDate();
+                var daysInPrevMonth = new Date(year, month, 0).getDate();
+
+                var html = '<div class="calendar-header">';
+                html += '<button type="button" id="prev-month">&laquo;</button>';
+                html += '<h6>' + monthNames[month] + ' ' + year + '</h6>';
+                html += '<button type="button" id="next-month">&raquo;</button>';
+                html += '</div>';
+
+                html += '<div class="calendar-grid">';
+                
+                // Day headers
+                for (var i = 0; i < 7; i++) {
+                  html += '<div class="calendar-day-header">' + dayNames[i] + '</div>';
+                }
+
+                // Previous month days
+                for (var i = firstDay - 1; i >= 0; i--) {
+                  var day = daysInPrevMonth - i;
+                  html += '<div class="calendar-day other-month">' + day + '</div>';
+                }
+
+                // Current month days
+                for (var day = 1; day <= daysInMonth; day++) {
+                  var date = new Date(year, month, day);
+                  date.setHours(0, 0, 0, 0);
+                  var classes = ['calendar-day'];
+                  var disabled = date < today;
+                  
+                  if (disabled) {
+                    classes.push('disabled');
+                  }
+                  
+                  if (date.getTime() === today.getTime()) {
+                    classes.push('today');
+                  }
+
+                  if (selectedDate && date.getTime() === selectedDate.getTime()) {
+                    classes.push('selected');
+                  }
+
+                  var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+                  html += '<div class="' + classes.join(' ') + '" data-date="' + dateStr + '"';
+                  if (disabled) {
+                    html += ' style="pointer-events: none;"';
+                  }
+                  html += '>' + day + '</div>';
+                }
+
+                // Next month days
+                var totalCells = firstDay + daysInMonth;
+                var remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+                for (var day = 1; day <= remainingCells; day++) {
+                  html += '<div class="calendar-day other-month">' + day + '</div>';
+                }
+
+                html += '</div>';
+                calendarDiv.innerHTML = html;
+
+                // Add event listeners
+                document.getElementById('prev-month').addEventListener('click', function() {
+                  currentMonth--;
+                  if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                  }
+                  renderCalendar(currentMonth, currentYear);
+                });
+
+                document.getElementById('next-month').addEventListener('click', function() {
+                  currentMonth++;
+                  if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                  }
+                  renderCalendar(currentMonth, currentYear);
+                });
+
+                // Add click handlers to calendar days
+                calendarDiv.querySelectorAll('.calendar-day:not(.disabled):not(.other-month)').forEach(function(dayEl) {
+                  dayEl.addEventListener('click', function() {
+                    var dateStr = this.getAttribute('data-date');
+                    selectedDate = new Date(dateStr + 'T00:00:00');
+                    deliveryDateInput.value = dateStr;
+                    
+                    // Update visual selection
+                    calendarDiv.querySelectorAll('.calendar-day').forEach(function(el) {
+                      el.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                  });
+                });
+              }
+
+              subscribeBtn.addEventListener('click', function(){
+                dateContainer.style.display = 'block';
+                subscribeBtn.style.display = 'none';
+                if (!document.getElementById('delivery-calendar').innerHTML) {
+                  renderCalendar(currentMonth, currentYear);
+                }
+                dateContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              });
+
+              addToCartBtn.addEventListener('click', function(){
+                var deliveryDate = deliveryDateInput.value;
+                if (!deliveryDate) {
+                  alert('Please select a delivery date');
+                  return;
+                }
+                // Add to cart logic here
+                console.log('Selected date:', deliveryDate);
+                // You can add your AJAX call here to add to cart
+              });
+            })();
+            </script>
           </div>
         </div>
       </div>
