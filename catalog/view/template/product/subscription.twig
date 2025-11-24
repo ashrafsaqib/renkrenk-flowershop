@@ -136,7 +136,7 @@
 
 
 
-          <div class="mb-3 duration-section" style="display: none;">
+          <div class="mb-3 duration-section">
             <div class="mb-2">
               {% set current_duration_name = null %}
               {% for duration in durations %}
@@ -148,11 +148,17 @@
             </div>
 
             <div class="d-flex flex-wrap gap-2" role="group" aria-label="Durations">
+                <button id="ongoing-duration" type="button"
+                        class="btn-duration btn btn-outline-dark btn-lg active"
+                        data-id="0"
+                        aria-pressed="true">
+                  On Going
+                </button>
               {% for duration in durations %}
                 <button type="button"
-                        class="btn-duration btn btn-outline-dark btn-lg {% if loop.first %}active{% endif %}"
+                        class="btn-duration btn btn-outline-dark btn-lg gift-duration"
                         data-id="{{ duration.duration_id|default(duration.id) }}"
-                        aria-pressed="{% if loop.first %} true{% else %}false{% endif %}">
+                        aria-pressed="false">
                   {{ duration.label }}
                 </button>
               {% endfor %}
@@ -305,9 +311,37 @@
       {% if description %}
         <ul class="nav nav-tabs">
           <li class="nav-item"><a href="#tab-description" data-bs-toggle="tab" class="nav-link active">{{ tab_description }}</a></li>
+          <li class="nav-item"><a href="#tab-delivery" data-bs-toggle="tab" class="nav-link">Delivery</a></li>
+          <li class="nav-item"><a href="#tab-care" data-bs-toggle="tab" class="nav-link">Care</a></li>
         </ul>
         <div class="tab-content">
           <div id="tab-description" class="tab-pane active">{{ description }}</div>
+          <div id="tab-delivery" class="tab-pane">
+            <h4>Delivery Information</h4>
+            <p>We offer flexible delivery options for your flower subscription:</p>
+            <ul>
+              <li><strong>Standard Delivery:</strong> Monday to Friday between 9 AM - 6 PM</li>
+              <li><strong>Express Delivery:</strong> Same-day delivery available for orders placed before 12 PM</li>
+              <li><strong>Subscription Delivery:</strong> Choose your preferred delivery day each week/month</li>
+              <li><strong>Coverage Area:</strong> We deliver across the entire city and surrounding suburbs</li>
+            </ul>
+            <p>All flowers are carefully packaged to ensure they arrive fresh and beautiful. Our delivery team takes special care to handle each arrangement with attention.</p>
+            <p><strong>Note:</strong> Delivery times may vary during peak seasons and holidays. We'll always keep you informed about your delivery status.</p>
+          </div>
+          <div id="tab-care" class="tab-pane">
+            <h4>Flower Care Instructions</h4>
+            <p>To keep your flowers fresh and vibrant for as long as possible, follow these simple care tips:</p>
+            <ul>
+              <li><strong>Water:</strong> Change the water every 2-3 days and use clean, room temperature water</li>
+              <li><strong>Trimming:</strong> Cut stems at a 45-degree angle every few days to help water absorption</li>
+              <li><strong>Placement:</strong> Keep flowers away from direct sunlight, heat sources, and drafts</li>
+              <li><strong>Food:</strong> Use the provided flower food in the water to extend freshness</li>
+              <li><strong>Leaves:</strong> Remove any leaves that fall below the water line to prevent bacteria growth</li>
+            </ul>
+            <p><strong>Temperature:</strong> Flowers last longer in cool environments (65-72°F is ideal).</p>
+            <p><strong>Avoid:</strong> Keep flowers away from ripening fruit, which releases ethylene gas that can shorten flower life.</p>
+            <p>With proper care, most arrangements will stay fresh for 7-14 days.</p>
+          </div>
         </div>
       {% endif %}
 
@@ -385,8 +419,10 @@ $('.image').magnificPopup({
 // Gift option toggle
 (function(){
   var hidden = document.getElementById('is_gift');
-  var durationSection = document.querySelector('.duration-section');
+  var durationSection = $('.gift-duration');
+  durationSection.hide();
   var giftsSection = document.querySelector('.gifts-section');
+  var ongoingDurationBtn = document.getElementById('ongoing-duration');
   var vasesSection = document.querySelector('.vases-section');
 
   document.querySelectorAll('.btn-gift-option').forEach(function(btn){
@@ -405,13 +441,22 @@ $('.image').magnificPopup({
 
       // show/hide duration, gifts and vases sections
       if (value === 'yes') {
-        if (durationSection) durationSection.style.display = 'block';
+        durationSection.show();
         if (giftsSection) giftsSection.style.display = 'block';
+        ongoingDurationBtn.classList.remove('active');
+        ongoingDurationBtn.setAttribute('aria-pressed','false');
+        ongoingDurationBtn.style.display = 'none';
+        durationSection[0].classList.add('active');
+        durationSection[0].setAttribute('aria-pressed','true');
+
         if (vasesSection) vasesSection.style.display = 'none';
       } else {
-        if (durationSection) durationSection.style.display = 'none';
+        durationSection.hide();
         if (giftsSection) giftsSection.style.display = 'none';
         if (vasesSection) vasesSection.style.display = 'block';
+        ongoingDurationBtn.classList.add('active');
+        ongoingDurationBtn.setAttribute('aria-pressed','true');
+        ongoingDurationBtn.style.display = 'block';
       }
     });
   });
