@@ -62,6 +62,23 @@
     </div>
   </div>
 
+  <!-- Offcanvas Slider for Shopping Cart (Right Side) -->
+  <div class="offcanvas offcanvas-end w-25" tabindex="-1" id="cartModal" aria-labelledby="cartModalLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title fw-bold" id="cartModalLabel">SHOPPING CART</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div id="cart-content-offcanvas">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Offcanvas Slider for Location (Left Side) -->
   <div class="offcanvas offcanvas-start" tabindex="-1" id="locationModal" aria-labelledby="locationModalLabel">
     <div class="offcanvas-header pt-4">
@@ -174,7 +191,7 @@
                 </div>
               </li>
               <li class="list-inline-item"><a href="{{ wishlist }}" id="wishlist-total" title="{{ text_wishlist }}"><i class="fa-regular fa-heart"></i> <span class="d-none d-lg-inline"></span></a></li>
-              <li class="list-inline-item"><a href="{{ shopping_cart }}" title="{{ text_shopping_cart }}"><i class="fa-solid fa-cart-shopping"></i> <span class="d-none d-lg-inline"></span></a></li>
+              <li class="list-inline-item"><a href="#" id="cart-toggle" data-bs-toggle="offcanvas" data-bs-target="#cartModal" title="{{ text_shopping_cart }}"><i class="fa-solid fa-cart-shopping"></i> <span class="d-none d-lg-inline"></span></a></li>
             </ul>
           </div>
           
@@ -194,6 +211,45 @@
       .pac-container {
         z-index: 9999 !important;
       }
+
+      /* Cart Offcanvas Styles */
+      #cartModal .offcanvas-body {
+        padding: 1.5rem;
+      }
+
+      #cartModal .cart-item {
+        transition: background-color 0.2s;
+      }
+
+      #cartModal .cart-item:hover {
+        background-color: #f8f9fa;
+      }
+
+      #cartModal .cart-item img {
+        max-width: 100%;
+        height: auto;
+        object-fit: cover;
+      }
+
+      #cartModal .cart-totals {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+      }
+
+      #cartModal .cart-update-form .input-group {
+        max-width: 120px;
+      }
+
+      #cartModal h6 a {
+        font-size: 0.9rem;
+        line-height: 1.3;
+      }
+
+      #cartModal .cart-actions .btn {
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+      }
     </style>
     <main class="flex-grow-1 mb-4">
       {{ menu }}
@@ -204,4 +260,105 @@
         const GOOGLE_API_KEY = "{{ google_api_key }}";
         // JSON list of cities and common districts for manual selection
         const turkishCitiesAndDistricts = {{ turkish_cities_and_districts_json|raw }};
+
+        // Load cart contents when offcanvas is opened
+        document.addEventListener('DOMContentLoaded', function() {
+          const cartModal = document.getElementById('cartModal');
+          const cartToggle = document.getElementById('cart-toggle');
+          
+          if (cartModal && cartToggle) {
+            cartModal.addEventListener('show.bs.offcanvas', function () {
+              loadCartContents();
+            });
+          }
+        });
+
+        function loadCartContents() {
+          const cartContentDiv = document.getElementById('cart-content-offcanvas');
+          
+          // Show loading spinner
+          cartContentDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+          
+          // Fetch cart contents via AJAX
+          fetch('index.php?route=common/cart.info&language={{ config_language }}', {
+            method: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => response.text())
+          .then(html => {
+            cartContentDiv.innerHTML = html;
+            
+            // Re-attach form submission handlers for cart updates
+            const forms = cartContentDiv.querySelectorAll('form[data-oc-target="#cart-content-offcanvas"]');
+            forms.forEach(form => {
+              form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const submitButton = e.submitter || form.querySelector('button[type="submit"]');
+                const actionUrl = submitButton ? submitButton.getAttribute('formaction') : form.getAttribute('action');
+                
+                if (actionUrl) {
+                  fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                      'X-Requested-With': 'XMLHttpRequest'
+                    }
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    // Reload cart contents after update
+                    loadCartContents();
+                    
+                    // Update cart total in header if exists
+                    if (typeof cart === 'object' && typeof cart.update === 'function') {
+                      cart.update();
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error updating cart:', error);
+                    loadCartContents();
+                  });
+                }
+              });
+            });
+
+            // Handle remove buttons (forms)
+            const removeForms = cartContentDiv.querySelectorAll('form[action*="common/cart.remove"]');
+            removeForms.forEach(form => {
+              form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                
+                fetch(form.action, {
+                  method: 'POST',
+                  body: formData,
+                  headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => {
+                  // Reload cart contents after removal
+                  loadCartContents();
+                  
+                  // Update cart total in header if exists
+                  if (typeof cart === 'object' && typeof cart.update === 'function') {
+                    cart.update();
+                  }
+                })
+                .catch(error => {
+                  console.error('Error removing item:', error);
+                  loadCartContents();
+                });
+              });
+            });
+          })
+          .catch(error => {
+            console.error('Error loading cart:', error);
+            cartContentDiv.innerHTML = '<div class="alert alert-danger">Error loading cart contents. Please try again.</div>';
+          });
+        }
       </script>
