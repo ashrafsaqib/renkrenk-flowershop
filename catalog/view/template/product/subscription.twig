@@ -60,19 +60,6 @@
             </div>
             </div>
 
-          <script type="text/javascript">
-            (function(){
-              document.querySelectorAll('.btn-subscription').forEach(function(btn){
-                btn.addEventListener('click', function(){
-                  var id = this.getAttribute('data-id');
-                  var url = new URL(window.location.href);
-                  url.searchParams.set('subscription_plan_id', id);
-                  window.location = url.toString();
-                });
-              });
-            })();
-          </script>
-
           
           <div class="mb-3">
             <div class="mb-2">
@@ -87,33 +74,18 @@
 
             <div class="d-flex flex-wrap gap-2" role="group" aria-label="Payment frequencies">
               {% for frequency in frequencies %}
-                <button type="button"
-                        class="btn-frequency btn btn-outline-dark btn-lg {% if loop.first %}active{% endif %}"
-                        data-id="{{ frequency.frequency_id|default(frequency.id) }}"
-                        aria-pressed="{% if loop.first %}true{% else %}false{% endif %}">
+                <label class="btn-frequency btn btn-outline-dark btn-lg {% if loop.first %}active{% endif %}">
+                  <input type="radio"
+                         name="frequency_id"
+                         class="d-none"
+                         value="{{ frequency.frequency_id }}"
+                         {% if loop.first %}checked{% endif %}
+                         data-label="{{ frequency.name }}" />
                   {{ frequency.name }}
-                </button>
+                </label>
               {% endfor %}
             </div>
           </div>
-
-          <script type="text/javascript">
-          (function(){
-            document.querySelectorAll('.btn-frequency').forEach(function(btn){
-              btn.addEventListener('click', function(){
-                // update selectedFrequency text
-                document.getElementById('selectedFrequency').textContent = this.textContent;
-                // add class active and remove class from others
-                document.querySelectorAll('.btn-frequency').forEach(function(b){
-                  b.classList.remove('active');
-                  b.setAttribute('aria-pressed','false');
-                });
-                this.classList.add('active');
-                this.setAttribute('aria-pressed','true');
-              });
-            });
-          })();
-          </script>
           
           <br/>
 
@@ -123,15 +95,15 @@
             </div>
 
             <div class="d-flex gap-2" role="group" aria-label="Gift option">
-              <button type="button" class="btn-gift-option btn btn-outline-dark btn-lg active" data-value="no" aria-pressed="true">
+              <label class="btn-gift-option btn btn-outline-dark btn-lg active">
+                <input type="radio" name="is_gift" class="d-none" value="no" checked />
                 No
-              </button>
-              <button type="button" class="btn-gift-option btn btn-outline-dark btn-lg" data-value="yes" aria-pressed="false">
+              </label>
+              <label class="btn-gift-option btn btn-outline-dark btn-lg">
+                <input type="radio" name="is_gift" class="d-none" value="yes" />
                 Yes
-              </button>
+              </label>
             </div>
-
-            <input type="hidden" id="is_gift" name="is_gift" value="no" />
           </div>
 
 
@@ -148,23 +120,26 @@
             </div>
 
             <div class="d-flex flex-wrap gap-2" role="group" aria-label="Durations">
-                <button id="ongoing-duration" type="button"
-                        class="btn-duration btn btn-outline-dark btn-lg active"
-                        data-id="0"
-                        aria-pressed="true">
+                <label id="ongoing-duration" class="btn-duration btn btn-outline-dark btn-lg active">
+                  <input type="radio"
+                         name="duration_id"
+                         class="d-none"
+                         value="0"
+                         checked
+                         data-label="On Going" />
                   On Going
-                </button>
+                </label>
               {% for duration in durations %}
-                <button type="button"
-                        class="btn-duration btn btn-outline-dark btn-lg gift-duration"
-                        data-id="{{ duration.duration_id|default(duration.id) }}"
-                        aria-pressed="false">
+                <label class="btn-duration btn btn-outline-dark btn-lg gift-duration">
+                  <input type="radio"
+                         name="duration_id"
+                         class="d-none"
+                         value="{{ duration.duration_id }}"
+                         data-label="{{ duration.label }}" />
                   {{ duration.label }}
-                </button>
+                </label>
               {% endfor %}
             </div>
-
-            <input type="hidden" id="duration_id" name="duration_id" value="{{ duration_id|default('') }}" />
           </div>
 
         
@@ -213,37 +188,9 @@
               {% endfor %}
             </div>
 
-            <input type="hidden" id="gift_id" name="gift_id" value="{{ gift_id|default('') }}" />
+            <input type="hidden" id="gift_id" name="gift_id" value="0" />
           </div>
 
-          <script type="text/javascript">
-          (function(){
-            var label = document.getElementById('selectedGift');
-            var hidden = document.getElementById('gift_id');
-
-            // initialize label with active or first button
-            if (label && !label.textContent.trim()) {
-              var init = document.querySelector('.btn-gift.active') || document.querySelector('.btn-gift');
-              if (init) label.textContent = init.getAttribute('data-name') || init.getAttribute('title');
-            }
-
-            document.querySelectorAll('.btn-gift').forEach(function(btn){
-              btn.addEventListener('click', function(){
-                // toggle active state
-                document.querySelectorAll('.btn-gift').forEach(function(b){
-                  b.classList.remove('active');
-                  b.setAttribute('aria-pressed','false');
-                });
-                this.classList.add('active');
-                this.setAttribute('aria-pressed','true');
-
-                // update display and hidden value
-                if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
-                if (hidden) hidden.value = this.getAttribute('data-id');
-              });
-            });
-          })();
-          </script>
           {% endif %}
 
           {% if vases %}
@@ -290,40 +237,9 @@
               {% endfor %}
             </div>
 
-            <input type="hidden" id="vase_id" name="vase_id" value="{{ vase_id|default('') }}" />
+            <input type="hidden" id="vase_id" name="vase_id" value="0" />
           </div>
 
-          <script type="text/javascript">
-          (function(){
-            var label = document.getElementById('selectedVase');
-            var hidden = document.getElementById('vase_id');
-
-            // initialize label with active or first button
-            if (label && !label.textContent.trim()) {
-              var init = document.querySelector('.btn-vase.active') || document.querySelector('.btn-vase');
-              if (init) label.textContent = init.getAttribute('data-name') || init.getAttribute('title');
-            }
-
-            document.querySelectorAll('.btn-vase').forEach(function(btn){
-              btn.addEventListener('click', function(){
-                // toggle active state
-                document.querySelectorAll('.btn-vase').forEach(function(b){
-                  b.classList.remove('active');
-                  b.setAttribute('aria-pressed','false');
-                });
-                this.classList.add('active');
-                this.setAttribute('aria-pressed','true');
-
-                // update display and hidden value
-                if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
-                if (hidden) hidden.value = this.getAttribute('data-id');
-
-                // update the radio button
-                this.querySelector('input[type="radio"]').checked = true;
-              });
-            });
-          })();
-          </script>
           {% endif %}
 
           <div id="subscription">
@@ -428,146 +344,6 @@
             }
             </style>
 
-            <script type="text/javascript">
-            (function(){
-              var subscribeBtn = document.getElementById('button-subscribe');
-              var dateContainer = document.getElementById('date-selection-container');
-              var addToCartBtn = document.getElementById('button-add-to-cart');
-              var deliveryDateInput = document.getElementById('delivery-date');
-              var today = new Date();
-              today.setHours(0, 0, 0, 0);
-              var selectedDate = new Date(today);
-
-              // Set default date to today
-              var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-              deliveryDateInput.value = todayStr;
-
-              // Calendar functionality
-              var currentMonth = new Date().getMonth();
-              var currentYear = new Date().getFullYear();
-
-              var monthNames = ["January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"];
-              var dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-              function renderCalendar(month, year) {
-                var calendarDiv = document.getElementById('delivery-calendar');
-                var firstDay = new Date(year, month, 1).getDay();
-                var daysInMonth = new Date(year, month + 1, 0).getDate();
-                var daysInPrevMonth = new Date(year, month, 0).getDate();
-
-                var html = '<div class="calendar-header">';
-                html += '<button type="button" id="prev-month">&laquo;</button>';
-                html += '<h6>' + monthNames[month] + ' ' + year + '</h6>';
-                html += '<button type="button" id="next-month">&raquo;</button>';
-                html += '</div>';
-
-                html += '<div class="calendar-grid pb-2">';
-                
-                // Day headers
-                for (var i = 0; i < 7; i++) {
-                  html += '<div class="calendar-day-header">' + dayNames[i] + '</div>';
-                }
-
-                // Previous month days
-                for (var i = firstDay - 1; i >= 0; i--) {
-                  var day = daysInPrevMonth - i;
-                  html += '<div class="calendar-day other-month">' + day + '</div>';
-                }
-
-                // Current month days
-                for (var day = 1; day <= daysInMonth; day++) {
-                  var date = new Date(year, month, day);
-                  date.setHours(0, 0, 0, 0);
-                  var classes = ['calendar-day'];
-                  var disabled = date < today;
-                  
-                  if (disabled) {
-                    classes.push('disabled');
-                  }
-                  
-                  if (date.getTime() === today.getTime()) {
-                    classes.push('today');
-                  }
-
-                  if (selectedDate && date.getTime() === selectedDate.getTime()) {
-                    classes.push('selected');
-                  }
-
-                  var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-                  html += '<div class="' + classes.join(' ') + '" data-date="' + dateStr + '"';
-                  if (disabled) {
-                    html += ' style="pointer-events: none;"';
-                  }
-                  html += '>' + day + '</div>';
-                }
-
-                // Next month days
-                var totalCells = firstDay + daysInMonth;
-                var remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-                for (var day = 1; day <= remainingCells; day++) {
-                  html += '<div class="calendar-day other-month">' + day + '</div>';
-                }
-
-                html += '</div>';
-                calendarDiv.innerHTML = html;
-
-                // Add event listeners
-                document.getElementById('prev-month').addEventListener('click', function() {
-                  currentMonth--;
-                  if (currentMonth < 0) {
-                    currentMonth = 11;
-                    currentYear--;
-                  }
-                  renderCalendar(currentMonth, currentYear);
-                });
-
-                document.getElementById('next-month').addEventListener('click', function() {
-                  currentMonth++;
-                  if (currentMonth > 11) {
-                    currentMonth = 0;
-                    currentYear++;
-                  }
-                  renderCalendar(currentMonth, currentYear);
-                });
-
-                // Add click handlers to calendar days
-                calendarDiv.querySelectorAll('.calendar-day:not(.disabled):not(.other-month)').forEach(function(dayEl) {
-                  dayEl.addEventListener('click', function() {
-                    var dateStr = this.getAttribute('data-date');
-                    selectedDate = new Date(dateStr + 'T00:00:00');
-                    deliveryDateInput.value = dateStr;
-                    
-                    // Update visual selection
-                    calendarDiv.querySelectorAll('.calendar-day').forEach(function(el) {
-                      el.classList.remove('selected');
-                    });
-                    this.classList.add('selected');
-                  });
-                });
-              }
-
-              subscribeBtn.addEventListener('click', function(){
-                dateContainer.style.display = 'block';
-                subscribeBtn.style.display = 'none';
-                if (!document.getElementById('delivery-calendar').innerHTML) {
-                  renderCalendar(currentMonth, currentYear);
-                }
-                dateContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-              });
-
-              addToCartBtn.addEventListener('click', function(){
-                var deliveryDate = deliveryDateInput.value;
-                if (!deliveryDate) {
-                  alert('Please select a delivery date');
-                  return;
-                }
-                // Add to cart logic here
-                console.log('Selected date:', deliveryDate);
-                // You can add your AJAX call here to add to cart
-              });
-            })();
-            </script>
           </div>
         </div>
       </div>
@@ -650,109 +426,319 @@
 </div>
 
 <script type="text/javascript"><!--
-$('#button-subscribe').on('click', function() {
-    // Add subscription to cart or redirect to checkout
-    $.ajax({
-        url: 'index.php?route=checkout/cart.add&language={{ config_language }}',
-        type: 'post',
-        data: {
-            subscription_plan_id: {{ subscription_plan_id }}
-        },
-        dataType: 'json',
-        success: function(json) {
-            if (json['success']) {
-                $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
-                
-                $('#header-cart').load('index.php?route=common/cart.info&language={{ config_language }}');
-            }
-        },
-        error: function(xhr, ajaxOptions, thrownError) {
-            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-        }
-    });
-});
-
-$('.image').magnificPopup({
+$(document).ready(function() {
+  // Magnific Popup for images
+  $('.image').magnificPopup({
     type: 'image',
     delegate: 'a',
     gallery: {
-        enabled: true
+      enabled: true
     }
-});
+  });
 
-// Gift option toggle
-(function(){
-  var hidden = document.getElementById('is_gift');
-  var durationSection = $('.gift-duration');
-  durationSection.hide();
-  var giftsSection = document.querySelector('.gifts-section');
-  var ongoingDurationBtn = document.getElementById('ongoing-duration');
-  var vasesSection = document.querySelector('.vases-section');
-
-  document.querySelectorAll('.btn-gift-option').forEach(function(btn){
+  // Subscription plan selection
+  document.querySelectorAll('.btn-subscription').forEach(function(btn){
     btn.addEventListener('click', function(){
-      // toggle active state
-      document.querySelectorAll('.btn-gift-option').forEach(function(b){
-        b.classList.remove('active');
-        b.setAttribute('aria-pressed','false');
-      });
-      this.classList.add('active');
-      this.setAttribute('aria-pressed','true');
-
-      // update hidden value
-      var value = this.getAttribute('data-value');
-      if (hidden) hidden.value = value;
-
-      // show/hide duration, gifts and vases sections
-      if (value === 'yes') {
-        durationSection.show();
-        if (giftsSection) giftsSection.style.display = 'block';
-        ongoingDurationBtn.classList.remove('active');
-        ongoingDurationBtn.setAttribute('aria-pressed','false');
-        ongoingDurationBtn.style.display = 'none';
-        durationSection[0].classList.add('active');
-        durationSection[0].setAttribute('aria-pressed','true');
-
-        if (vasesSection) vasesSection.style.display = 'none';
-      } else {
-        durationSection.hide();
-        if (giftsSection) giftsSection.style.display = 'none';
-        if (vasesSection) vasesSection.style.display = 'block';
-        ongoingDurationBtn.classList.add('active');
-        ongoingDurationBtn.setAttribute('aria-pressed','true');
-        ongoingDurationBtn.style.display = 'block';
-      }
+      var id = this.getAttribute('data-id');
+      var url = new URL(window.location.href);
+      url.searchParams.set('subscription_plan_id', id);
+      window.location = url.toString();
     });
   });
-})();
 
-// Duration selection
-(function(){
-  var label = document.getElementById('selectedDuration');
-  var hidden = document.getElementById('duration_id');
+  // Frequency selection
+  (function(){
+    var label = document.getElementById('selectedFrequency');
+    var checkedFreq = document.querySelector('input[name="frequency_id"]:checked');
+    if (label && checkedFreq) {
+      label.textContent = checkedFreq.getAttribute('data-label');
+    }
 
-            // initialize label with active or first button
-            if (label && !label.textContent.trim()) {
-              var init = document.querySelector('.btn-duration.active') || document.querySelector('.btn-duration');
-              if (init) label.textContent = init.textContent.trim();
-            }
+    document.querySelectorAll('.btn-frequency').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var radio = this.querySelector('input[type="radio"]');
+        radio.checked = true;
+        if (label) label.textContent = radio.getAttribute('data-label');
+        document.querySelectorAll('.btn-frequency').forEach(function(b){
+          b.classList.remove('active');
+        });
+        this.classList.add('active');
+      });
+    });
+  })();
 
-            document.querySelectorAll('.btn-duration').forEach(function(btn){
-              btn.addEventListener('click', function(){
-                // toggle active state
-                document.querySelectorAll('.btn-duration').forEach(function(b){
-                  b.classList.remove('active');
-                  b.setAttribute('aria-pressed','false');
-                });
-                this.classList.add('active');
-                this.setAttribute('aria-pressed','true');
+  // Gift option toggle
+  (function(){
+    var durationSection = $('.gift-duration');
+    durationSection.hide();
+    var giftsSection = document.querySelector('.gifts-section');
+    var ongoingDurationBtn = document.getElementById('ongoing-duration');
+    var vasesSection = document.querySelector('.vases-section');
 
-                // update display and hidden value
-                if (label) label.textContent = this.textContent.trim();
-                if (hidden) hidden.value = this.getAttribute('data-id');
-              });
-            });
-})();
+    document.querySelectorAll('.btn-gift-option').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var radio = this.querySelector('input[type="radio"]');
+        radio.checked = true;
+        
+        document.querySelectorAll('.btn-gift-option').forEach(function(b){
+          b.classList.remove('active');
+        });
+        this.classList.add('active');
+
+        if (radio.value === 'yes') {
+          durationSection.show();
+          if (giftsSection) giftsSection.style.display = 'block';
+          ongoingDurationBtn.classList.remove('active');
+          ongoingDurationBtn.style.display = 'none';
+          durationSection[0].classList.add('active');
+          var firstGiftDuration = durationSection[0].querySelector('input[type="radio"]');
+          if (firstGiftDuration) firstGiftDuration.checked = true;
+          if (vasesSection) vasesSection.style.display = 'none';
+        } else {
+          durationSection.hide();
+          if (giftsSection) giftsSection.style.display = 'none';
+          if (vasesSection) vasesSection.style.display = 'block';
+          ongoingDurationBtn.classList.add('active');
+          ongoingDurationBtn.style.display = 'block';
+          var ongoingRadio = ongoingDurationBtn.querySelector('input[type="radio"]');
+          if (ongoingRadio) ongoingRadio.checked = true;
+        }
+      });
+    });
+  })();
+
+  // Duration selection
+  (function(){
+    var label = document.getElementById('selectedDuration');
+    var checkedDuration = document.querySelector('input[name="duration_id"]:checked');
+    if (label && checkedDuration) {
+      label.textContent = checkedDuration.getAttribute('data-label');
+    }
+
+    document.querySelectorAll('.btn-duration').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var radio = this.querySelector('input[type="radio"]');
+        radio.checked = true;
+        document.querySelectorAll('.btn-duration').forEach(function(b){
+          b.classList.remove('active');
+        });
+        this.classList.add('active');
+        if (label) label.textContent = radio.getAttribute('data-label');
+      });
+    });
+  })();
+
+  // Gift selection
+  (function(){
+    var label = document.getElementById('selectedGift');
+    var hidden = document.getElementById('gift_id');
+
+    if (label && !label.textContent.trim()) {
+      label.textContent = 'None';
+    }
+    if (hidden) hidden.value = '0';
+
+    document.querySelectorAll('.btn-gift').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('.btn-gift').forEach(function(b){
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed','false');
+        });
+        this.classList.add('active');
+        this.setAttribute('aria-pressed','true');
+
+        if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
+        if (hidden) hidden.value = this.getAttribute('data-id');
+      });
+    });
+  })();
+
+  // Vase selection
+  (function(){
+    var label = document.getElementById('selectedVase');
+    var hidden = document.getElementById('vase_id');
+
+    if (label && !label.textContent.trim()) {
+      label.textContent = 'None';
+    }
+    if (hidden) hidden.value = '0';
+
+    document.querySelectorAll('.btn-vase').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('.btn-vase').forEach(function(b){
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed','false');
+        });
+        this.classList.add('active');
+        this.setAttribute('aria-pressed','true');
+
+        if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
+        if (hidden) hidden.value = this.getAttribute('data-id');
+        this.querySelector('input[type="radio"]').checked = true;
+      });
+    });
+  })();
+
+  // Calendar and Add to Cart
+  (function(){
+    var subscribeBtn = document.getElementById('button-subscribe');
+    var dateContainer = document.getElementById('date-selection-container');
+    var addToCartBtn = document.getElementById('button-add-to-cart');
+    var deliveryDateInput = document.getElementById('delivery-date');
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var selectedDate = new Date(today);
+
+    var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    deliveryDateInput.value = todayStr;
+
+    var currentMonth = new Date().getMonth();
+    var currentYear = new Date().getFullYear();
+    var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    function renderCalendar(month, year) {
+      var calendarDiv = document.getElementById('delivery-calendar');
+      var firstDay = new Date(year, month, 1).getDay();
+      var daysInMonth = new Date(year, month + 1, 0).getDate();
+      var daysInPrevMonth = new Date(year, month, 0).getDate();
+
+      var html = '<div class="calendar-header">';
+      html += '<button type="button" id="prev-month">&laquo;</button>';
+      html += '<h6>' + monthNames[month] + ' ' + year + '</h6>';
+      html += '<button type="button" id="next-month">&raquo;</button>';
+      html += '</div><div class="calendar-grid pb-2">';
+      
+      for (var i = 0; i < 7; i++) {
+        html += '<div class="calendar-day-header">' + dayNames[i] + '</div>';
+      }
+      
+      for (var i = firstDay - 1; i >= 0; i--) {
+        html += '<div class="calendar-day other-month">' + (daysInPrevMonth - i) + '</div>';
+      }
+      
+      for (var day = 1; day <= daysInMonth; day++) {
+        var date = new Date(year, month, day);
+        date.setHours(0, 0, 0, 0);
+        var classes = ['calendar-day'];
+        var disabled = date < today;
+        if (disabled) classes.push('disabled');
+        if (date.getTime() === today.getTime()) classes.push('today');
+        if (selectedDate && date.getTime() === selectedDate.getTime()) classes.push('selected');
+        var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+        html += '<div class="' + classes.join(' ') + '" data-date="' + dateStr + '"';
+        if (disabled) html += ' style="pointer-events: none;"';
+        html += '>' + day + '</div>';
+      }
+      
+      var totalCells = firstDay + daysInMonth;
+      var remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+      for (var day = 1; day <= remainingCells; day++) {
+        html += '<div class="calendar-day other-month">' + day + '</div>';
+      }
+      html += '</div>';
+      calendarDiv.innerHTML = html;
+
+      document.getElementById('prev-month').addEventListener('click', function() {
+        currentMonth--;
+        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+        renderCalendar(currentMonth, currentYear);
+      });
+
+      document.getElementById('next-month').addEventListener('click', function() {
+        currentMonth++;
+        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+        renderCalendar(currentMonth, currentYear);
+      });
+
+      calendarDiv.querySelectorAll('.calendar-day:not(.disabled):not(.other-month)').forEach(function(dayEl) {
+        dayEl.addEventListener('click', function() {
+          var dateStr = this.getAttribute('data-date');
+          selectedDate = new Date(dateStr + 'T00:00:00');
+          deliveryDateInput.value = dateStr;
+          calendarDiv.querySelectorAll('.calendar-day').forEach(function(el) {
+            el.classList.remove('selected');
+          });
+          this.classList.add('selected');
+        });
+      });
+    }
+
+    subscribeBtn.addEventListener('click', function(){
+      dateContainer.style.display = 'block';
+      subscribeBtn.style.display = 'none';
+      if (!document.getElementById('delivery-calendar').innerHTML) {
+        renderCalendar(currentMonth, currentYear);
+      }
+      dateContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    addToCartBtn.addEventListener('click', function(){
+      var deliveryDate = deliveryDateInput.value;
+      if (!deliveryDate) {
+        alert('Please select a delivery date');
+        return;
+      }
+
+      var frequencyRadio = document.querySelector('input[name="frequency_id"]:checked');
+      var isGiftRadio = document.querySelector('input[name="is_gift"]:checked');
+      var durationRadio = document.querySelector('input[name="duration_id"]:checked');
+      var giftRadio = document.querySelector('input[name="gift_option"]:checked');
+      var vaseRadio = document.querySelector('input[name="vase_option"]:checked');
+
+      var subscriptionData = {
+        subscription_plan_id: {{ subscription_plan_id }},
+        product_id: {{ subscription_plan_id }},
+        quantity: 1,
+        delivery_date: deliveryDate,
+        frequency_id: frequencyRadio ? frequencyRadio.value : '',
+        is_gift: isGiftRadio ? isGiftRadio.value : 'no',
+        duration_id: durationRadio ? durationRadio.value : '0',
+        gift_id: giftRadio ? giftRadio.value : '0',
+        vase_id: vaseRadio ? vaseRadio.value : '0'
+      };
+
+      console.log('Subscription Data:', subscriptionData);
+
+      addToCartBtn.disabled = true;
+      var originalText = addToCartBtn.innerHTML;
+      addToCartBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Adding to Cart...';
+
+      $.ajax({
+        url: 'index.php?route=checkout/cart.add&language={{ config_language }}',
+        type: 'post',
+        data: subscriptionData,
+        dataType: 'json',
+        success: function(json) {
+          addToCartBtn.disabled = false;
+          addToCartBtn.innerHTML = originalText;
+
+          if (json['error']) {
+            var errorMsg = json['error']['warning'] || json['error']['subscription'] || 'An error occurred. Please try again.';
+            $('#content').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + errorMsg + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            $('html, body').animate({ scrollTop: 0 }, 'slow');
+          }
+
+          if (json['success']) {
+            $('#content').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            $('#header-cart').load('index.php?route=common/cart.info&language={{ config_language }}');
+            $('html, body').animate({ scrollTop: 0 }, 'slow');
+            setTimeout(function() {
+              dateContainer.style.display = 'none';
+              subscribeBtn.style.display = 'block';
+            }, 1500);
+          }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+          addToCartBtn.disabled = false;
+          addToCartBtn.innerHTML = originalText;
+          console.error('AJAX Error:', thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+          alert('An error occurred while adding to cart. Please try again.');
+        }
+      });
+    });
+  })();
+});
 //--></script>
 
 {{ footer }}

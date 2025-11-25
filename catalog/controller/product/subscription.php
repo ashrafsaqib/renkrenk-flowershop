@@ -107,6 +107,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			}
 			
 			$data['frequencies'][] = [
+				'frequency_id' => $freq['subscription_plan_frequency_id'],
 				'frequency' => $this->language->get('text_' . $freq['frequency']),
 				'cycle' => $freq['cycle'],
 				'name' => 'Every '. $freq['cycle']. ' '.strtoupper($freq['frequency']),
@@ -126,6 +127,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			}
 			
 			$data['durations'][] = [
+				'duration_id' => $dur['subscription_plan_duration_id'],
 				'duration' => $dur['duration'],
 				'label' => $dur['label'],
 				'price' => $dur['price'],
