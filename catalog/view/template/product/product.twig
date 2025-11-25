@@ -147,7 +147,8 @@
                     {% if option.type == 'date' %}
                       <div class="mb-3{% if option.required %} required{% endif %}">
                         <label for="input-option-{{ option.product_option_id }}" class="form-label">{{ option.name }}</label>
-                        <input type="date" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option-{{ option.product_option_id }}" class="form-control"/>
+                        <div id="calendar-option-{{ option.product_option_id }}" class="mb-2"></div>
+                        <input type="hidden" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option-{{ option.product_option_id }}"/>
                         <div id="error-option-{{ option.product_option_id }}" class="invalid-feedback"></div>
                       </div>
                     {% endif %}
@@ -313,6 +314,22 @@ $(document).ready(function() {
             enabled: true
         }
     });
+
+    // Initialize calendar for date options
+    {% for option in options %}
+        {% if option.type == 'date' %}
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            var calendar{{ option.product_option_id }} = new Calendar('calendar-option-{{ option.product_option_id }}', {
+                minDate: today,
+                defaultDate: {% if option.value %}'{{ option.value }}'{% else %}today{% endif %},
+                onDateSelect: function(dateStr) {
+                    document.getElementById('input-option-{{ option.product_option_id }}').value = dateStr;
+                }
+            });
+            calendar{{ option.product_option_id }}.render();
+        {% endif %}
+    {% endfor %}
 });
 //--></script>
 {{ footer }}

@@ -14,7 +14,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 	public function index(): ?\Opencart\System\Engine\Action {
 		$this->load->language('product/subscription');
 
-
+			$this->document->addScript('catalog/view/javascript/calendar.js');
 			$this->document->addScript('catalog/view/javascript/jquery/magnific/jquery.magnific-popup.min.js');
 			$this->document->addStyle('catalog/view/javascript/jquery/magnific/magnific-popup.css');
 
