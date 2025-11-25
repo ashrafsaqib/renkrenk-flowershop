@@ -396,6 +396,7 @@
               transition: all 0.2s;
               background-color: #fff;
               font-size: 0.875rem;
+              border-radius: 25px;
             }
             .calendar-day:hover:not(.disabled):not(.other-month) {
               background-color: #e9ecef;
@@ -433,13 +434,17 @@
               var dateContainer = document.getElementById('date-selection-container');
               var addToCartBtn = document.getElementById('button-add-to-cart');
               var deliveryDateInput = document.getElementById('delivery-date');
-              var selectedDate = null;
+              var today = new Date();
+              today.setHours(0, 0, 0, 0);
+              var selectedDate = new Date(today);
+
+              // Set default date to today
+              var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+              deliveryDateInput.value = todayStr;
 
               // Calendar functionality
               var currentMonth = new Date().getMonth();
               var currentYear = new Date().getFullYear();
-              var today = new Date();
-              today.setHours(0, 0, 0, 0);
 
               var monthNames = ["January", "February", "March", "April", "May", "June",
                 "July", "August", "September", "October", "November", "December"];
@@ -457,7 +462,7 @@
                 html += '<button type="button" id="next-month">&raquo;</button>';
                 html += '</div>';
 
-                html += '<div class="calendar-grid">';
+                html += '<div class="calendar-grid pb-2">';
                 
                 // Day headers
                 for (var i = 0; i < 7; i++) {
