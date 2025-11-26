@@ -441,6 +441,39 @@ class Product extends \Opencart\System\Engine\Controller {
 
 			$data['related'] = $this->load->controller('product/related');
 
+			// Vases
+			$data['vases'] = [];
+
+			$vase_results = $this->model_catalog_product->getVases($product_id);
+
+			foreach ($vase_results as $vase) {
+				if ($vase['image'] && is_file(DIR_IMAGE . html_entity_decode($vase['image'], ENT_QUOTES, 'UTF-8'))) {
+					$image = $vase['image'];
+				} else {
+					$image = 'placeholder.png';
+				}
+
+				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+					$price = $this->currency->format($this->tax->calculate($vase['price'], $vase['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				} else {
+					$price = false;
+				}
+
+				if ((float)$vase['special']) {
+					$special = $this->currency->format($this->tax->calculate($vase['special'], $vase['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				} else {
+					$special = false;
+				}
+
+				$data['vases'][] = [
+					'product_id' => $vase['product_id'],
+					'name'       => $vase['name'],
+					'price'      => $price,
+					'special'    => $special,
+					'thumb'      => $this->model_tool_image->resize($image, 100, 100)
+				];
+			}
+
 			$data['tags'] = [];
 
 			if ($product_info['tag']) {

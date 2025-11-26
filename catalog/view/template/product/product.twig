@@ -121,19 +121,6 @@
                       </div>
                     {% endif %}
 
-                    {% if option.type == 'text' %}
-                      <div class="mb-3{% if option.required %} required{% endif %} step1">
-                        <label for="input-option-{{ option.product_option_id }}" class="form-label">{{ option.name }}</label> <input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" placeholder="{{ option.name }}" id="input-option-{{ option.product_option_id }}" class="form-control"/>
-                        <div id="error-option-{{ option.product_option_id }}" class="invalid-feedback"></div>
-                      </div>
-                    {% endif %}
-
-                    {% if option.type == 'textarea' %}
-                      <div class="mb-3{% if option.required %} required{% endif %} step1">
-                        <label for="input-option-{{ option.product_option_id }}" class="form-label">{{ option.name }}</label> <textarea name="option[{{ option.product_option_id }}]" rows="5" placeholder="{{ option.name }}" id="input-option-{{ option.product_option_id }}" class="form-control">{{ option.value }}</textarea>
-                        <div id="error-option-{{ option.product_option_id }}" class="invalid-feedback"></div>
-                      </div>
-                    {% endif %}
 
                     {% if option.type == 'file' %}
                       <div class="mb-3{% if option.required %} required{% endif %}">
@@ -146,14 +133,6 @@
                       </div>
                     {% endif %}
 
-                    {% if option.type == 'date' %}
-                      <div class="mb-3{% if option.required %} required{% endif %} w-75 step2">
-                        <label for="input-option-{{ option.product_option_id }}" class="form-label">{{ option.name }}</label>
-                        <div id="calendar-option-{{ option.product_option_id }}" class="mb-2"></div>
-                        <input type="hidden" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option-{{ option.product_option_id }}"/>
-                        <div id="error-option-{{ option.product_option_id }}" class="invalid-feedback"></div>
-                      </div>
-                    {% endif %}
 
                     {% if option.type == 'time' %}
                       <div class="mb-3{% if option.required %} required{% endif %}">
@@ -173,6 +152,74 @@
                   {% endfor %}
                 </div>
               {% endif %}
+
+              {% if vases %}
+                <hr>
+                <div class="mb-3">
+                  <div class="mb-2">
+                    <label class="form-label">Select Vase: <small id="selectedVase" class="text-muted">None</small></label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Vases">
+                    <label
+                      class="btn-vase-img btn active"
+                      data-id="0"
+                      data-name="None"
+                      aria-pressed="true"
+                      title="None"
+                    >
+                      <input type="radio"
+                             name="vase_id"
+                             class="d-none"
+                             value="0"
+                             checked/>
+                      <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 12px; font-weight: bold;">None</div>
+                    </label>
+                    {% for vase in vases %}
+                    <label
+                      class="btn-vase-img btn"
+                      data-id="{{ vase.product_id }}"
+                      data-name="{{ vase.name }}"
+                      aria-pressed="false"
+                      title="{{ vase.name }}"
+                    >
+                      <input type="radio"
+                             name="vase_id"
+                             class="d-none"
+                             value="{{ vase.product_id }}"/>
+                      <img src="{{ vase.thumb }}" alt="{{ vase.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                    </label>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+
+                     {% for option in options %}
+
+                    {% if option.type == 'text' %}
+                      <div class="mb-3{% if option.required %} required{% endif %} step1">
+                        <label for="input-option-{{ option.product_option_id }}" class="form-label">{{ option.name }}</label> <input type="text" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" placeholder="{{ option.name }}" id="input-option-{{ option.product_option_id }}" class="form-control"/>
+                        <div id="error-option-{{ option.product_option_id }}" class="invalid-feedback"></div>
+                      </div>
+                    {% endif %}
+
+                    {% if option.type == 'textarea' %}
+                      <div class="mb-3{% if option.required %} required{% endif %} step1">
+                        <label for="input-option-{{ option.product_option_id }}" class="form-label">{{ option.name }}</label> <textarea name="option[{{ option.product_option_id }}]" rows="5" placeholder="{{ option.name }}" id="input-option-{{ option.product_option_id }}" class="form-control">{{ option.value }}</textarea>
+                        <div id="error-option-{{ option.product_option_id }}" class="invalid-feedback"></div>
+                      </div>
+                    {% endif %}
+
+                    {% if option.type == 'date' %}
+                      <div class="mb-3{% if option.required %} required{% endif %} w-75 step2">
+                        <label for="input-option-{{ option.product_option_id }}" class="form-label">{{ option.name }}</label>
+                        <div id="calendar-option-{{ option.product_option_id }}" class="mb-2"></div>
+                        <input type="hidden" name="option[{{ option.product_option_id }}]" value="{{ option.value }}" id="input-option-{{ option.product_option_id }}"/>
+                        <div id="error-option-{{ option.product_option_id }}" class="invalid-feedback"></div>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+               
 
               {% if subscription_plans %}
                 <hr/>
@@ -339,6 +386,29 @@ $(document).ready(function() {
         {% endif %}
     {% endfor %}
 
+    // Vase selection
+    (function(){
+        var label = document.getElementById('selectedVase');
+
+        if (label && !label.textContent.trim()) {
+            label.textContent = 'None';
+        }
+
+        document.querySelectorAll('.btn-vase-img').forEach(function(btn){
+            btn.addEventListener('click', function(){
+                document.querySelectorAll('.btn-vase-img').forEach(function(b){
+                    b.classList.remove('active');
+                    b.setAttribute('aria-pressed','false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-pressed','true');
+
+                if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
+                this.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+    })();
+
     // Stepped checkout logic
     var hasStep1 = $('.step1').length > 0;
     var hasStep2 = $('.step2').length > 0;
@@ -382,6 +452,35 @@ $(document).ready(function() {
     text-transform: uppercase;
     font-size: 12px;
     font-weight: 300;
-}
+  }
+
+  /* Vase selection styles */
+  .btn-vase-img {
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-vase-img .img-thumbnail {
+    border: 2px solid #dee2e6;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+  }
+
+  .btn-vase-img:hover .img-thumbnail {
+    border-color: #0d6efd;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+  }
+
+  .btn-vase-img.active .img-thumbnail {
+    border-color: #0d6efd;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25);
+  }
+
+  .image-btns {
+    gap: 0.5rem;
+  }
 </style>
 {{ footer }}

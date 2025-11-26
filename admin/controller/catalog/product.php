@@ -935,6 +935,23 @@ class Product extends \Opencart\System\Engine\Controller {
 			}
 		}
 
+		// Vase
+		if ($product_id) {
+			$product_vases = $this->model_catalog_product->getVases($product_id);
+		} else {
+			$product_vases = [];
+		}
+
+		$data['product_vases'] = [];
+
+		foreach ($product_vases as $vase_id) {
+			$vase_info = $this->model_catalog_product->getProduct($vase_id);
+
+			if ($vase_info) {
+				$data['product_vases'][] = $vase_info;
+			}
+		}
+
 		// Attribute
 		$this->load->model('catalog/attribute');
 

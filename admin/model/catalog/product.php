@@ -113,6 +113,13 @@ class Product extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		// Vase
+		if (isset($data['product_vase'])) {
+			foreach ($data['product_vase'] as $vase_id) {
+				$this->model_catalog_product->addVase($product_id, $vase_id);
+			}
+		}
+
 		// Attributes
 		if (isset($data['product_attribute'])) {
 			foreach ($data['product_attribute'] as $product_attribute) {
@@ -321,6 +328,15 @@ class Product extends \Opencart\System\Engine\Model {
 		if (isset($data['product_related'])) {
 			foreach ($data['product_related'] as $related_id) {
 				$this->model_catalog_product->addRelated($product_id, $related_id);
+			}
+		}
+
+		// Vase
+		$this->model_catalog_product->deleteVases($product_id);
+
+		if (isset($data['product_vase'])) {
+			foreach ($data['product_vase'] as $vase_id) {
+				$this->model_catalog_product->addVase($product_id, $vase_id);
 			}
 		}
 
@@ -2804,6 +2820,73 @@ class Product extends \Opencart\System\Engine\Model {
 		}
 
 		return $product_related_data;
+	}
+
+	/**
+	 * Add Vase
+	 *
+	 * Add vase record to the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 * @param int $vase_id    primary key of the vase product record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $this->model_catalog_product->addVase($product_id, $vase_id);
+	 */
+	public function addVase(int $product_id, int $vase_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "product_to_vase` WHERE `product_id` = '" . (int)$product_id . "' AND `vase_id` = '" . (int)$vase_id . "'");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "product_to_vase` SET `product_id` = '" . (int)$product_id . "', `vase_id` = '" . (int)$vase_id . "'");
+	}
+
+	/**
+	 * Delete Vase
+	 *
+	 * Delete vase record in the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $this->model_catalog_product->deleteVases($product_id);
+	 */
+	public function deleteVases(int $product_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "product_to_vase` WHERE `product_id` = '" . (int)$product_id . "'");
+	}
+
+	/**
+	 * Get Vases
+	 *
+	 * Get the record of the vase record in the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return array<int, int> vase records that have product ID
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $product_vases = $this->model_catalog_product->getVases($product_id);
+	 */
+	public function getVases(int $product_id): array {
+		$product_vase_data = [];
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_to_vase` WHERE `product_id` = '" . (int)$product_id . "'");
+
+		foreach ($query->rows as $result) {
+			$product_vase_data[] = $result['vase_id'];
+		}
+
+		return $product_vase_data;
 	}
 
 	/**

@@ -25,6 +25,7 @@
             <li class="nav-item"><a href="#tab-general" data-bs-toggle="tab" class="nav-link active">{{ tab_general }}</a></li>
             <li class="nav-item"><a href="#tab-data" data-bs-toggle="tab" class="nav-link">{{ tab_data }}</a></li>
             <li class="nav-item"><a href="#tab-links" data-bs-toggle="tab" class="nav-link">{{ tab_links }}</a></li>
+            <li class="nav-item"><a href="#tab-vase" data-bs-toggle="tab" class="nav-link">{{ tab_vase }}</a></li>
             <li class="nav-item"><a href="#tab-attribute" data-bs-toggle="tab" class="nav-link">{{ tab_attribute }}</a></li>
             <li class="nav-item"><a href="#tab-option" data-bs-toggle="tab" class="nav-link">{{ tab_option }}</a></li>
             <li class="nav-item"><a href="#tab-subscription" data-bs-toggle="tab" class="nav-link">{{ tab_subscription }}</a></li>
@@ -629,6 +630,37 @@
                     {% endif %}
                   </div>
                   <div class="form-text">{{ help_related }}</div>
+                </div>
+              </div>
+            </div>
+            <div id="tab-vase" class="tab-pane">
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">{{ entry_vase }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="vase" value="" placeholder="{{ entry_vase }}" id="input-vase" data-oc-target="autocomplete-vase" class="form-control" autocomplete="off"/>
+                  <ul id="autocomplete-vase" class="dropdown-menu"></ul>
+                  <div class="input-group">
+                    <div class="form-control p-0" style="height: 150px; overflow: auto;">
+                      <table id="product-vase" class="table m-0">
+                        <tbody>
+                          {% for product_vase in product_vases %}
+                            <tr id="product-vase-{{ product_vase.product_id }}">
+                              <td>{{ product_vase.name }}<input type="hidden" name="product_vase[]" value="{{ product_vase.product_id }}"/></td>
+                              <td class="text-end"><button type="button" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                    {% if master_id %}
+                      <div class="input-group-text">
+                        <div class="form-check form-switch">
+                          <input type="checkbox" name="override[product_vase]" value="1" id="input-variant-vase" data-oc-toggle="switch" data-oc-target="#input-vase, #product-vase" class="form-check-input"{% if override.product_vase %} checked{% endif %}/> <label for="input-variant-vase" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="form-text">{{ help_vase }}</div>
                 </div>
               </div>
             </div>
@@ -1531,6 +1563,40 @@ $('#input-related').autocomplete({
 });
 
 $('#product-related').on('click', '.btn', function() {
+    $(this).parent().parent().remove();
+});
+
+// Vase
+$('#input-vase').autocomplete({
+    'source': function(request, response) {
+        $.ajax({
+            url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function(json) {
+                response($.map(json, function(item) {
+                    return {
+                        label: item['name'],
+                        value: item['product_id']
+                    }
+                }));
+            }
+        });
+    },
+    'select': function(item) {
+        $('#input-vase').val('');
+
+        $('#product-vase-' + item['value']).remove();
+
+        html = '<tr id="product-vase-' + item['value'] + '">';
+        html += '  <td>' + item['label'] + '<input type="hidden" name="product_vase[]" value="' + item['value'] + '"/></td>';
+        html += '  <td class="text-end"><button type="button" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+        html += '</tr>';
+
+        $('#product-vase tbody').append(html);
+    }
+});
+
+$('#product-vase').on('click', '.btn', function() {
     $(this).parent().parent().remove();
 });
 
