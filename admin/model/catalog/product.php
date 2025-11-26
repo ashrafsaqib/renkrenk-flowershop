@@ -120,6 +120,13 @@ class Product extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		// Color
+		if (isset($data['product_color'])) {
+			foreach ($data['product_color'] as $color_id) {
+				$this->model_catalog_product->addColor($product_id, $color_id);
+			}
+		}
+
 		// Attributes
 		if (isset($data['product_attribute'])) {
 			foreach ($data['product_attribute'] as $product_attribute) {
@@ -337,6 +344,15 @@ class Product extends \Opencart\System\Engine\Model {
 		if (isset($data['product_vase'])) {
 			foreach ($data['product_vase'] as $vase_id) {
 				$this->model_catalog_product->addVase($product_id, $vase_id);
+			}
+		}
+
+		// Color
+		$this->model_catalog_product->deleteColors($product_id);
+
+		if (isset($data['product_color'])) {
+			foreach ($data['product_color'] as $color_id) {
+				$this->model_catalog_product->addColor($product_id, $color_id);
 			}
 		}
 
@@ -2887,6 +2903,48 @@ class Product extends \Opencart\System\Engine\Model {
 		}
 
 		return $product_vase_data;
+	}
+
+	/**
+	 * Add Color
+	 *
+	 * @param int $product_id primary key of the product record
+	 * @param int $color_id   primary key of the color product record
+	 *
+	 * @return void
+	 */
+	public function addColor(int $product_id, int $color_id): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "product_to_color` SET `product_id` = '" . (int)$product_id . "', `color_id` = '" . (int)$color_id . "'");
+	}
+
+	/**
+	 * Delete Colors
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return void
+	 */
+	public function deleteColors(int $product_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "product_to_color` WHERE `product_id` = '" . (int)$product_id . "'");
+	}
+
+	/**
+	 * Get Colors
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return array<int, int> color product IDs
+	 */
+	public function getColors(int $product_id): array {
+		$product_color_data = [];
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_to_color` WHERE `product_id` = '" . (int)$product_id . "'");
+
+		foreach ($query->rows as $result) {
+			$product_color_data[] = $result['color_id'];
+		}
+
+		return $product_color_data;
 	}
 
 	/**

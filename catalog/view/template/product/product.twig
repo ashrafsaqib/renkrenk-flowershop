@@ -55,6 +55,28 @@
           <br/>
           <div id="product">
             <form id="form-product">
+              
+              {% if colors %}
+                <hr>
+                <div class="mb-3">
+                  <div class="mb-2">
+                    <label class="form-label">Select Color</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Colors">
+                    {% for color in colors %}
+                    <a
+                      href="{{ color.href }}"
+                      class="btn-color-link{% if color.selected %} active{% endif %}"
+                      title="{{ color.name }}"
+                    >
+                      <img src="{{ color.thumb }}" alt="{{ color.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                    </a>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+
               {% if options %}
                 <hr>
                 <h3>{{ text_option }}</h3>
@@ -481,6 +503,34 @@ $(document).ready(function() {
 
   .image-btns {
     gap: 0.5rem;
+  }
+
+  /* Color selection styles */
+  .btn-color-link {
+    display: inline-block;
+    padding: 0;
+    border: none;
+    background: transparent;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-color-link .img-thumbnail {
+    border: 2px solid #dee2e6;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+  }
+
+  .btn-color-link:hover .img-thumbnail {
+    border-color: #0d6efd;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .btn-color-link.active .img-thumbnail {
+    border-color: #0d6efd;
+    border-width: 3px;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.35);
   }
 </style>
 {{ footer }}

@@ -465,18 +465,68 @@ class Product extends \Opencart\System\Engine\Controller {
 					$special = false;
 				}
 
-				$data['vases'][] = [
-					'product_id' => $vase['product_id'],
-					'name'       => $vase['name'],
-					'price'      => $price,
-					'special'    => $special,
-					'thumb'      => $this->model_tool_image->resize($image, 100, 100)
-				];
+			$data['vases'][] = [
+				'product_id' => $vase['product_id'],
+				'name'       => $vase['name'],
+				'price'      => $price,
+				'special'    => $special,
+				'thumb'      => $this->model_tool_image->resize($image, 100, 100)
+			];
+		}
+
+		// Colors
+		$data['colors'] = [];
+
+		$color_results = $this->model_catalog_product->getColors($product_id);
+
+		// Add current product to colors list
+		if ($product_info['image'] && is_file(DIR_IMAGE . html_entity_decode($product_info['image'], ENT_QUOTES, 'UTF-8'))) {
+			$current_image = $product_info['image'];
+		} else {
+			$current_image = 'placeholder.png';
+		}
+
+		$data['colors'][] = [
+			'product_id' => $product_id,
+			'name'       => $product_info['name'],
+			'price'      => $data['price'],
+			'special'    => $data['special'],
+			'thumb'      => $this->model_tool_image->resize($current_image, 100, 100),
+			'href'       => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_id),
+			'selected'   => true
+		];
+
+		foreach ($color_results as $color) {
+			if ($color['image'] && is_file(DIR_IMAGE . html_entity_decode($color['image'], ENT_QUOTES, 'UTF-8'))) {
+				$image = $color['image'];
+			} else {
+				$image = 'placeholder.png';
 			}
 
-			$data['tags'] = [];
+			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+				$price = $this->currency->format($this->tax->calculate($color['price'], $color['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			} else {
+				$price = false;
+			}
 
-			if ($product_info['tag']) {
+			if ((float)$color['special']) {
+				$special = $this->currency->format($this->tax->calculate($color['special'], $color['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			} else {
+				$special = false;
+			}
+
+			$data['colors'][] = [
+				'product_id' => $color['product_id'],
+				'name'       => $color['name'],
+				'price'      => $price,
+				'special'    => $special,
+				'thumb'      => $this->model_tool_image->resize($image, 100, 100),
+				'href'       => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $color['product_id']),
+				'selected'   => false
+			];
+		}
+
+		$data['tags'] = [];			if ($product_info['tag']) {
 				$tags = explode(',', $product_info['tag']);
 
 				foreach ($tags as $tag) {

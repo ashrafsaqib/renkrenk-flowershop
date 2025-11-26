@@ -109,6 +109,7 @@ $_['entry_filter']               = 'Filters';
 $_['entry_download']             = 'Downloads';
 $_['entry_related']              = 'Related Products';
 $_['entry_vase']                 = 'Vase Products';
+$_['entry_color']                = 'Color Products';
 $_['entry_tag']                  = 'Product Tags';
 $_['entry_reward']               = 'Reward Points';
 $_['entry_layout']               = 'Layout Override';
@@ -126,6 +127,7 @@ $_['help_filter']                = '(Autocomplete)';
 $_['help_download']              = '(Autocomplete)';
 $_['help_related']               = '(Autocomplete)';
 $_['help_vase']                  = '(Autocomplete)';
+$_['help_color']                 = '(Autocomplete)';
 $_['help_option']                = '(Autocomplete)';
 $_['help_points']                = 'Number of points needed to buy this item. If you don\'t want this product to be purchased with points leave as 0.';
 $_['help_location']              = 'Select countries and zones where this product is available for sale';
@@ -135,6 +137,7 @@ $_['button_load_zones']          = 'Load Zones';
 
 // Tab
 $_['tab_vase']                   = 'Vase';
+$_['tab_color']                  = 'Color';
 $_['tab_location']               = 'Location';
 
 // Text

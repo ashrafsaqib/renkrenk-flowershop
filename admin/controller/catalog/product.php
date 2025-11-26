@@ -952,6 +952,23 @@ class Product extends \Opencart\System\Engine\Controller {
 			}
 		}
 
+		// Color
+		if ($product_id) {
+			$product_colors = $this->model_catalog_product->getColors($product_id);
+		} else {
+			$product_colors = [];
+		}
+
+		$data['product_colors'] = [];
+
+		foreach ($product_colors as $color_id) {
+			$color_info = $this->model_catalog_product->getProduct($color_id);
+
+			if ($color_info) {
+				$data['product_colors'][] = $color_info;
+			}
+		}
+
 		// Attribute
 		$this->load->model('catalog/attribute');
 
