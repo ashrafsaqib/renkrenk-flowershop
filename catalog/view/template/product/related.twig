@@ -1,8 +1,80 @@
 {% if products %}
-  <h3>{{ text_related }}</h3>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4">
-    {% for product in products %}
-      <div class="col mb-3">{{ product }}</div>
-    {% endfor %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">{{ text_related }}</h3>
+    <div class="related-scroll-controls">
+      <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="related-scroll-left">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" id="related-scroll-right">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
   </div>
+  <div class="related-products-wrapper position-relative">
+    <div class="related-products-scroll d-flex gap-3 overflow-auto" id="related-products-container">
+      {% for product in products %}
+        <div class="related-product-item flex-shrink-0" style="width: 250px;">{{ product }}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <style>
+    .related-products-scroll {
+      scroll-behavior: smooth;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    .related-products-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .related-product-item {
+      min-width: 250px;
+    }
+    
+    .related-scroll-controls button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  </style>
+
+  <script>
+    (function() {
+      const container = document.getElementById('related-products-container');
+      const leftBtn = document.getElementById('related-scroll-left');
+      const rightBtn = document.getElementById('related-scroll-right');
+      
+      if (container && leftBtn && rightBtn) {
+        const scrollAmount = 270; // Width of item + gap
+        
+        // Check scroll position and update button states
+        function updateButtons() {
+          leftBtn.disabled = container.scrollLeft <= 0;
+          rightBtn.disabled = container.scrollLeft >= (container.scrollWidth - container.clientWidth - 5);
+        }
+        
+        // Scroll left
+        leftBtn.addEventListener('click', function() {
+          container.scrollLeft -= scrollAmount;
+          setTimeout(updateButtons, 300);
+        });
+        
+        // Scroll right
+        rightBtn.addEventListener('click', function() {
+          container.scrollLeft += scrollAmount;
+          setTimeout(updateButtons, 300);
+        });
+        
+        // Update buttons on scroll
+        container.addEventListener('scroll', updateButtons);
+        
+        // Initial button state
+        updateButtons();
+        
+        // Update on window resize
+        window.addEventListener('resize', updateButtons);
+      }
+    })();
+  </script>
 {% endif %}
