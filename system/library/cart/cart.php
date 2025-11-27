@@ -295,6 +295,77 @@ class Cart {
 						$this->data[$cart['cart_id']][$key] = $value;
 					}
 				} else {
+					// If the product row is not found, but this cart row references a subscription plan,
+					// build a product-like structure from the subscription plan so subscription-only
+					// items can be stored in cart without a real product entry.
+					if (!empty($cart['subscription_plan_id'])) {
+						$sp_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_plan` `sp` LEFT JOIN `" . DB_PREFIX . "subscription_plan_description` `spd` ON (`sp`.`subscription_plan_id` = `spd`.`subscription_plan_id`) WHERE `sp`.`subscription_plan_id` = '" . (int)$cart['subscription_plan_id'] . "' AND `spd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' AND `sp`.`status` = '1'");
+
+						if ($sp_query->num_rows) {
+							// Minimal product-like row used by the rest of the cart logic
+							$product_row = [
+								'product_id' => 0,
+								'master_id' => 0,
+								'variant' => json_encode([]),
+								'image' => isset($sp_query->row['image']) ? $sp_query->row['image'] : '',
+								'quantity' => 99999,
+								'price' => 0,
+								'points' => 0,
+								'weight' => 0,
+								'weight_class_id' => $this->config->get('config_weight_class_id') ?? 0,
+								'length' => 0,
+								'width' => 0,
+								'height' => 0,
+								'length_class_id' => $this->config->get('config_length_class_id') ?? 0,
+								'subtract' => 0,
+								'minimum' => 1,
+								'tax_class_id' => 0,
+								'shipping' => 0,
+								'download' => [],
+								'minimum_status' => true,
+								'stock_status' => true
+							];
+
+							// Build subscription data from the plan row
+							$subscription_data = ['remaining' => $sp_query->row['duration']] + $sp_query->row;
+
+							// Price selection: prefer trial price if enabled
+							$price = isset($sp_query->row['price']) ? (float)$sp_query->row['price'] : 0;
+							if (!empty($sp_query->row['trial_status'])) {
+								$price = isset($sp_query->row['trial_price']) ? (float)$sp_query->row['trial_price'] : $price;
+							}
+
+							$this->data[$cart['cart_id']] = [
+								'cart_id' => $cart['cart_id'],
+								'option' => [],
+								'subscription' => $subscription_data,
+								'download' => [],
+								'quantity' => $cart['quantity'],
+								'minimum_status' => true,
+								'stock' => true,
+								'stock_status' => true,
+								'price' => $price,
+								'total' => $price * $cart['quantity'],
+								'reward' => 0,
+								'points' => 0,
+								'weight' => 0
+							] + $product_row;
+
+							// Merge any override fields stored with the cart row
+							if ($cart['override']) {
+								$override = json_decode($cart['override'], true);
+								if (is_array($override)) {
+									foreach ($override as $key => $value) {
+										$this->data[$cart['cart_id']][$key] = $value;
+									}
+								}
+							}
+
+							continue;
+						}
+					}
+
+					// Fallback: remove invalid cart entries
 					$this->remove($cart['cart_id']);
 				}
 			}
@@ -470,14 +541,17 @@ class Cart {
 		$tax_data = [];
 
 		foreach ($this->getProducts() as $product) {
-			if ($product['tax_class_id']) {
-				$tax_rates = $this->tax->getRates($product['price'], $product['tax_class_id']);
+			$tax_class_id = isset($product['tax_class_id']) ? (int)$product['tax_class_id'] : 0;
+
+			if ($tax_class_id) {
+				$price_for_tax = isset($product['price']) ? (float)$product['price'] : 0.0;
+				$tax_rates = $this->tax->getRates($price_for_tax, $tax_class_id);
 
 				foreach ($tax_rates as $tax_rate) {
 					if (!isset($tax_data[$tax_rate['tax_rate_id']])) {
-						$tax_data[$tax_rate['tax_rate_id']] = ($tax_rate['amount'] * $product['quantity']);
+						$tax_data[$tax_rate['tax_rate_id']] = ($tax_rate['amount'] * (int)$product['quantity']);
 					} else {
-						$tax_data[$tax_rate['tax_rate_id']] += ($tax_rate['amount'] * $product['quantity']);
+						$tax_data[$tax_rate['tax_rate_id']] += ($tax_rate['amount'] * (int)$product['quantity']);
 					}
 				}
 			}
@@ -499,7 +573,10 @@ class Cart {
 		$total = 0;
 
 		foreach ($this->getProducts() as $product) {
-			$total += $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'];
+			$price = isset($product['price']) ? (float)$product['price'] : 0.0;
+			$tax_class_id = isset($product['tax_class_id']) ? (int)$product['tax_class_id'] : 0;
+
+			$total += $this->tax->calculate($price, $tax_class_id, $this->config->get('config_tax')) * (int)$product['quantity'];
 		}
 
 		return $total;

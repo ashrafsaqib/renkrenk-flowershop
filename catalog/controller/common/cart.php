@@ -26,6 +26,9 @@ class Cart extends \Opencart\System\Engine\Controller {
 		// Image
 		$this->load->model('tool/image');
 
+		// Product model (used to resolve gift/vase names)
+		$this->load->model('catalog/product');
+
 		// Display prices
 		if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 			($this->model_checkout_cart->getTotals)($totals, $taxes, $total);
@@ -71,13 +74,31 @@ class Cart extends \Opencart\System\Engine\Controller {
 				}
 			}
 
+			// Resolve gift/vase names when present in override metadata
+			if (!empty($product['gift_id'])) {
+				$gift_info = $this->model_catalog_product->getProduct((int)$product['gift_id']);
+				if ($gift_info) {
+					$product['gift_name'] = $gift_info['name'];
+				}
+			}
+
+			if (!empty($product['vase_id'])) {
+				$vase_info = $this->model_catalog_product->getProduct((int)$product['vase_id']);
+				if ($vase_info) {
+					$product['vase_name'] = $vase_info['name'];
+				}
+			}
+
 			$data['products'][] = [
 				'thumb'        => $this->model_tool_image->resize($product['image'], 80,80),
 				'subscription' => $subscription,
 				'price'        => $price_status ? $product['price_text'] : '',
 				'total'        => $price_status ? $product['total_text'] : '',
 				'href'         => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product['product_id'])
-			] + $product;
+			] + $product + [
+				'gift_name' => $product['gift_name'] ?? '',
+				'vase_name' => $product['vase_name'] ?? ''
+			];
 		}
 
 		// Totals

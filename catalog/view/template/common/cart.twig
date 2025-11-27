@@ -28,6 +28,19 @@
               {% if product.subscription %}
                 <div>{{ product.subscription }}</div>
               {% endif %}
+
+              {# Subscription metadata (if present) #}
+              {% if product.delivery_date %}
+                <div class="small">Delivery: {{ product.delivery_date }}</div>
+              {% endif %}
+
+              {% if product.is_gift %}
+                <div class="small">Gift: Yes{% if product.gift_name %} — {{ product.gift_name }}{% endif %}</div>
+              {% endif %}
+
+              {% if product.vase_name %}
+                <div class="small">Vase: {{ product.vase_name }}</div>
+              {% endif %}
             </div>
             <div class="d-flex justify-content-between align-items-center">
               <div class="text-muted small">Qty: {{ product.quantity }}</div>

@@ -68,12 +68,16 @@ class Cart extends \Opencart\System\Engine\Model {
 			$subscription_data = [];
 
 			if ($product['subscription']) {
-				$subscription_data = [
-					'trial_frequency_text' => $this->language->get('text_' . $product['subscription']['trial_frequency']),
-					'trial_price_text'     => $this->currency->format($this->tax->calculate($product['subscription']['trial_price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
-					'frequency_text'       => $this->language->get('text_' . $product['subscription']['frequency']),
-					'price_text'           => $this->currency->format($this->tax->calculate($product['subscription']['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])
-				] + $product['subscription'];
+					$trial_price = isset($product['subscription']['trial_price']) ? (float)$product['subscription']['trial_price'] : 0.0;
+					$price = isset($product['subscription']['price']) ? (float)$product['subscription']['price'] : 0.0;
+					$tax_class_id = isset($product['tax_class_id']) ? (int)$product['tax_class_id'] : 0;
+
+					$subscription_data = [
+						'trial_frequency_text' => $this->language->get('text_' . ($product['subscription']['trial_frequency'] ?? '')),
+						'trial_price_text'     => $this->currency->format($this->tax->calculate($trial_price, $tax_class_id, $this->config->get('config_tax')), $this->session->data['currency']),
+						'frequency_text'       => $this->language->get('text_' . ($product['subscription']['frequency'] ?? '')),
+						'price_text'           => $this->currency->format($this->tax->calculate($price, $tax_class_id, $this->config->get('config_tax')), $this->session->data['currency'])
+					] + $product['subscription'];
 			}
 
 			$product_data[] = [

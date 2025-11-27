@@ -278,14 +278,75 @@ class Cart extends \Opencart\System\Engine\Controller {
 			if ($subscriptions && (!$subscription_plan_id || !in_array($subscription_plan_id, array_column($subscriptions, 'subscription_plan_id')))) {
 				$json['error']['subscription'] = $this->language->get('error_subscription');
 			}
+		} elseif ($subscription_plan_id) {
+			// Allow subscription-only adds where no product record exists (product_id may be 0)
+			// Create a minimal product_info stub so downstream logic can run without errors.
+			$product_info = [
+				'name' => $this->language->get('text_subscription') ?? 'Subscription',
+				'master_id' => 0,
+				'override' => [],
+				'variant' => []
+			];
 		} else {
 			$json['error']['warning'] = $this->language->get('error_product');
 		}
 
 		if (!$json) {
-			$this->cart->add($product_id, $quantity, $option, $subscription_plan_id);
+			// Prepare cart override metadata for subscriptions (kept separate from product option/variant override)
+			$cart_override = [];
 
-			$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_id), $product_info['name'], $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language')));
+			if ($subscription_plan_id) {
+				// Store metadata as top-level override keys so cart products keep full subscription data
+				$cart_override['subscription_plan_id'] = $subscription_plan_id;
+
+				if (isset($this->request->post['frequency_id'])) {
+					$cart_override['subscription_plan_frequency_id'] = (int)$this->request->post['frequency_id'];
+				}
+
+				if (isset($this->request->post['delivery_date'])) {
+					$cart_override['delivery_date'] = $this->request->post['delivery_date'];
+				}
+
+				if (isset($this->request->post['is_gift'])) {
+					$cart_override['is_gift'] = $this->request->post['is_gift'] === 'yes' || (int)$this->request->post['is_gift'] ? 1 : 0;
+				}
+
+				if (isset($this->request->post['gift_id'])) {
+					$cart_override['gift_id'] = (int)$this->request->post['gift_id'];
+				}
+
+				if (isset($this->request->post['vase_id'])) {
+					$cart_override['vase_id'] = (int)$this->request->post['vase_id'];
+				}
+
+				// Map duration if provided
+				if (isset($this->request->post['duration_id'])) {
+					$cart_override['duration'] = (int)$this->request->post['duration_id'];
+				}
+			}
+
+			$this->cart->add($product_id, $quantity, $option, $subscription_plan_id, $cart_override);
+
+			// Build a friendly name and link for success message.
+			if (!empty($product_info) && isset($product_info['product_id']) && (int)$product_info['product_id']) {
+				$product_link = $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . (int)$product_id);
+				$product_name = $product_info['name'];
+			} elseif ($subscription_plan_id) {
+				// Try to resolve subscription plan name
+				$plan_query = $this->db->query("SELECT `name` FROM `" . DB_PREFIX . "subscription_plan_description` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "' AND `language_id` = '" . (int)$this->config->get('config_language_id') . "' LIMIT 1");
+				if ($plan_query->num_rows) {
+					$product_name = $plan_query->row['name'];
+				} else {
+					$product_name = $product_info['name'] ?? $this->language->get('text_subscription') ?? 'Subscription';
+				}
+
+				$product_link = $this->url->link('product/subscription', 'language=' . $this->config->get('config_language') . '&subscription_plan_id=' . (int)$subscription_plan_id);
+			} else {
+				$product_link = $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . (int)$product_id);
+				$product_name = $product_info['name'] ?? '';
+			}
+
+			$json['success'] = sprintf($this->language->get('text_success'), $product_link, $product_name, $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language')));
 
 			// Unset all shipping and payment methods
 			unset($this->session->data['shipping_method']);
