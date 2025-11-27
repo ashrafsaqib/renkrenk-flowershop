@@ -62,13 +62,13 @@
   </div>
 
   <div class="cart-actions mt-4">
-    <a href="{{ cart }}" class="btn btn-outline-dark w-100 mb-2" data-bs-dismiss="offcanvas">{{ text_cart }}</a>
-    <a href="{{ checkout }}" class="btn btn-primary w-100" data-bs-dismiss="offcanvas">{{ text_checkout }}</a>
+    <a href="{{ cart }}" class="btn btn-outline-dark w-100 mb-2">{{ text_cart }}</a>
+    <a href="{{ checkout }}" class="btn btn-primary w-100">{{ text_checkout }}</a>
   </div>
 {% else %}
   <div class="text-center py-5">
     <i class="fa-solid fa-cart-shopping fa-3x text-muted mb-3"></i>
     <p class="text-muted">{{ text_no_results }}</p>
-    <a href="{{ cart }}" class="btn btn-primary" data-bs-dismiss="offcanvas">{{ text_continue }}</a>
+    <a href="{{ cart }}" class="btn btn-primary">{{ text_continue }}</a>
   </div>
 {% endif %}
