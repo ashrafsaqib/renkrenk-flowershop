@@ -348,6 +348,84 @@ class Cart extends \Opencart\System\Engine\Controller {
 
 			$json['success'] = sprintf($this->language->get('text_success'), $product_link, $product_name, $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language')));
 
+			// Prepare popup data with product details
+			$this->load->model('tool/image');
+			
+			$popup_product = [];
+			
+			if ($product_info && isset($product_info['product_id']) && $product_info['product_id']) {
+				// Get full product details for popup
+				$full_product = $this->model_catalog_product->getProduct($product_id);
+				
+				if ($full_product) {
+					$popup_product = [
+						'product_id' => $full_product['product_id'],
+						'name' => $full_product['name'],
+						'model' => $full_product['model'],
+						'image' => $this->model_tool_image->resize($full_product['image'], 400, 400),
+						'quantity' => $quantity,
+						'price' => $this->currency->format($this->tax->calculate($full_product['price'], $full_product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+						'href' => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $full_product['product_id'])
+					];
+				}
+			} elseif ($subscription_plan_id) {
+				// Build popup data for subscription-only adds - fetch subscription plan details
+				$this->load->model('catalog/subscription_plan');
+				$subscription_plan_info = $this->model_catalog_subscription_plan->getSubscriptionPlan($subscription_plan_id);
+				
+				// Get subscription plan image
+				$subscription_image = 'placeholder.png';
+				if (!empty($subscription_plan_info['image'])) {
+					$subscription_image = $subscription_plan_info['image'];
+				}
+				
+				// Get subscription plan price
+				$subscription_price = '';
+				if (isset($subscription_plan_info['price']) && $subscription_plan_info['price'] > 0) {
+					$subscription_price = $this->currency->format($subscription_plan_info['price'], $this->session->data['currency']);
+				}
+				
+				$popup_product = [
+					'product_id' => 0,
+					'name' => $product_name,
+					'model' => '',
+					'image' => $this->model_tool_image->resize($subscription_image, 400, 400),
+					'quantity' => $quantity,
+					'price' => $subscription_price,
+					'href' => $product_link
+				];
+			}
+			
+			if (!empty($popup_product)) {
+				$json['popup'] = [
+					'product' => $popup_product,
+					'related' => []
+				];
+				
+				// Get related products
+				if ($product_id) {
+					$related_products = $this->model_catalog_product->getRelated($product_id);
+					
+					if ($related_products) {
+						$results = array_slice($related_products, 0, 4); // Limit to 4 related products
+						
+						foreach ($results as $related) {
+							$related_info = $this->model_catalog_product->getProduct($related['product_id']);
+							
+							if ($related_info) {
+								$json['popup']['related'][] = [
+									'product_id' => $related_info['product_id'],
+									'name' => $related_info['name'],
+									'thumb' => $this->model_tool_image->resize($related_info['image'], 200, 200),
+									'price' => $this->currency->format($this->tax->calculate($related_info['price'], $related_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+									'href' => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $related_info['product_id'])
+								];
+							}
+						}
+					}
+				}
+			}
+
 			// Unset all shipping and payment methods
 			unset($this->session->data['shipping_method']);
 			unset($this->session->data['shipping_methods']);

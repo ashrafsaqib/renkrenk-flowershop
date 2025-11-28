@@ -14,6 +14,15 @@ $_['text_no_results']            = 'Your shopping cart is empty!';
 $_['text_model']                 = 'Model';
 $_['text_cart']                  = 'View Cart';
 $_['text_checkout']              = 'Checkout';
+$_['text_success_added']         = 'Product successfully added to your cart!';
+$_['text_related_products']      = 'You may also like';
+$_['text_quantity']              = 'Quantity';
+$_['text_price']                 = 'Price';
+
+// Buttons
+$_['button_buy_now']             = 'Buy Now';
+$_['button_view_cart']           = 'View Cart';
+$_['button_continue']            = 'Continue Shopping';
 
 // Error
 $_['error_product']              = 'Warning: Product could not be found!';

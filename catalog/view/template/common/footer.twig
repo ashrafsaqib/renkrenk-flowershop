@@ -56,6 +56,10 @@ Please donate via PayPal to donate@opencart.com
 </footer>
 </div>
 {{ cookie }}
+
+{# Include Cart Add Success Popup #}
+{{ cart_popup }}
+
 <script src="{{ bootstrap }}" type="text/javascript"></script>
 {% for script in scripts %}
   <script src="{{ script.href }}" type="text/javascript"></script>

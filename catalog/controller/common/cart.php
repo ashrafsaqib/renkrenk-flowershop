@@ -246,4 +246,29 @@ class Cart extends \Opencart\System\Engine\Controller {
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
+
+	/**
+	 * Popup
+	 *
+	 * @return string
+	 */
+	public function popup(): string {
+		$this->load->language('common/cart');
+
+		$data['text_success_added'] = $this->language->get('text_success_added') ?: 'Product successfully added to your cart!';
+		$data['text_related_products'] = $this->language->get('text_related_products') ?: 'You may also like';
+		$data['text_model'] = $this->language->get('text_model') ?: 'Model';
+		$data['text_quantity'] = $this->language->get('text_quantity') ?: 'Quantity';
+		$data['text_price'] = $this->language->get('text_price') ?: 'Price';
+		
+		$data['button_buy_now'] = $this->language->get('button_buy_now') ?: 'Buy Now';
+		$data['button_view_cart'] = $this->language->get('button_view_cart') ?: 'View Cart';
+		$data['button_continue'] = $this->language->get('button_continue') ?: 'Continue Shopping';
+
+		$data['cart'] = $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language'));
+		$data['checkout'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
+		$data['language'] = $this->config->get('config_language');
+
+		return $this->load->view('common/cart_popup', $data);
+	}
 }
