@@ -1,67 +1,7 @@
 {# Cart Add Success Popup - Full Screen Modal #}
 <div id="cart-popup-modal" class="cart-popup-overlay" style="display: none;">
-  <div class="cart-popup-container">
-    <div class="cart-popup-layout">
-      {# Left Column - Main Content (70%) #}
-      <div class="cart-popup-left">
-        {# Header #}
-        <div class="popup-header">
-          <h2 class="popup-title">YOU'VE GOT GREAT TASTE.</h2>
-          <p class="popup-subtitle">Your item has been added to your basket</p>
-        </div>
-
-        {# Added Product - Horizontal Layout #}
-        <div class="added-product-section">
-          <div class="added-product-flex">
-            <div class="added-product-image">
-              <img id="popup-product-image" src="" alt="" />
-            </div>
-            <div class="added-product-details">
-              <h3 id="popup-product-name" class="added-product-title"></h3>
-              <p id="popup-product-price" class="added-product-price"></p>
-              <div class="added-product-meta" id="popup-product-quantity-wrapper">
-                <span>Quantity: <span id="popup-product-quantity"></span></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {# Upsell Section - Related Products #}
-        <div class="upsell-section" id="popup-related-products" style="display: none;">
-          <h3 class="upsell-title">LET YOURSELF BE TEMPTED</h3>
-          <div class="upsell-grid" id="popup-related-container">
-            {# Related products will be injected here via JS #}
-          </div>
-        </div>
-      </div>
-
-      {# Right Column - Sidebar (30%) #}
-      <div class="cart-popup-right">
-        {# Close Button #}
-        <button type="button" class="cart-popup-close" onclick="closeCartPopup()">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        {# Gift Info Section #}
-        <div class="gift-info-section">
-          <div class="gift-info-content">
-            <div class="gift-icon">
-              <i class="fa-solid fa-gift"></i>
-            </div>
-            <p class="gift-text">COMPLIMENTARY GIFT WRAPPING INCLUDED</p>
-            <hr class="divider">
-            <p class="gift-message">Add a personal message to make your gift extra special</p>
-          </div>
-        </div>
-
-        {# Bottom Actions - Pushed to Bottom #}
-        <div class="sidebar-actions">
-          <a href="#" class="continue-link" onclick="closeCartPopup(); return false;">Continue Shopping</a>
-          <a href="{{ checkout }}" class="btn-action btn-primary-action">BUY NOW</a>
-          <a href="{{ cart }}" class="btn-action btn-secondary-action">GO TO BASKET</a>
-        </div>
-      </div>
-    </div>
+  <div class="cart-popup-container" id="cart-popup-content">
+    {# Content will be injected here from server #}
   </div>
 </div>
 
@@ -241,7 +181,6 @@
 
 .upsell-product-card {
   background: #ffffff;
-  border: 1px solid #e8e8e8;
   transition: all 0.3s ease;
   cursor: pointer;
 }
@@ -275,9 +214,6 @@
   font-size: 14px;
   font-weight: 500;
   color: #2c2c2c;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
-  min-height: 40px;
 }
 
 .upsell-product-name a {
@@ -473,96 +409,19 @@ function closeCartPopup() {
   }
 }
 
-function showCartPopup(data) {
+function showCartPopup(popupHtml) {
   const modal = document.getElementById('cart-popup-modal');
-  if (!modal || !data.product) return;
+  const container = document.getElementById('cart-popup-content');
+  
+  if (!modal || !container || !popupHtml) return;
 
-  // Populate product details
-  const productImage = document.getElementById('popup-product-image');
-  const productName = document.getElementById('popup-product-name');
-  const productQuantity = document.getElementById('popup-product-quantity');
-  const productQuantityWrapper = document.getElementById('popup-product-quantity-wrapper');
-  const productPrice = document.getElementById('popup-product-price');
-
-  if (productImage && data.product.image) {
-    productImage.src = data.product.image;
-    productImage.alt = data.product.name || '';
-  }
-
-  if (productName && data.product.name) {
-    productName.textContent = data.product.name;
-  }
-
-  if (productQuantity && data.product.quantity) {
-    productQuantity.textContent = data.product.quantity;
-  }
-
-  if (productPrice && data.product.price) {
-    productPrice.textContent = data.product.price;
-  } else {
-    productPrice.style.display = 'none';
-  }
-
-  // Populate related products (upsell)
-  const relatedSection = document.getElementById('popup-related-products');
-  const relatedContainer = document.getElementById('popup-related-container');
-
-  if (data.related && data.related.length > 0) {
-    relatedContainer.innerHTML = '';
-    
-    data.related.forEach(function(product) {
-      const card = document.createElement('div');
-      card.className = 'upsell-product-card';
-      
-      card.innerHTML = `
-        <a href="${product.href}">
-          <div class="upsell-product-image">
-            <img src="${product.thumb}" alt="${product.name}" />
-          </div>
-          <div class="upsell-product-info">
-            <div class="upsell-product-name">
-              <a href="${product.href}">${product.name}</a>
-            </div>
-            <div class="upsell-product-price">${product.price}</div>
-          </div>
-        </a>
-      `;
-      
-      relatedContainer.appendChild(card);
-    });
-    
-    relatedSection.style.display = 'block';
-  } else {
-    relatedSection.style.display = 'none';
-  }
+  // Inject server-rendered HTML
+  container.innerHTML = popupHtml;
 
   // Show modal
   modal.style.display = 'flex';
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
-}
-
-function addRelatedToCart(productId) {
-  // Simple add to cart for related products
-  fetch('index.php?route=checkout/cart.add&language={{ language }}', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: 'product_id=' + productId + '&quantity=1'
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Refresh cart header or show notification
-      if (typeof updateCart === 'function') {
-        updateCart();
-      }
-      alert('Product added to cart!');
-    } else if (data.error) {
-      alert(data.error.warning || 'Error adding product');
-    }
-  });
 }
 
 // Close modal on overlay click

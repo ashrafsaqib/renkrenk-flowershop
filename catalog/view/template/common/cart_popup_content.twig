@@ -1,0 +1,76 @@
+{# Cart Popup Content - Server-side rendered #}
+<div class="cart-popup-layout">
+  {# Left Column - Main Content (70%) #}
+  <div class="cart-popup-left">
+    {# Header #}
+    <div class="popup-header">
+      <h2 class="popup-title">YOU'VE GOT GREAT TASTE.</h2>
+      <p class="popup-subtitle">Your item has been added to your basket</p>
+    </div>
+
+    {# Added Product - Horizontal Layout #}
+    <div class="added-product-section">
+      <div class="added-product-flex">
+        <div class="added-product-image">
+          <img src="{{ product.image }}" alt="{{ product.name }}" />
+        </div>
+        <div class="added-product-details">
+          <h3 class="added-product-title">{{ product.name }}</h3>
+          {% if product.price %}
+            <p class="added-product-price">{{ product.price }}</p>
+          {% endif %}
+          <div class="added-product-meta">
+            <span>Quantity: {{ product.quantity }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Upsell Section - Related Products #}
+    {% if related %}
+      <div class="upsell-section">
+        <h3 class="upsell-title">LET YOURSELF BE TEMPTED</h3>
+        <div class="upsell-grid">
+          {% for product in related %}
+            <a href="{{ product.href }}" class="upsell-product-card">
+              <div class="upsell-product-image">
+                <img src="{{ product.thumb }}" alt="{{ product.name }}" />
+              </div>
+              <div class="upsell-product-info">
+                <div class="upsell-product-name">{{ product.name }}</div>
+                <div class="upsell-product-price">{{ product.price }}</div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Right Column - Sidebar (30%) #}
+  <div class="cart-popup-right">
+    {# Close Button #}
+    <button type="button" class="cart-popup-close" onclick="closeCartPopup()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    {# Gift Info Section #}
+    <div class="gift-info-section">
+      <div class="gift-info-content">
+        <div class="gift-icon">
+          <i class="fa-solid fa-gift"></i>
+        </div>
+        <p class="gift-text">COMPLIMENTARY GIFT WRAPPING INCLUDED</p>
+        <hr class="divider">
+        <p class="gift-message">Add a personal message to make your gift extra special</p>
+      </div>
+    </div>
+
+    {# Bottom Actions - Pushed to Bottom #}
+    <div class="sidebar-actions">
+      <a href="#" class="continue-link" onclick="closeCartPopup(); return false;">Continue Shopping</a>
+      <a href="{{ checkout }}" class="btn-action btn-primary-action">BUY NOW</a>
+      <a href="{{ cart }}" class="btn-action btn-secondary-action">GO TO BASKET</a>
+    </div>
+  </div>
+</div>

@@ -397,12 +397,12 @@ class Cart extends \Opencart\System\Engine\Controller {
 			}
 			
 			if (!empty($popup_product)) {
-				$json['popup'] = [
+				$popup_data = [
 					'product' => $popup_product,
 					'related' => []
 				];
 				
-				// Get related products
+				// Get related products for regular products
 				if ($product_id) {
 					$related_products = $this->model_catalog_product->getRelated($product_id);
 					
@@ -413,7 +413,7 @@ class Cart extends \Opencart\System\Engine\Controller {
 							$related_info = $this->model_catalog_product->getProduct($related['product_id']);
 							
 							if ($related_info) {
-								$json['popup']['related'][] = [
+								$popup_data['related'][] = [
 									'product_id' => $related_info['product_id'],
 									'name' => $related_info['name'],
 									'thumb' => $this->model_tool_image->resize($related_info['image'], 200, 200),
@@ -424,6 +424,36 @@ class Cart extends \Opencart\System\Engine\Controller {
 						}
 					}
 				}
+				
+				// Get related products for subscriptions
+				if ($subscription_plan_id && empty($popup_data['related'])) {
+					$related_products = $this->model_catalog_subscription_plan->getRelatedProducts($subscription_plan_id);
+					
+					if ($related_products) {
+						$results = array_slice($related_products, 0, 4); // Limit to 4 related products
+						
+						foreach ($results as $related) {
+							$related_info = $this->model_catalog_product->getProduct($related['product_id']);
+							
+							if ($related_info) {
+								$popup_data['related'][] = [
+									'product_id' => $related_info['product_id'],
+									'name' => $related_info['name'],
+									'thumb' => $this->model_tool_image->resize($related_info['image'], 200, 200),
+									'price' => $this->currency->format($this->tax->calculate($related_info['price'], $related_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+									'href' => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $related_info['product_id'])
+								];
+							}
+						}
+					}
+				}
+				
+				// Add URLs for the sidebar
+				$popup_data['cart'] = $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language'));
+				$popup_data['checkout'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
+				
+				// Render popup HTML server-side
+				$json['popup_html'] = $this->load->view('common/cart_popup_content', $popup_data);
 			}
 
 			// Unset all shipping and payment methods
