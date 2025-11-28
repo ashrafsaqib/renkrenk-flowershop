@@ -181,18 +181,30 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			}
 		}
 
-		// Load related products for current subscription plan
-		$data['related_products'] = [];
-		$related = $this->model_catalog_subscription_plan->getRelatedProducts($subscription_plan_id);
+		// Load related products
+		$this->load->model('catalog/product');
+		$this->load->model('tool/image');
 		
-		foreach ($related as $related_product) {
-			$product_info = $this->model_catalog_product->getProduct($related_product['product_id']);
+		$data['text_related'] = $this->language->get('text_related');
+		
+		$data['products'] = [];
+		
+		$results = $this->model_catalog_subscription_plan->getRelatedProducts($subscription_plan_id);
+		
+		foreach ($results as $result) {
+			$product_info = $this->model_catalog_product->getProduct($result['product_id']);
 			
 			if ($product_info) {
-				if ($product_info['image']) {
-					$thumb = $this->model_tool_image->resize($product_info['image'], $this->config->get('config_image_product_width'), $this->config->get('config_image_product_height'));
+				$description = trim(strip_tags(html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8')));
+
+				if (oc_strlen($description) > $this->config->get('config_product_description_length')) {
+					$description = oc_substr($description, 0, $this->config->get('config_product_description_length')) . '..';
+				}
+
+				if ($product_info['image'] && is_file(DIR_IMAGE . html_entity_decode($product_info['image'], ENT_QUOTES, 'UTF-8'))) {
+					$image = $product_info['image'];
 				} else {
-					$thumb = $this->model_tool_image->resize('placeholder.png', $this->config->get('config_image_product_width'), $this->config->get('config_image_product_height'));
+					$image = 'placeholder.png';
 				}
 
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
@@ -206,16 +218,33 @@ class Subscription extends \Opencart\System\Engine\Controller {
 				} else {
 					$special = false;
 				}
-				
-				$data['related_products'][] = [
-					'product_id' => $product_info['product_id'],
-					'name' => $product_info['name'],
-					'thumb' => $thumb,
-					'price' => $price,
-					'special' => $special,
-					'href' => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_info['product_id'])
-				];
+
+				if ($this->config->get('config_tax')) {
+					$tax = $this->currency->format((float)$product_info['special'] ? $product_info['special'] : $product_info['price'], $this->session->data['currency']);
+				} else {
+					$tax = false;
+				}
+
+				$product_data = [
+					'thumb'       => $this->model_tool_image->resize($image, $this->config->get('config_image_related_width'), $this->config->get('config_image_related_height')),
+					'name'        => $product_info['name'],
+					'description' => $description,
+					'price'       => $price,
+					'special'     => $special,
+					'tax'         => $tax,
+					'minimum'     => $product_info['minimum'] > 0 ? $product_info['minimum'] : 1,
+					'rating'      => $product_info['rating'],
+					'href'        => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_info['product_id'])
+				] + $product_info;
+
+				$data['products'][] = $this->load->controller('product/thumb', $product_data);
 			}
+		}
+		
+		if ($data['products']) {
+			$data['related'] = $this->load->view('product/related', $data);
+		} else {
+			$data['related'] = '';
 		}
 
 		// Load all subscription plans for selection buttons

@@ -384,41 +384,8 @@
           </div>
         </div>
       {% endif %}
-
-      {% if related_products %}
-      <div class="row mt-5 mb-5">
-        <div class="col-12">
-          <h5>RELATED PRODUCTS</h5>
-        </div>
-      </div>
-      <div class="row">
-        {% for product in related_products %}
-          <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-            <div class="product-card card h-100">
-              <a href="{{ product.href }}">
-                <img src="{{ product.thumb }}" alt="{{ product.name }}" class="card-img-top" style="height: 200px; object-fit: cover;"/>
-              </a>
-              <div class="card-body">
-                <h5 class="card-title">
-                  <a href="{{ product.href }}" class="text-decoration-none text-dark">{{ product.name }}</a>
-                </h5>
-                {% if product.price %}
-                  <p class="card-text">
-                    {% if product.special %}
-                      <span class="price-old text-muted text-decoration-line-through">{{ product.price }}</span>
-                      <span class="price-new text-danger fw-bold">{{ product.special }}</span>
-                    {% else %}
-                      <span class="price-new fw-bold">{{ product.price }}</span>
-                    {% endif %}
-                  </p>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-      {% endif %}
       
+      {{ related }}
       {{ content_bottom }}
     </div>
     {{ column_right }}
