@@ -149,8 +149,8 @@ class Cart extends \Opencart\System\Engine\Controller {
 					$subscription .= sprintf($this->language->get('text_subscription_cancel'), $product['subscription']['price_text'], $product['subscription']['cycle'], $product['subscription']['frequency']);
 				}
 			}
-
-			$data['products'][] = [
+			
+			$product_data = [
 				'thumb'        => $this->model_tool_image->resize($product['image'], $this->config->get('config_image_cart_width'), $this->config->get('config_image_cart_height')),
 				'subscription' => $subscription,
 				'stock'        => $product['stock_status'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
@@ -160,6 +160,58 @@ class Cart extends \Opencart\System\Engine\Controller {
 				'href'         => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product['product_id']),
 				'remove'       => $this->url->link('checkout/cart.remove', 'language=' . $this->config->get('config_language') . '&key=' . $product['cart_id'])
 			] + $product;
+			
+			// Add subscription options data similar to popup
+			// Note: cart library merges override fields directly into product array
+			if (isset($product['subscription_plan_id']) && $product['subscription_plan_id'] > 0) {
+				$product_data['subscription_options'] = [];
+				
+				// Add frequency
+				if (isset($product['subscription_plan_frequency_id'])) {
+					$freq_query = $this->db->query("SELECT `frequency`, `cycle` FROM `" . DB_PREFIX . "subscription_plan_frequency` WHERE `subscription_plan_frequency_id` = '" . (int)$product['subscription_plan_frequency_id'] . "' LIMIT 1");
+					if ($freq_query->num_rows) {
+						$product_data['subscription_options']['frequency'] = 'Every ' . $freq_query->row['cycle'] . ' ' . strtoupper($freq_query->row['frequency']);
+					}
+				}
+				
+				// Add delivery date
+				if (isset($product['delivery_date'])) {
+					$product_data['subscription_options']['delivery_date'] = date('F j, Y', strtotime($product['delivery_date']));
+				}
+				
+				// Add duration
+				if (isset($product['duration']) && $product['duration'] > 0) {
+					$dur_query = $this->db->query("SELECT `label` FROM `" . DB_PREFIX . "subscription_plan_duration` WHERE `subscription_plan_duration_id` = '" . (int)$product['duration'] . "' LIMIT 1");
+					if ($dur_query->num_rows) {
+						$product_data['subscription_options']['duration'] = $dur_query->row['label'];
+					}
+				} elseif (isset($product['duration'])) {
+					$product_data['subscription_options']['duration'] = 'On Going';
+				}
+				
+				// Add gift status
+				if (isset($product['is_gift'])) {
+					$product_data['subscription_options']['is_gift'] = $product['is_gift'] ? 'Yes' : 'No';
+				}
+				
+				// Add vase name
+				if (isset($product['vase_id']) && $product['vase_id'] > 0) {
+					$vase_query = $this->db->query("SELECT `name` FROM `" . DB_PREFIX . "product_description` WHERE `product_id` = '" . (int)$product['vase_id'] . "' AND `language_id` = '" . (int)$this->config->get('config_language_id') . "' LIMIT 1");
+					if ($vase_query->num_rows) {
+						$product_data['subscription_options']['vase'] = $vase_query->row['name'];
+					}
+				}
+				
+				// Add gift card name
+				if (isset($product['gift_id']) && $product['gift_id'] > 0) {
+					$gift_query = $this->db->query("SELECT `name` FROM `" . DB_PREFIX . "product_description` WHERE `product_id` = '" . (int)$product['gift_id'] . "' AND `language_id` = '" . (int)$this->config->get('config_language_id') . "' LIMIT 1");
+					if ($gift_query->num_rows) {
+						$product_data['subscription_options']['gift'] = $gift_query->row['name'];
+					}
+				}
+			}
+			
+			$data['products'][] = $product_data;
 		}
 
 		$data['totals'] = [];
@@ -327,6 +379,34 @@ class Cart extends \Opencart\System\Engine\Controller {
 
 			$this->cart->add($product_id, $quantity, $option, $subscription_plan_id, $cart_override);
 
+			// Add vase and gift card as separate products if selected
+			$vase_product_info = null;
+			$gift_product_info = null;
+			
+			if ($subscription_plan_id) {
+				// Add vase as a separate product if selected
+				if (isset($cart_override['vase_id']) && $cart_override['vase_id'] > 0) {
+					$vase_product_info = $this->model_catalog_product->getProduct($cart_override['vase_id']);
+					if ($vase_product_info) {
+						$this->cart->add($cart_override['vase_id'], 1, [], 0, [
+							'linked_to_subscription' => $subscription_plan_id,
+							'is_vase_addon' => 1
+						]);
+					}
+				}
+				
+				// Add gift card as a separate product if selected
+				if (isset($cart_override['gift_id']) && $cart_override['gift_id'] > 0) {
+					$gift_product_info = $this->model_catalog_product->getProduct($cart_override['gift_id']);
+					if ($gift_product_info) {
+						$this->cart->add($cart_override['gift_id'], 1, [], 0, [
+							'linked_to_subscription' => $subscription_plan_id,
+							'is_gift_addon' => 1
+						]);
+					}
+				}
+			}
+
 			// Build a friendly name and link for success message.
 			if (!empty($product_info) && isset($product_info['product_id']) && (int)$product_info['product_id']) {
 				$product_link = $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . (int)$product_id);
@@ -445,6 +525,60 @@ class Cart extends \Opencart\System\Engine\Controller {
 								];
 							}
 						}
+					}
+				}
+				
+				// Add addon products (vase and gift) to popup data
+				$popup_data['addons'] = [];
+				
+				if ($vase_product_info) {
+					$popup_data['addons'][] = [
+						'type' => 'vase',
+						'name' => $vase_product_info['name'],
+						'image' => $this->model_tool_image->resize($vase_product_info['image'], 100, 100),
+						'price' => $this->currency->format($this->tax->calculate($vase_product_info['price'], $vase_product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])
+					];
+				}
+				
+				if ($gift_product_info) {
+					$popup_data['addons'][] = [
+						'type' => 'gift',
+						'name' => $gift_product_info['name'],
+						'image' => $this->model_tool_image->resize($gift_product_info['image'], 100, 100),
+						'price' => $this->currency->format($this->tax->calculate($gift_product_info['price'], $gift_product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])
+					];
+				}
+				
+				// Add subscription options to popup data if present
+				if ($subscription_plan_id && !empty($cart_override)) {
+					$popup_data['subscription_options'] = [];
+					
+					// Add frequency
+					if (isset($cart_override['subscription_plan_frequency_id'])) {
+						$freq_query = $this->db->query("SELECT `frequency`, `cycle` FROM `" . DB_PREFIX . "subscription_plan_frequency` WHERE `subscription_plan_frequency_id` = '" . (int)$cart_override['subscription_plan_frequency_id'] . "' LIMIT 1");
+						if ($freq_query->num_rows) {
+							$popup_data['subscription_options']['frequency'] = 'Every ' . $freq_query->row['cycle'] . ' ' . strtoupper($freq_query->row['frequency']);
+						}
+					}
+					
+					// Add delivery date
+					if (isset($cart_override['delivery_date'])) {
+						$popup_data['subscription_options']['delivery_date'] = date('F j, Y', strtotime($cart_override['delivery_date']));
+					}
+					
+					// Add duration
+					if (isset($cart_override['duration']) && $cart_override['duration'] > 0) {
+						$dur_query = $this->db->query("SELECT `label` FROM `" . DB_PREFIX . "subscription_plan_duration` WHERE `subscription_plan_duration_id` = '" . (int)$cart_override['duration'] . "' LIMIT 1");
+						if ($dur_query->num_rows) {
+							$popup_data['subscription_options']['duration'] = $dur_query->row['label'];
+						}
+					} else {
+						$popup_data['subscription_options']['duration'] = 'On Going';
+					}
+					
+					// Add gift status
+					if (isset($cart_override['is_gift'])) {
+						$popup_data['subscription_options']['is_gift'] = $cart_override['is_gift'] ? 'Yes' : 'No';
 					}
 				}
 				

@@ -22,8 +22,55 @@
           <div class="added-product-meta">
             <span>Quantity: {{ product.quantity }}</span>
           </div>
+          
+          {# Subscription Options #}
+          {% if subscription_options %}
+            <div class="subscription-options-meta">
+              {% if subscription_options.frequency %}
+                <div class="subscription-option">
+                  <strong>Select Your Frequency:</strong> {{ subscription_options.frequency }}
+                </div>
+              {% endif %}
+              {% if subscription_options.is_gift %}
+                <div class="subscription-option">
+                  <strong>Is This A Gift?:</strong> {{ subscription_options.is_gift }}
+                </div>
+              {% endif %}
+              {% if subscription_options.duration %}
+                <div class="subscription-option">
+                  <strong>Select Your Duration:</strong> {{ subscription_options.duration }}
+                </div>
+              {% endif %}
+              {% if subscription_options.delivery_date %}
+                <div class="subscription-option">
+                  <strong>First Delivery:</strong> {{ subscription_options.delivery_date }}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
         </div>
       </div>
+      
+      {# Addon Products (Vase & Gift Card) #}
+      {% if addons %}
+        <div class="addon-products-section">
+          <h4 class="addon-title">INCLUDES:</h4>
+          <div class="addon-list">
+            {% for addon in addons %}
+              <div class="addon-item">
+                <div class="addon-image">
+                  <img src="{{ addon.image }}" alt="{{ addon.name }}" />
+                </div>
+                <div class="addon-info">
+                  <div class="addon-name">{{ addon.name }}</div>
+                  <div class="addon-price">{{ addon.price }}</div>
+                  <div class="addon-type-badge">{{ addon.type|upper }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
     </div>
 
     {# Upsell Section - Related Products #}
