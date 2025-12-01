@@ -417,7 +417,23 @@ class Order extends \Opencart\System\Engine\Model {
 	 * $this->model_checkout_order->addProduct($order_id, $order_product_data);
 	 */
 	public function addProduct(int $order_id, array $data): int {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_product` SET `order_id` = '" . (int)$order_id . "', `product_id` = '" . (int)$data['product_id'] . "', `master_id` = '" . (int)$data['master_id'] . "', `name` = '" . $this->db->escape($data['name']) . "', `model` = '" . $this->db->escape($data['model']) . "', `quantity` = '" . (int)$data['quantity'] . "', `price` = '" . (float)$data['price'] . "', `total` = '" . (float)$data['total'] . "', `tax` = '" . (float)$data['tax'] . "', `reward` = '" . (int)$data['reward'] . "'");
+		// Set default values for required fields
+		$product_data = [
+			'product_id' => 0,
+			'master_id'  => 0,
+			'name'       => '',
+			'model'      => '',
+			'quantity'   => 1,
+			'price'      => 0,
+			'total'      => 0,
+			'tax'        => 0,
+			'reward'     => 0
+		];
+		
+		// Merge with provided data
+		$product_data = array_merge($product_data, $data);
+		
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_product` SET `order_id` = '" . (int)$order_id . "', `product_id` = '" . (int)$product_data['product_id'] . "', `master_id` = '" . (int)$product_data['master_id'] . "', `name` = '" . $this->db->escape($product_data['name']) . "', `model` = '" . $this->db->escape($product_data['model']) . "', `quantity` = '" . (int)$product_data['quantity'] . "', `price` = '" . (float)$product_data['price'] . "', `total` = '" . (float)$product_data['total'] . "', `tax` = '" . (float)$product_data['tax'] . "', `reward` = '" . (int)$product_data['reward'] . "'");
 
 		$order_product_id = $this->db->getLastId();
 
@@ -617,7 +633,32 @@ class Order extends \Opencart\System\Engine\Model {
 	 * $this->model_checkout_order->addSubscription($order_id, $order_product_id, $order_subscription_data);
 	 */
 	public function addSubscription(int $order_id, int $order_product_id, array $data): void {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_subscription` SET `order_product_id` = '" . (int)$order_product_id . "', `order_id` = '" . (int)$order_id . "', `product_id` = '" . (int)$data['product_id'] . "', `subscription_plan_id` = '" . (int)$data['subscription_plan_id'] . "', `trial_price` = '" . (float)$data['trial_price'] . "', `trial_tax` = '" . (float)$data['trial_tax'] . "', `trial_frequency` = '" . $this->db->escape($data['trial_frequency']) . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_status` = '" . (int)$data['trial_status'] . "', `price` = '" . (float)$data['price'] . "', `tax` = '" . (float)$data['tax'] . "', `frequency` = '" . $this->db->escape($data['frequency']) . "', `cycle` = '" . (int)$data['cycle'] . "', `duration` = '" . (int)$data['duration'] . "', `subscription_plan_frequency_id` = '" . (int)(isset($data['subscription_plan_frequency_id']) ? $data['subscription_plan_frequency_id'] : (isset($data['subscription_plan_frequency_id']) ? $data['subscription_plan_frequency_id'] : 0)) . "', `delivery_date` = '" . $this->db->escape(isset($data['delivery_date']) ? $data['delivery_date'] : '') . "', `is_gift` = '" . (int)(isset($data['is_gift']) ? $data['is_gift'] : 0) . "', `gift_id` = '" . (int)(isset($data['gift_id']) ? $data['gift_id'] : 0) . "', `vase_id` = '" . (int)(isset($data['vase_id']) ? $data['vase_id'] : 0) . "'");
+		// Set default values for required fields
+		$subscription_data = [
+			'product_id'                     => 0,
+			'subscription_plan_id'           => 0,
+			'trial_price'                    => 0,
+			'trial_tax'                      => 0,
+			'trial_frequency'                => '',
+			'trial_cycle'                    => 0,
+			'trial_duration'                 => 0,
+			'trial_status'                   => 0,
+			'price'                          => 0,
+			'tax'                            => 0,
+			'frequency'                      => '',
+			'cycle'                          => 0,
+			'duration'                       => 0,
+			'subscription_plan_frequency_id' => 0,
+			'delivery_date'                  => '',
+			'is_gift'                        => 0,
+			'gift_id'                        => 0,
+			'vase_id'                        => 0
+		];
+		
+		// Merge with provided data
+		$subscription_data = array_merge($subscription_data, $data);
+		
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_subscription` SET `order_product_id` = '" . (int)$order_product_id . "', `order_id` = '" . (int)$order_id . "', `product_id` = '" . (int)$subscription_data['product_id'] . "', `subscription_plan_id` = '" . (int)$subscription_data['subscription_plan_id'] . "', `trial_price` = '" . (float)$subscription_data['trial_price'] . "', `trial_tax` = '" . (float)$subscription_data['trial_tax'] . "', `trial_frequency` = '" . $this->db->escape($subscription_data['trial_frequency']) . "', `trial_cycle` = '" . (int)$subscription_data['trial_cycle'] . "', `trial_duration` = '" . (int)$subscription_data['trial_duration'] . "', `trial_status` = '" . (int)$subscription_data['trial_status'] . "', `price` = '" . (float)$subscription_data['price'] . "', `tax` = '" . (float)$subscription_data['tax'] . "', `frequency` = '" . $this->db->escape($subscription_data['frequency']) . "', `cycle` = '" . (int)$subscription_data['cycle'] . "', `duration` = '" . (int)$subscription_data['duration'] . "', `subscription_plan_frequency_id` = '" . (int)$subscription_data['subscription_plan_frequency_id'] . "', `delivery_date` = '" . $this->db->escape($subscription_data['delivery_date']) . "', `is_gift` = '" . (int)$subscription_data['is_gift'] . "', `gift_id` = '" . (int)$subscription_data['gift_id'] . "', `vase_id` = '" . (int)$subscription_data['vase_id'] . "'");
 	}
 
 	/**

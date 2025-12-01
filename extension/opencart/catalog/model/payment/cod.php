@@ -18,13 +18,7 @@ class COD extends \Opencart\System\Engine\Model {
 	public function getMethods(array $address = []): array {
 		$this->load->language('extension/opencart/payment/cod');
 
-		if ($this->cart->hasSubscription()) {
-			$status = false;
-		} elseif (!$this->cart->hasShipping()) {
-			$status = false;
-		} elseif (!$this->config->get('config_checkout_payment_address')) {
-			$status = true;
-		} elseif (!$this->config->get('payment_cod_geo_zone_id')) {
+		if (!$this->config->get('payment_cod_geo_zone_id')) {
 			$status = true;
 		} else {
 			// Geo Zone
