@@ -54,6 +54,36 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		$results = $this->model_checkout_subscription->getSubscriptions($filter_data);
 
 		foreach ($results as $result) {
+			// Check if subscription is paused
+			if (!empty($result['paused_until']) && strtotime($result['paused_until']) >= strtotime(date('Y-m-d'))) {
+				// Subscription is paused, skip processing
+				continue;
+			}
+			
+			// Check if next delivery should be skipped
+			if (!empty($result['skip_next_delivery']) && $result['skip_next_delivery'] == 1) {
+				// Skip this delivery and reset the flag
+				$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET 
+					`skip_next_delivery` = 0,
+					`last_modified_by` = 'system',
+					`date_modified` = NOW()
+					WHERE `subscription_id` = '" . (int)$result['subscription_id'] . "'");
+				
+				// Calculate next delivery date
+				if ($result['trial_status'] && $result['trial_remaining']) {
+					$date_next = date('Y-m-d', strtotime($result['date_next'] . ' +' . $result['trial_cycle'] . ' ' . $result['trial_frequency']));
+				} else {
+					$date_next = date('Y-m-d', strtotime($result['date_next'] . ' +' . $result['cycle'] . ' ' . $result['frequency']));
+				}
+				
+				$this->model_checkout_subscription->editDateNext($result['subscription_id'], $date_next);
+				
+				// Log the skip action
+				$this->model_checkout_subscription->addHistory($result['subscription_id'], $result['subscription_status_id'], 'Delivery skipped by customer');
+				
+				continue;
+			}
+			
 			if (($result['trial_status'] && $result['trial_remaining']) || (!$result['duration'] && $result['remaining'])) {
 				$error = [];
 
@@ -364,6 +394,26 @@ class Subscription extends \Opencart\System\Engine\Controller {
 					}
 
 					$store->session->data['order_id'] = $this->model_checkout_order->addOrder($order_data);
+					
+					// Get current iteration number for this subscription
+					$iteration_query = $this->db->query("
+						SELECT MAX(`iteration_number`) as max_iteration 
+						FROM `" . DB_PREFIX . "subscription_order` 
+						WHERE `subscription_id` = '" . (int)$result['subscription_id'] . "'
+					");
+					
+					$next_iteration = 1;
+					if ($iteration_query->num_rows && $iteration_query->row['max_iteration']) {
+						$next_iteration = (int)$iteration_query->row['max_iteration'] + 1;
+					}
+					
+					// Link this renewal order to the subscription
+					$this->model_checkout_subscription->addSubscriptionOrder(
+						$result['subscription_id'],
+						$store->session->data['order_id'],
+						false,
+						$next_iteration
+					);
 
 					// Validate if payment extension installed
 					$store->load->model('setting/extension');

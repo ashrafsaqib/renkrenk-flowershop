@@ -46,7 +46,31 @@ $_['column_date_added']          = 'Date Added';
 // Button
 $_['button_cancel']              = 'Cancel Subscription';
 
+// Success messages for subscription management
+$_['text_pause_success']         = 'Success: Your subscription has been paused!';
+$_['text_resume_success']        = 'Success: Your subscription has been resumed!';
+$_['text_skip_success']          = 'Success: Next delivery will be skipped!';
+$_['text_frequency_success']     = 'Success: Subscription frequency has been updated!';
+$_['text_delivery_date_success'] = 'Success: Delivery date has been updated!';
+$_['text_plan_success']          = 'Success: Subscription plan has been changed!';
+$_['text_cancel_success']        = 'Success: Your subscription has been canceled!';
+$_['text_address_success']       = 'Success: Delivery address has been updated!';
+
 // Error
 $_['error_subscription']         = 'Subscription could not be found!';
 $_['error_duration']             = 'Subscription can not be canceled until %s more orders!';
 $_['error_canceled']             = 'Subscription already canceled!';
+$_['error_login']                = 'Please login to manage your subscription!';
+$_['error_pause']                = 'Unable to pause subscription. Please try again.';
+$_['error_pause_date']           = 'Please select a valid pause date!';
+$_['error_resume']               = 'Unable to resume subscription. Please try again.';
+$_['error_skip']                 = 'Unable to skip next delivery. Please try again.';
+$_['error_frequency']            = 'Please select a valid frequency!';
+$_['error_frequency_change']     = 'Unable to change frequency. Please try again.';
+$_['error_delivery_date']        = 'Please select a valid delivery date!';
+$_['error_delivery_date_change'] = 'Unable to change delivery date. Please try again.';
+$_['error_plan']                 = 'Please select a valid plan!';
+$_['error_plan_change']          = 'Unable to change plan. Please try again.';
+$_['error_cancel']               = 'Unable to cancel subscription. Please try again.';
+$_['error_address']              = 'Please select a valid address!';
+$_['error_address_change']       = 'Unable to change delivery address. Please try again.';

@@ -143,7 +143,14 @@ class Order extends \Opencart\System\Engine\Model {
 			$limit = 1;
 		}
 
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order` WHERE `subscription_id` = '" . (int)$subscription_id . "' AND `customer_id` = '" . (int)$this->customer->getId() . "' AND `order_status_id` > '0' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "' ORDER BY `order_id` DESC LIMIT " . (int)$start . "," . (int)$limit);
+		$query = $this->db->query("SELECT o.* FROM `" . DB_PREFIX . "order` o 
+			INNER JOIN `" . DB_PREFIX . "subscription_order` so ON (o.order_id = so.order_id) 
+			WHERE so.subscription_id = '" . (int)$subscription_id . "' 
+			AND o.customer_id = '" . (int)$this->customer->getId() . "' 
+			AND o.order_status_id > '0' 
+			AND o.store_id = '" . (int)$this->config->get('config_store_id') . "' 
+			ORDER BY so.iteration_number ASC, o.order_id ASC 
+			LIMIT " . (int)$start . "," . (int)$limit);
 
 		return $query->rows;
 	}
@@ -391,7 +398,10 @@ class Order extends \Opencart\System\Engine\Model {
 	 * $order_total = $this->model_account_order->getTotalOrdersBySubscriptionId($subscription_id);
 	 */
 	public function getTotalOrdersBySubscriptionId(int $subscription_id): int {
-		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "order` WHERE `subscription_id` = '" . (int)$subscription_id . "' AND `customer_id` = '" . (int)$this->customer->getId() . "'");
+		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "order` o 
+			INNER JOIN `" . DB_PREFIX . "subscription_order` so ON (o.order_id = so.order_id) 
+			WHERE so.subscription_id = '" . (int)$subscription_id . "' 
+			AND o.customer_id = '" . (int)$this->customer->getId() . "'");
 
 		return (int)$query->row['total'];
 	}

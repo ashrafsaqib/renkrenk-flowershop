@@ -73,15 +73,38 @@ class Subscription extends \Opencart\System\Engine\Model {
 			$date_next = date('Y-m-d', strtotime('+' . $data['cycle'] . ' ' . $data['frequency']));
 		}
 
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription` SET `order_id` = '" . (isset($data['order_id']) ? (int)$data['order_id'] : 0) . "', `store_id` = '" . (int)$data['store_id'] . "', `customer_id` = '" . (int)$data['customer_id'] . "', `payment_address_id` = '" . (int)$data['payment_address_id'] . "', `payment_method` = '" . $this->db->escape($data['payment_method'] ? json_encode($data['payment_method']) : '') . "', `shipping_address_id` = '" . (int)$data['shipping_address_id'] . "', `shipping_method` = '" . $this->db->escape($data['shipping_method'] ? json_encode($data['shipping_method']) : '') . "', `subscription_plan_id` = '" . (int)$data['subscription_plan_id'] . "', `trial_price` = '" . (float)$data['trial_price'] . "', `trial_tax` = '" . (float)$data['trial_tax'] . "', `trial_frequency` = '" . $this->db->escape($data['trial_frequency']) . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_remaining` = '" . (int)$trial_remaining . "', `trial_status` = '" . (int)$data['trial_status'] . "', `price` = '" . (float)$data['price'] . "', `tax` = '" . (float)$data['tax'] . "', `frequency` = '" . $this->db->escape($data['frequency']) . "', `cycle` = '" . (int)$data['cycle'] . "', `duration` = '" . (int)$data['duration'] . "', `remaining` = '" . (int)$remaining . "', `date_next` = '" . $this->db->escape($date_next) . "', `comment` = '" . $this->db->escape($data['comment']) . "', `language` = '" . $this->db->escape($data['language']) . "', `currency` = '" . $this->db->escape($data['currency']) . "', `date_added` = NOW(), `date_modified` = NOW()");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription` SET `order_id` = '" . (isset($data['order_id']) ? (int)$data['order_id'] : 0) . "', `store_id` = '" . (int)$data['store_id'] . "', `customer_id` = '" . (int)$data['customer_id'] . "', `payment_address_id` = '" . (int)$data['payment_address_id'] . "', `payment_method` = '" . $this->db->escape($data['payment_method'] ? json_encode($data['payment_method']) : '') . "', `shipping_address_id` = '" . (int)$data['shipping_address_id'] . "', `shipping_method` = '" . $this->db->escape($data['shipping_method'] ? json_encode($data['shipping_method']) : '') . "', `subscription_plan_id` = '" . (int)$data['subscription_plan_id'] . "', `trial_price` = '" . (float)$data['trial_price'] . "', `trial_tax` = '" . (float)$data['trial_tax'] . "', `trial_frequency` = '" . $this->db->escape($data['trial_frequency']) . "', `trial_cycle` = '" . (int)$data['trial_cycle'] . "', `trial_duration` = '" . (int)$data['trial_duration'] . "', `trial_remaining` = '" . (int)$trial_remaining . "', `trial_status` = '" . (int)$data['trial_status'] . "', `price` = '" . (float)$data['price'] . "', `tax` = '" . (float)$data['tax'] . "', `frequency` = '" . $this->db->escape($data['frequency']) . "', `cycle` = '" . (int)$data['cycle'] . "', `duration` = '" . (int)$data['duration'] . "', `remaining` = '" . (int)$remaining . "', `date_next` = '" . $this->db->escape($date_next) . "', `comment` = '" . $this->db->escape($data['comment']) . "', `language` = '" . $this->db->escape($data['language']) . "', `currency` = '" . $this->db->escape($data['currency']) . "', `subscription_plan_frequency_id` = '" . (isset($data['subscription_plan_frequency_id']) ? (int)$data['subscription_plan_frequency_id'] : 0) . "', `delivery_date` = '" . $this->db->escape(isset($data['delivery_date']) ? $data['delivery_date'] : '') . "', `is_gift` = '" . (isset($data['is_gift']) ? (int)$data['is_gift'] : 0) . "', `gift_id` = '" . (isset($data['gift_id']) ? (int)$data['gift_id'] : 0) . "', `vase_id` = '" . (isset($data['vase_id']) ? (int)$data['vase_id'] : 0) . "', `duration_id` = '" . (isset($data['duration_id']) ? (int)$data['duration_id'] : 0) . "', `date_added` = NOW(), `date_modified` = NOW()");
 
 		$subscription_id = $this->db->getLastId();
+		
+		// Link subscription to initial order
+		if (isset($data['order_id']) && $data['order_id']) {
+			$this->addSubscriptionOrder($subscription_id, (int)$data['order_id'], true, 1);
+		}
 
 		foreach ($data['subscription_product'] as $subscription_product) {
 			$this->addProduct($subscription_id, $subscription_product);
 		}
 
 		return $subscription_id;
+	}
+
+	/**
+	 * Add Subscription Order
+	 *
+	 * Links a subscription to an order (initial or renewal)
+	 *
+	 * @param int  $subscription_id   primary key of the subscription record
+	 * @param int  $order_id          primary key of the order record
+	 * @param bool $is_initial_order  whether this is the initial order (true) or a renewal (false)
+	 * @param int  $iteration_number  the iteration number of this subscription (1 for initial, increments for renewals)
+	 *
+	 * @return int returns the primary key of the new subscription_order record
+	 */
+	public function addSubscriptionOrder(int $subscription_id, int $order_id, bool $is_initial_order = false, int $iteration_number = 1): int {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_order` SET `subscription_id` = '" . (int)$subscription_id . "', `order_id` = '" . (int)$order_id . "', `is_initial_order` = '" . (int)$is_initial_order . "', `iteration_number` = '" . (int)$iteration_number . "', `date_added` = NOW()");
+
+		return $this->db->getLastId();
 	}
 
 	/**
@@ -237,6 +260,319 @@ class Subscription extends \Opencart\System\Engine\Model {
 	 */
 	public function editDateNext(int $subscription_id, string $date_next): void {
 		$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET `date_next` = '" . $this->db->escape($date_next) . "' WHERE `subscription_id` = '" . (int)$subscription_id . "'");
+	}
+
+	/**
+	 * Pause Subscription
+	 *
+	 * Pause a subscription until a specific date
+	 *
+	 * @param int    $subscription_id primary key of the subscription record
+	 * @param string $paused_until    date until which subscription is paused
+	 * @param string $comment         optional customer comment
+	 * @param string $modified_by     who made the change (customer, admin, system)
+	 *
+	 * @return bool
+	 */
+	public function pauseSubscription(int $subscription_id, string $paused_until, string $comment = '', string $modified_by = 'customer'): bool {
+		$subscription = $this->getSubscription($subscription_id);
+		
+		if (!$subscription) {
+			return false;
+		}
+		
+		// Update subscription
+		$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET 
+			`paused_until` = '" . $this->db->escape($paused_until) . "',
+			`last_modified_by` = '" . $this->db->escape($modified_by) . "',
+			`date_modified` = NOW()
+			WHERE `subscription_id` = '" . (int)$subscription_id . "'");
+		
+		// Log the action
+		$this->addSubscriptionHistory($subscription_id, 'pause', null, $paused_until, $comment, $modified_by);
+		
+		return true;
+	}
+
+	/**
+	 * Resume Subscription
+	 *
+	 * Resume a paused subscription
+	 *
+	 * @param int    $subscription_id primary key of the subscription record
+	 * @param string $comment         optional customer comment
+	 * @param string $modified_by     who made the change (customer, admin, system)
+	 *
+	 * @return bool
+	 */
+	public function resumeSubscription(int $subscription_id, string $comment = '', string $modified_by = 'customer'): bool {
+		$subscription = $this->getSubscription($subscription_id);
+		
+		if (!$subscription) {
+			return false;
+		}
+		
+		$old_value = $subscription['paused_until'];
+		
+		// Update subscription
+		$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET 
+			`paused_until` = NULL,
+			`last_modified_by` = '" . $this->db->escape($modified_by) . "',
+			`date_modified` = NOW()
+			WHERE `subscription_id` = '" . (int)$subscription_id . "'");
+		
+		// Log the action
+		$this->addSubscriptionHistory($subscription_id, 'resume', $old_value, null, $comment, $modified_by);
+		
+		return true;
+	}
+
+	/**
+	 * Skip Next Delivery
+	 *
+	 * Skip the next scheduled delivery
+	 *
+	 * @param int    $subscription_id primary key of the subscription record
+	 * @param string $comment         optional customer comment
+	 * @param string $modified_by     who made the change (customer, admin, system)
+	 *
+	 * @return bool
+	 */
+	public function skipNextDelivery(int $subscription_id, string $comment = '', string $modified_by = 'customer'): bool {
+		$subscription = $this->getSubscription($subscription_id);
+		
+		if (!$subscription) {
+			return false;
+		}
+		
+		// Update subscription
+		$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET 
+			`skip_next_delivery` = 1,
+			`last_modified_by` = '" . $this->db->escape($modified_by) . "',
+			`date_modified` = NOW()
+			WHERE `subscription_id` = '" . (int)$subscription_id . "'");
+		
+		// Log the action
+		$this->addSubscriptionHistory($subscription_id, 'skip', null, $subscription['date_next'], $comment, $modified_by);
+		
+		return true;
+	}
+
+	/**
+	 * Change Subscription Frequency
+	 *
+	 * Change the frequency and cycle of a subscription
+	 *
+	 * @param int    $subscription_id             primary key of the subscription record
+	 * @param int    $subscription_plan_frequency_id new frequency plan ID
+	 * @param string $frequency                   new frequency (day, week, month, year)
+	 * @param int    $cycle                       new cycle number
+	 * @param string $comment                     optional customer comment
+	 * @param string $modified_by                 who made the change (customer, admin, system)
+	 *
+	 * @return bool
+	 */
+	public function changeFrequency(int $subscription_id, int $subscription_plan_frequency_id, string $frequency, int $cycle, string $comment = '', string $modified_by = 'customer'): bool {
+		$subscription = $this->getSubscription($subscription_id);
+		
+		if (!$subscription) {
+			return false;
+		}
+		
+		$old_value = json_encode([
+			'frequency_id' => $subscription['subscription_plan_frequency_id'],
+			'frequency' => $subscription['frequency'],
+			'cycle' => $subscription['cycle']
+		]);
+		
+		$new_value = json_encode([
+			'frequency_id' => $subscription_plan_frequency_id,
+			'frequency' => $frequency,
+			'cycle' => $cycle
+		]);
+		
+		// Calculate new date_next based on new frequency
+		$date_next = date('Y-m-d', strtotime('+' . $cycle . ' ' . $frequency));
+		
+		// Update subscription
+		$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET 
+			`subscription_plan_frequency_id` = '" . (int)$subscription_plan_frequency_id . "',
+			`frequency` = '" . $this->db->escape($frequency) . "',
+			`cycle` = '" . (int)$cycle . "',
+			`date_next` = '" . $this->db->escape($date_next) . "',
+			`last_modified_by` = '" . $this->db->escape($modified_by) . "',
+			`date_modified` = NOW()
+			WHERE `subscription_id` = '" . (int)$subscription_id . "'");
+		
+		// Log the action
+		$this->addSubscriptionHistory($subscription_id, 'frequency_change', $old_value, $new_value, $comment, $modified_by);
+		
+		return true;
+	}
+
+	/**
+	 * Change Delivery Date
+	 *
+	 * Change the preferred delivery date
+	 *
+	 * @param int    $subscription_id primary key of the subscription record
+	 * @param string $delivery_date   new delivery date
+	 * @param string $comment         optional customer comment
+	 * @param string $modified_by     who made the change (customer, admin, system)
+	 *
+	 * @return bool
+	 */
+	public function changeDeliveryDate(int $subscription_id, string $delivery_date, string $comment = '', string $modified_by = 'customer'): bool {
+		$subscription = $this->getSubscription($subscription_id);
+		
+		if (!$subscription) {
+			return false;
+		}
+		
+		$old_value = $subscription['delivery_date'];
+		
+		// Update subscription
+		$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET 
+			`delivery_date` = '" . $this->db->escape($delivery_date) . "',
+			`last_modified_by` = '" . $this->db->escape($modified_by) . "',
+			`date_modified` = NOW()
+			WHERE `subscription_id` = '" . (int)$subscription_id . "'");
+		
+		// Log the action
+		$this->addSubscriptionHistory($subscription_id, 'delivery_date_change', $old_value, $delivery_date, $comment, $modified_by);
+		
+		return true;
+	}
+
+	/**
+	 * Change Subscription Plan
+	 *
+	 * Change the subscription plan (bouquet type)
+	 *
+	 * @param int    $subscription_id     primary key of the subscription record
+	 * @param int    $subscription_plan_id new plan ID
+	 * @param float  $price               new price
+	 * @param string $comment             optional customer comment
+	 * @param string $modified_by         who made the change (customer, admin, system)
+	 *
+	 * @return bool
+	 */
+	public function changeSubscriptionPlan(int $subscription_id, int $subscription_plan_id, float $price, string $comment = '', string $modified_by = 'customer'): bool {
+		$subscription = $this->getSubscription($subscription_id);
+		
+		if (!$subscription) {
+			return false;
+		}
+		
+		$old_value = json_encode([
+			'plan_id' => $subscription['subscription_plan_id'],
+			'price' => $subscription['price']
+		]);
+		
+		$new_value = json_encode([
+			'plan_id' => $subscription_plan_id,
+			'price' => $price
+		]);
+		
+		// Update subscription
+		$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET 
+			`subscription_plan_id` = '" . (int)$subscription_plan_id . "',
+			`price` = '" . (float)$price . "',
+			`last_modified_by` = '" . $this->db->escape($modified_by) . "',
+			`date_modified` = NOW()
+			WHERE `subscription_id` = '" . (int)$subscription_id . "'");
+		
+		// Log the action
+		$this->addSubscriptionHistory($subscription_id, 'plan_change', $old_value, $new_value, $comment, $modified_by);
+		
+		return true;
+	}
+
+	/**
+	 * Cancel Subscription
+	 *
+	 * Cancel a subscription
+	 *
+	 * @param int    $subscription_id primary key of the subscription record
+	 * @param string $comment         customer feedback/reason
+	 * @param string $modified_by     who made the change (customer, admin, system)
+	 *
+	 * @return bool
+	 */
+	public function cancelSubscription(int $subscription_id, string $comment = '', string $modified_by = 'customer'): bool {
+		$subscription = $this->getSubscription($subscription_id);
+		
+		if (!$subscription) {
+			return false;
+		}
+		
+		// Get cancelled status ID from config
+		$cancelled_status_id = $this->config->get('config_subscription_canceled_status_id');
+		
+		if (!$cancelled_status_id) {
+			$cancelled_status_id = 3; // Default cancelled status
+		}
+		
+		// Update subscription status
+		$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET 
+			`subscription_status_id` = '" . (int)$cancelled_status_id . "',
+			`last_modified_by` = '" . $this->db->escape($modified_by) . "',
+			`date_modified` = NOW()
+			WHERE `subscription_id` = '" . (int)$subscription_id . "'");
+		
+		// Log the action
+		$this->addSubscriptionHistory($subscription_id, 'cancel', 'active', 'cancelled', $comment, $modified_by);
+		
+		// Add to subscription history
+		$this->addHistory($subscription_id, $cancelled_status_id, $comment);
+		
+		return true;
+	}
+
+	/**
+	 * Add Subscription Action Log
+	 *
+	 * Log a subscription management action (separate from status history)
+	 *
+	 * @param int    $subscription_id primary key of the subscription record
+	 * @param string $action_type     type of action (pause, skip, frequency_change, etc.)
+	 * @param string $old_value       previous value
+	 * @param string $new_value       new value
+	 * @param string $comment         customer or admin comment
+	 * @param string $modified_by     who made the change
+	 *
+	 * @return int
+	 */
+	public function addSubscriptionHistory(int $subscription_id, string $action_type, ?string $old_value, ?string $new_value, string $comment = '', string $modified_by = 'customer'): int {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_history` SET 
+			`subscription_id` = '" . (int)$subscription_id . "',
+			`subscription_status_id` = 0,
+			`action_type` = '" . $this->db->escape($action_type) . "',
+			`old_value` = '" . $this->db->escape($old_value) . "',
+			`new_value` = '" . $this->db->escape($new_value) . "',
+			`notify` = 0,
+			`comment` = '" . $this->db->escape($comment) . "',
+			`modified_by` = '" . $this->db->escape($modified_by) . "',
+			`date_added` = NOW()");
+		
+		return $this->db->getLastId();
+	}
+
+	/**
+	 * Get Subscription Action Log
+	 *
+	 * Get all action log records for a subscription (management actions, not status changes)
+	 *
+	 * @param int $subscription_id primary key of the subscription record
+	 *
+	 * @return array
+	 */
+	public function getSubscriptionHistory(int $subscription_id): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_history` 
+			WHERE `subscription_id` = '" . (int)$subscription_id . "' 
+			ORDER BY `date_added` DESC");
+		
+		return $query->rows;
 	}
 
 	/**
@@ -630,5 +966,51 @@ class Subscription extends \Opencart\System\Engine\Model {
 	 */
 	public function addLog(int $subscription_id, string $code, string $description, bool $status = false): void {
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "subscription_log` SET `subscription_id` = '" . (int)$subscription_id . "', `code` = '" . $this->db->escape($code) . "', `description` = '" . $this->db->escape($description) . "', `status` = '" . (int)$status . "', `date_added` = NOW()");
+	}
+
+	/**
+	 * Change Delivery Address
+	 *
+	 * Update the shipping address for a subscription
+	 *
+	 * @param int    $subscription_id primary key of the subscription record
+	 * @param int    $address_id      primary key of the new shipping address
+	 * @param string $comment         optional customer comment
+	 * @param string $modified_by     who made the change (customer, admin, system)
+	 *
+	 * @return bool
+	 */
+	public function changeDeliveryAddress(int $subscription_id, int $address_id, string $comment = '', string $modified_by = 'customer'): bool {
+		// Get current address
+		$query = $this->db->query("SELECT shipping_address_id FROM `" . DB_PREFIX . "subscription` WHERE subscription_id = '" . (int)$subscription_id . "'");
+		
+		if (!$query->num_rows) {
+			return false;
+		}
+
+		$old_address_id = $query->row['shipping_address_id'];
+
+		// Update subscription with new address
+		$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET 
+			`shipping_address_id` = '" . (int)$address_id . "',
+			`last_modified_by` = '" . $this->db->escape($modified_by) . "'
+			WHERE `subscription_id` = '" . (int)$subscription_id . "'");
+
+		// Log the change
+		$log_comment = 'Delivery address changed from address ID #' . $old_address_id . ' to #' . $address_id;
+		if ($comment) {
+			$log_comment .= '. Customer note: ' . $comment;
+		}
+
+		$this->addSubscriptionHistory(
+			$subscription_id,
+			'address_change',
+			(string)$old_address_id,
+			(string)$address_id,
+			$modified_by,
+			$log_comment
+		);
+
+		return true;
 	}
 }

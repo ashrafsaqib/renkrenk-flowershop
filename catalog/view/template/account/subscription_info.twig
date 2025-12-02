@@ -127,9 +127,67 @@
         </div>
         {% endif %}
       </div>
-      <div class="text-end mb-3">
-        <button type="button" id="button-cancel" class="btn btn-danger">{{ button_cancel }}</button>
+      
+      {# Subscription Management Actions #}
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0">Manage Your Subscription</h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-2">
+            {% if paused_until %}
+              <div class="col-12 mb-2">
+                <div class="alert alert-warning">
+                  <i class="fa fa-pause-circle"></i> Your subscription is paused until {{ paused_until }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#modal-resume">
+                  <i class="fa fa-play"></i> Resume Subscription
+                </button>
+              </div>
+            {% else %}
+              <div class="col-md-6 col-lg-4 mb-2">
+                <button type="button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#modal-pause">
+                  <i class="fa fa-pause"></i> Pause Subscription
+                </button>
+              </div>
+              <div class="col-md-6 col-lg-4 mb-2">
+                <button type="button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#modal-skip">
+                  <i class="fa fa-forward"></i> Skip Next Delivery
+                </button>
+              </div>
+            {% endif %}
+            
+            <div class="col-md-6 col-lg-4 mb-2">
+              <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modal-frequency">
+                <i class="fa fa-calendar"></i> Change Frequency
+              </button>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-2">
+              <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modal-delivery-date">
+                <i class="fa fa-clock"></i> Change Delivery Date
+              </button>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-2">
+              <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modal-plan">
+                <i class="fa fa-exchange"></i> Change Plan
+              </button>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-2">
+              <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modal-address">
+                <i class="fa fa-map-marker"></i> Change Address
+              </button>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-2">
+              <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#modal-cancel">
+                <i class="fa fa-times-circle"></i> Cancel Subscription
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
+
       <h2>{{ text_history }}</h2>
       <div id="history">{{ history }}</div>
       <h2>{{ text_order }}</h2>
@@ -141,7 +199,7 @@
   </div>
 </div>
 <script type="text/javascript"><!--
-$('#button-cancel').on('click', function(e) {
+    $(document).on('click', '#button-cancel', function(e) {
     e.preventDefault();
 
     var element = this;
@@ -150,10 +208,12 @@ $('#button-cancel').on('click', function(e) {
         url: 'index.php?route=account/subscription.cancel&language={{ language }}&customer_token={{ customer_token }}&subscription_id={{ subscription_id }}',
         dataType: 'json',
         beforeSend: function() {
-            $(element).button('loading');
+            $(element).prop('disabled', true);
+            $(element).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
         },
         complete: function() {
-            $(element).button('reset');
+            $(element).prop('disabled', false);
+            $(element).html('Cancel');
         },
         success: function(json) {
             console.log(json);
@@ -185,5 +245,680 @@ $('#order').on('click', '.pagination a', function(e) {
 
     $('#order').load(this.href);
 });
+
+    // Pause Subscription
+    $(document).on('click', '#button-pause-confirm', function(e) {
+        e.preventDefault();
+        console.log('Pause button clicked');
+        
+        var pauseDate = $('#input-pause-date').val();
+        console.log('Pause date:', pauseDate);
+        
+        if (!pauseDate) {
+            $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Please select a pause date. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            return false;
+        }
+        
+        $.ajax({
+            url: 'index.php?route=account/subscription.pause&language={{ language }}&customer_token={{ customer_token }}',
+            type: 'post',
+            data: {
+                subscription_id: {{ subscription_id }},
+                paused_until: pauseDate,
+                comment: $('#input-pause-comment').val()
+            },
+            dataType: 'json',
+            beforeSend: function() {
+                console.log('Sending pause request...');
+                $('#button-pause-confirm').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+            },
+            complete: function() {
+                console.log('Request complete');
+                $('#button-pause-confirm').prop('disabled', false).html('Pause Subscription');
+            },
+            success: function(json) {
+                console.log('Response:', json);
+                if (json['error']) {
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+                if (json['success']) {
+                    $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('#modal-pause').modal('hide');
+                    location.reload();
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.log('AJAX Error:', thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+            }
+        });
+    });
+    // Resume Subscription
+    $(document).on('click', '#button-resume-confirm', function() {
+        $.ajax({
+            url: 'index.php?route=account/subscription.resume&language={{ language }}&customer_token={{ customer_token }}',
+            type: 'post',
+            data: {
+                subscription_id: {{ subscription_id }},
+                comment: $('#input-resume-comment').val()
+            },
+            dataType: 'json',
+            beforeSend: function() {
+                $('#button-resume-confirm').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+            },
+            complete: function() {
+                $('#button-resume-confirm').prop('disabled', false).html('Resume Subscription');
+            },
+            success: function(json) {
+                if (json['error']) {
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+                if (json['success']) {
+                    $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('#modal-resume').modal('hide');
+                    location.reload();
+                }
+            }
+        });
+    });
+
+    // Skip Next Delivery
+    $(document).on('click', '#button-skip-confirm', function() {
+        $.ajax({
+            url: 'index.php?route=account/subscription.skip&language={{ language }}&customer_token={{ customer_token }}',
+            type: 'post',
+            data: {
+                subscription_id: {{ subscription_id }},
+                comment: $('#input-skip-comment').val()
+            },
+            dataType: 'json',
+            beforeSend: function() {
+                $('#button-skip-confirm').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+            },
+            complete: function() {
+                $('#button-skip-confirm').prop('disabled', false).html('Skip Next Delivery');
+            },
+            success: function(json) {
+                if (json['error']) {
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+                if (json['success']) {
+                    $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('#modal-skip').modal('hide');
+                    location.reload();
+                }
+            }
+        });
+    });
+
+    // Change Frequency
+    $(document).on('click', '#button-frequency-confirm', function() {
+        $.ajax({
+            url: 'index.php?route=account/subscription.changeFrequency&language={{ language }}&customer_token={{ customer_token }}',
+            type: 'post',
+            data: {
+                subscription_id: {{ subscription_id }},
+                frequency_id: $('#input-frequency').val(),
+                comment: $('#input-frequency-comment').val()
+            },
+            dataType: 'json',
+            beforeSend: function() {
+                $('#button-frequency-confirm').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+            },
+            complete: function() {
+                $('#button-frequency-confirm').prop('disabled', false).html('Change Frequency');
+            },
+            success: function(json) {
+                if (json['error']) {
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+                if (json['success']) {
+                    $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('#modal-frequency').modal('hide');
+                    location.reload();
+                }
+            }
+        });
+    });
+
+    // Change Delivery Date
+    $(document).on('click', '#button-delivery-date-confirm', function() {
+        $.ajax({
+            url: 'index.php?route=account/subscription.changeDeliveryDate&language={{ language }}&customer_token={{ customer_token }}',
+            type: 'post',
+            data: {
+                subscription_id: {{ subscription_id }},
+                delivery_date: $('#input-delivery-date').val(),
+                comment: $('#input-delivery-date-comment').val()
+            },
+            dataType: 'json',
+            beforeSend: function() {
+                $('#button-delivery-date-confirm').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+            },
+            complete: function() {
+                $('#button-delivery-date-confirm').prop('disabled', false).html('Change Delivery Date');
+            },
+            success: function(json) {
+                if (json['error']) {
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+                if (json['success']) {
+                    $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('#modal-delivery-date').modal('hide');
+                    location.reload();
+                }
+            }
+        });
+    });
+
+    // Change Plan
+    $(document).on('click', '#button-plan-confirm', function() {
+        $.ajax({
+            url: 'index.php?route=account/subscription.changePlan&language={{ language }}&customer_token={{ customer_token }}',
+            type: 'post',
+            data: {
+                subscription_id: {{ subscription_id }},
+                plan_id: $('#input-plan').val(),
+                comment: $('#input-plan-comment').val()
+            },
+            dataType: 'json',
+            beforeSend: function() {
+                $('#button-plan-confirm').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+            },
+            complete: function() {
+                $('#button-plan-confirm').prop('disabled', false).html('Change Plan');
+            },
+            success: function(json) {
+                if (json['error']) {
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+                if (json['success']) {
+                    $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('#modal-plan').modal('hide');
+                    location.reload();
+                }
+            }
+        });
+    });
+
+$(document).ready(function() {
+    // Store current zone_id for preselection
+    var currentZoneId = '{{ current_address.zone_id|default("") }}';
+    var shouldSelectZone = true;
+
+    console.log('Document ready - currentZoneId:', currentZoneId);
+
+    // Function to load zones for a country
+    function loadZones(country_id, selectZone) {
+        console.log('Loading zones for country:', country_id);
+        
+        if (!country_id) {
+            $('#input-zone').html('<option value="">-- Select Region / State --</option>');
+            return;
+        }
+        
+        $.ajax({
+            url: 'index.php?route=localisation/country&language={{ language }}&country_id=' + country_id,
+            type: 'get',
+            dataType: 'json',
+            beforeSend: function() {
+                $('#input-zone').html('<option value="">Loading...</option>');
+            },
+            success: function(json) {
+                console.log('Zones loaded:', json);
+                console.log('Should select zone:', selectZone, 'Zone ID:', currentZoneId);
+                var html = '<option value="">-- Select Region / State --</option>';
+                
+                if (json['zone'] && json['zone'].length > 0) {
+                    for (var i = 0; i < json['zone'].length; i++) {
+                        html += '<option value="' + json['zone'][i]['zone_id'] + '"';
+                        // Compare both as strings and numbers
+                        if (selectZone && (json['zone'][i]['zone_id'] == currentZoneId || json['zone'][i]['zone_id'] === parseInt(currentZoneId))) {
+                            html += ' selected';
+                            console.log('Selected zone:', json['zone'][i]['name']);
+                        }
+                        html += '>' + json['zone'][i]['name'] + '</option>';
+                    }
+                } else {
+                    html = '<option value="">No regions available</option>';
+                }
+                
+                $('#input-zone').html(html);
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.log('Zone loading error:', thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                $('#input-zone').html('<option value="">Error loading regions</option>');
+            }
+        });
+    }
+
+    // Load zones when country changes
+    $(document).on('change', '#input-country', function() {
+        var country_id = $(this).val();
+        console.log('Country changed to:', country_id);
+        loadZones(country_id, shouldSelectZone);
+        shouldSelectZone = false; // Only auto-select on first load
+    });
+
+    // Trigger zone loading on modal open
+    $(document).on('shown.bs.modal', '#modal-address', function() {
+        var countryValue = $('#input-country').val();
+        console.log('Modal opened, country value:', countryValue);
+        console.log('Current zone_id to select:', currentZoneId);
+        console.log('Country dropdown exists:', $('#input-country').length);
+        console.log('Zone dropdown exists:', $('#input-zone').length);
+        
+        shouldSelectZone = true; // Reset flag when modal opens
+        
+        // Directly load zones if country is already set
+        if (countryValue) {
+            loadZones(countryValue, true);
+        }
+    });
+
+    // Change Address button handler
+    $(document).on('click', '#button-address-confirm', function() {
+        console.log('Address confirm button clicked');
+        
+        var activeTab = $('#modal-address .tab-pane.active').attr('id');
+        console.log('Active tab:', activeTab);
+        
+        var postData = {
+            subscription_id: {{ subscription_id }}
+        };
+        
+        if (activeTab === 'tab-edit-address') {
+            // User is editing current address
+            postData.update_current = '1';
+            postData.firstname = $('#input-firstname').val();
+            postData.lastname = $('#input-lastname').val();
+            postData.company = $('#input-company').val();
+            postData.address_1 = $('#input-address-1').val();
+            postData.address_2 = $('#input-address-2').val();
+            postData.city = $('#input-city').val();
+            postData.postcode = $('#input-postcode').val();
+            postData.country_id = $('#input-country').val();
+            postData.zone_id = $('#input-zone').val();
+            postData.comment = $('#input-edit-comment').val();
+            
+            console.log('Editing current address with data:', postData);
+        } else {
+            // User is selecting different address
+            postData.address_id = $('#input-address-select').val();
+            postData.comment = $('#input-select-comment').val();
+            
+            console.log('Selecting different address with data:', postData);
+        }
+        
+        $.ajax({
+            url: 'index.php?route=account/subscription.changeAddress&language={{ language }}&customer_token={{ customer_token }}',
+            type: 'post',
+            data: postData,
+            dataType: 'json',
+            beforeSend: function() {
+                $('#button-address-confirm').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Updating...');
+            },
+            complete: function() {
+                $('#button-address-confirm').prop('disabled', false).html('Update Address');
+            },
+            success: function(json) {
+                console.log('Response:', json);
+                
+                if (json['error']) {
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('#modal-address').modal('hide');
+                }
+                if (json['success']) {
+                    $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('#modal-address').modal('hide');
+                    location.reload();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('AJAX Error:', error);
+                $('#button-address-confirm').prop('disabled', false).html('Update Address');
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> An error occurred. Please try again. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            }
+        });
+    });
+
+    // Cancel with feedback
+    $(document).on('click', '#button-cancel-confirm', function() {
+        $.ajax({
+            url: 'index.php?route=account/subscription.cancel&language={{ language }}&customer_token={{ customer_token }}',
+            type: 'post',
+            data: {
+                subscription_id: {{ subscription_id }},
+                comment: $('#input-cancel-reason').val()
+            },
+            dataType: 'json',
+            beforeSend: function() {
+                $('#button-cancel-confirm').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+            },
+            complete: function() {
+                $('#button-cancel-confirm').prop('disabled', false).html('Cancel Subscription');
+            },
+            success: function(json) {
+                if (json['error']) {
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                }
+                if (json['success']) {
+                    $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('#modal-cancel').modal('hide');
+                    $('#history').load('index.php?route=account/subscription.history&language={{ language }}&customer_token={{ customer_token }}&subscription_id={{ subscription_id }}');
+                    location.reload();
+                }
+            }
+        });
+    });
+});
 //--></script>
+
+{# Modals for Subscription Management #}
+
+{# Pause Modal #}
+<div class="modal fade" id="modal-pause" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Pause Subscription</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Select a date until which you want to pause your subscription:</p>
+        <div class="mb-3">
+          <label for="input-pause-date" class="form-label">Pause Until Date <span class="text-danger">*</span></label>
+          <input type="date" id="input-pause-date" class="form-control" min="{{ date('now')|date('Y-m-d') }}" required>
+        </div>
+        <div class="mb-3">
+          <label for="input-pause-comment" class="form-label">Reason (Optional)</label>
+          <textarea id="input-pause-comment" class="form-control" rows="3" placeholder="e.g., Going on vacation"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="button-pause-confirm" class="btn btn-warning">Pause Subscription</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Resume Modal #}
+<div class="modal fade" id="modal-resume" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Resume Subscription</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you ready to resume your subscription?</p>
+        <div class="mb-3">
+          <label for="input-resume-comment" class="form-label">Comment (Optional)</label>
+          <textarea id="input-resume-comment" class="form-control" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="button-resume-confirm" class="btn btn-success">Resume Subscription</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Skip Modal #}
+<div class="modal fade" id="modal-skip" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Skip Next Delivery</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Your next delivery on <strong>{{ date_next }}</strong> will be skipped.</p>
+        <div class="mb-3">
+          <label for="input-skip-comment" class="form-label">Reason (Optional)</label>
+          <textarea id="input-skip-comment" class="form-control" rows="3" placeholder="e.g., Have too many flowers this month"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="button-skip-confirm" class="btn btn-info">Skip Next Delivery</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Change Frequency Modal #}
+<div class="modal fade" id="modal-frequency" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Change Delivery Frequency</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="input-frequency" class="form-label">Select New Frequency <span class="text-danger">*</span></label>
+          <select id="input-frequency" class="form-select" required>
+            <option value="">-- Select Frequency --</option>
+            {% if frequencies %}
+              {% for freq in frequencies %}
+                <option value="{{ freq.subscription_plan_frequency_id }}">{{ freq.name }} (Every {{ freq.cycle }} {{ freq.frequency }})</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="input-frequency-comment" class="form-label">Comment (Optional)</label>
+          <textarea id="input-frequency-comment" class="form-control" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="button-frequency-confirm" class="btn btn-primary">Change Frequency</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Change Delivery Date Modal #}
+<div class="modal fade" id="modal-delivery-date" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Change Delivery Date</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="input-delivery-date" class="form-label">Preferred Delivery Date <span class="text-danger">*</span></label>
+          <input type="date" id="input-delivery-date" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="input-delivery-date-comment" class="form-label">Comment (Optional)</label>
+          <textarea id="input-delivery-date-comment" class="form-control" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="button-delivery-date-confirm" class="btn btn-primary">Change Date</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Change Plan Modal #}
+<div class="modal fade" id="modal-plan" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Change Subscription Plan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="input-plan" class="form-label">Select New Plan <span class="text-danger">*</span></label>
+          <select id="input-plan" class="form-select" required>
+            <option value="">-- Select Plan --</option>
+            {% if plans %}
+              {% for plan in plans %}
+                <option value="{{ plan.subscription_plan_id }}">{{ plan.name }} - {{ plan.price }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="input-plan-comment" class="form-label">Comment (Optional)</label>
+          <textarea id="input-plan-comment" class="form-control" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="button-plan-confirm" class="btn btn-primary">Change Plan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Change Address Modal #}
+<div class="modal fade" id="modal-address" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Change Delivery Address</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="nav nav-tabs mb-3" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#tab-edit-address">Edit Current Address</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-select-address">Select Different Address</a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          {# Edit Current Address Tab #}
+          <div id="tab-edit-address" class="tab-pane fade show active">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="input-firstname" class="form-label">First Name <span class="text-danger">*</span></label>
+                <input type="text" id="input-firstname" class="form-control" value="{{ current_address.firstname }}" required>
+              </div>
+              <div class="col-md-6">
+                <label for="input-lastname" class="form-label">Last Name <span class="text-danger">*</span></label>
+                <input type="text" id="input-lastname" class="form-control" value="{{ current_address.lastname }}" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="input-company" class="form-label">Company</label>
+              <input type="text" id="input-company" class="form-control" value="{{ current_address.company }}">
+            </div>
+            <div class="mb-3">
+              <label for="input-address-1" class="form-label">Address 1 <span class="text-danger">*</span></label>
+              <input type="text" id="input-address-1" class="form-control" value="{{ current_address.address_1 }}" required>
+            </div>
+            <div class="mb-3">
+              <label for="input-address-2" class="form-label">Address 2</label>
+              <input type="text" id="input-address-2" class="form-control" value="{{ current_address.address_2 }}">
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="input-city" class="form-label">City <span class="text-danger">*</span></label>
+                <input type="text" id="input-city" class="form-control" value="{{ current_address.city }}" required>
+              </div>
+              <div class="col-md-6">
+                <label for="input-postcode" class="form-label">Postcode</label>
+                <input type="text" id="input-postcode" class="form-control" value="{{ current_address.postcode }}">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="input-country" class="form-label">Country <span class="text-danger">*</span></label>
+                <select id="input-country" class="form-select" required>
+                  <option value="">-- Select Country --</option>
+                  {% if countries %}
+                    {% for country in countries %}
+                      <option value="{{ country.country_id }}" {% if country.country_id == current_address.country_id %}selected{% endif %}>{{ country.name }}</option>
+                    {% endfor %}
+                  {% endif %}
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="input-zone" class="form-label">Region / State</label>
+                <select id="input-zone" class="form-select"></select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="input-edit-comment" class="form-label">Comment (Optional)</label>
+              <textarea id="input-edit-comment" class="form-control" rows="2" placeholder="Any special delivery instructions..."></textarea>
+            </div>
+          </div>
+
+          {# Select Different Address Tab #}
+          <div id="tab-select-address" class="tab-pane fade">
+            <div class="mb-3">
+              <label for="input-address-select" class="form-label">Select Address <span class="text-danger">*</span></label>
+              <select id="input-address-select" class="form-select">
+                <option value="">-- Select Address --</option>
+                {% if addresses %}
+                  {% for address in addresses %}
+                    <option value="{{ address.address_id }}" {% if address.is_current %}selected{% endif %}>
+                      {{ address.address }}{% if address.is_current %} (Current){% endif %}
+                    </option>
+                  {% endfor %}
+                {% endif %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="input-select-comment" class="form-label">Comment (Optional)</label>
+              <textarea id="input-select-comment" class="form-control" rows="2" placeholder="Any special delivery instructions..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-muted small mt-3"><i class="fa fa-info-circle"></i> The updated address will be used for all future deliveries.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="button-address-confirm" class="btn btn-primary">Update Address</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Cancel Modal #}
+<div class="modal fade" id="modal-cancel" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cancel Subscription</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-danger"><strong>Are you sure you want to cancel your subscription?</strong></p>
+        <p>We'd love to know why you're leaving:</p>
+        <div class="mb-3">
+          <label for="input-cancel-reason" class="form-label">Reason for Cancellation (Optional)</label>
+          <select id="input-cancel-reason" class="form-select mb-2">
+            <option value="">-- Select a reason --</option>
+            <option value="Too expensive">Too expensive</option>
+            <option value="Don't need it anymore">Don't need it anymore</option>
+            <option value="Quality issues">Quality issues</option>
+            <option value="Moving/Relocating">Moving/Relocating</option>
+            <option value="Found alternative">Found alternative</option>
+            <option value="Other">Other</option>
+          </select>
+          <textarea id="input-cancel-additional" class="form-control" rows="3" placeholder="Additional feedback (optional)"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Subscription</button>
+        <button type="button" id="button-cancel-confirm" class="btn btn-danger">Yes, Cancel Subscription</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {{ footer }}

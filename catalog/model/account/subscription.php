@@ -169,7 +169,11 @@ class Subscription extends \Opencart\System\Engine\Model {
 	 * $results = $this->model_account_subscription->getProducts($subscription_id);
 	 */
 	public function getProducts(int $subscription_id): array {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_product` WHERE `subscription_id` = '" . (int)$subscription_id . "'");
+		$query = $this->db->query("SELECT sp.*, pd.name, pd.description, p.model, p.image 
+			FROM `" . DB_PREFIX . "subscription_product` sp 
+			LEFT JOIN `" . DB_PREFIX . "product` p ON (sp.product_id = p.product_id) 
+			LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (sp.product_id = pd.product_id AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "') 
+			WHERE sp.subscription_id = '" . (int)$subscription_id . "'");
 
 		return $query->rows;
 	}

@@ -455,6 +455,11 @@ class Order extends \Opencart\System\Engine\Model {
 					$subscription_data[$meta_key] = $data[$meta_key];
 				}
 			}
+			
+			// Map 'duration' to 'duration_id' for subscription contract
+			if (isset($subscription_data['duration']) && !isset($subscription_data['duration_id'])) {
+				$subscription_data['duration_id'] = $subscription_data['duration'];
+			}
 
 			$this->model_checkout_order->addSubscription($order_id, $order_product_id, $subscription_data + ['quantity' => $data['quantity']]);
 		}

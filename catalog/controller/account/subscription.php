@@ -341,11 +341,35 @@ class Subscription extends \Opencart\System\Engine\Controller {
 					$option_data[] = ['value' => (oc_strlen($value) > 20 ? oc_substr($value, 0, 20) . '..' : $value)] + $option;
 				}
 
+				// Build subscription plan description
+				$subscription_plan = '';
+
+				if ($subscription_info['trial_status']) {
+					$trial_price = $this->currency->format($subscription_info['trial_price'] + ($this->config->get('config_tax') ? $subscription_info['trial_tax'] : 0), $subscription_info['currency']);
+					$trial_cycle = $subscription_info['trial_cycle'];
+					$trial_frequency = $this->language->get('text_' . $subscription_info['trial_frequency']);
+					$trial_duration = $subscription_info['trial_duration'];
+
+					$subscription_plan .= sprintf($this->language->get('text_subscription_trial'), $trial_price, $trial_cycle, $trial_frequency, $trial_duration);
+				}
+
+				$price = $this->currency->format($subscription_info['price'] + ($this->config->get('config_tax') ? $subscription_info['tax'] : 0), $subscription_info['currency']);
+				$cycle = $subscription_info['cycle'];
+				$frequency = $this->language->get('text_' . $subscription_info['frequency']);
+				$duration = $subscription_info['duration'];
+
+				if ($duration) {
+					$subscription_plan .= sprintf($this->language->get('text_subscription_duration'), $price, $cycle, $frequency, $duration);
+				} else {
+					$subscription_plan .= sprintf($this->language->get('text_subscription_cancel'), $price, $cycle, $frequency);
+				}
+
 				$data['products'][] = [
-					'option'      => $option_data,
-					'trial_price' => $this->currency->format($result['trial_price'] + ($this->config->get('config_tax') ? $result['trial_tax'] : 0), $subscription_info['currency']),
-					'price'       => $this->currency->format($result['price'] + ($this->config->get('config_tax') ? $result['tax'] : 0), $subscription_info['currency']),
-					'view'        => $this->url->link('product/product', 'product_id=' . $result['product_id'])
+					'option'       => $option_data,
+					'subscription' => $subscription_plan,
+					'trial_price'  => $this->currency->format($result['trial_price'] + ($this->config->get('config_tax') ? $result['trial_tax'] : 0), $subscription_info['currency']),
+					'price'        => $this->currency->format($result['price'] + ($this->config->get('config_tax') ? $result['tax'] : 0), $subscription_info['currency']),
+					'view'         => $this->url->link('product/product', 'product_id=' . $result['product_id'])
 				] + $result;
 			}
 
@@ -386,6 +410,61 @@ class Subscription extends \Opencart\System\Engine\Controller {
 				$data['order_link'] = '';
 			}
 
+			// Add pause status
+			$data['paused_until'] = isset($subscription_info['paused_until']) ? date($this->language->get('date_format_short'), strtotime($subscription_info['paused_until'])) : '';
+
+			// Get available frequencies for the subscription plan
+			$data['frequencies'] = [];
+			$frequency_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_plan_frequency` 
+				WHERE `subscription_plan_id` = '" . (int)$subscription_info['subscription_plan_id'] . "'");
+			$data['frequencies'] = $frequency_query->rows;
+
+		// Get available plans (same product subscription plans)
+		$data['plans'] = [];
+		$plan_query = $this->db->query("
+			SELECT sp.*, spd.name 
+			FROM `" . DB_PREFIX . "subscription_plan` sp
+			LEFT JOIN `" . DB_PREFIX . "subscription_plan_description` spd 
+				ON (sp.subscription_plan_id = spd.subscription_plan_id) 
+			WHERE sp.subscription_plan_id != '" . (int)$subscription_info['subscription_plan_id'] . "' 
+			AND sp.status = 1 
+			AND spd.language_id = '" . (int)$this->config->get('config_language_id') . "'
+		");
+		foreach ($plan_query->rows as $plan) {
+			$data['plans'][] = [
+				'subscription_plan_id' => $plan['subscription_plan_id'],
+				'name' => $plan['name'],
+				'price' => $this->currency->format($plan['price'], $this->session->data['currency'])
+			];
+		}
+
+			// Get customer addresses for address change
+			$data['addresses'] = [];
+			$this->load->model('account/address');
+			$addresses = $this->model_account_address->getAddresses($this->customer->getId());
+			
+			foreach ($addresses as $address) {
+				$data['addresses'][] = [
+					'address_id' => $address['address_id'],
+					'address' => $address['firstname'] . ' ' . $address['lastname'] . ', ' . 
+								$address['address_1'] . ', ' . $address['city'] . ', ' . 
+								$address['postcode'] . ', ' . $address['country'],
+					'is_current' => ($address['address_id'] == $subscription_info['shipping_address_id'])
+				];
+			}
+
+			// Get current shipping address details for editing
+			$current_address = $this->model_account_address->getAddress($this->customer->getId(), $subscription_info['shipping_address_id']);
+			if ($current_address) {
+				$data['current_address'] = $current_address;
+			} else {
+				$data['current_address'] = [];
+			}
+
+			// Load countries for address form
+			$this->load->model('localisation/country');
+			$data['countries'] = $this->model_localisation_country->getCountries();
+
 			$url = '';
 
 			if (isset($this->request->get['page'])) {
@@ -423,7 +502,9 @@ class Subscription extends \Opencart\System\Engine\Controller {
 
 		$json = [];
 
-		if (isset($this->request->get['subscription_id'])) {
+		if (isset($this->request->post['subscription_id'])) {
+			$subscription_id = (int)$this->request->post['subscription_id'];
+		} elseif (isset($this->request->get['subscription_id'])) {
 			$subscription_id = (int)$this->request->get['subscription_id'];
 		} else {
 			$subscription_id = 0;
@@ -441,12 +522,11 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			$subscription_info = $this->model_account_subscription->getSubscription($subscription_id);
 
 			if ($subscription_info) {
-				if ($subscription_info['trial_remaining']) {
-					$json['error'] = sprintf($this->language->get('error_duration'), $subscription_info['trial_remaining'] + $subscription_info['remaining']);
-				} elseif ($subscription_info['remaining']) {
-					$json['error'] = sprintf($this->language->get('error_duration'), $subscription_info['remaining']);
+				// Validate customer owns this subscription
+				if ($subscription_info['customer_id'] != $this->customer->getId()) {
+					$json['error'] = $this->language->get('error_subscription');
 				}
-
+				
 				if ($subscription_info['subscription_status_id'] == $this->config->get('config_subscription_canceled_status_id')) {
 					$json['error'] = $this->language->get('error_canceled');
 				}
@@ -458,9 +538,13 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		if (!$json) {
 			$this->load->model('checkout/subscription');
 
-			$this->model_checkout_subscription->addHistory($subscription_id, (int)$this->config->get('config_subscription_canceled_status_id'));
+			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
 
-			$json['success'] = $this->language->get('text_success');
+			if ($this->model_checkout_subscription->cancelSubscription($subscription_id, $comment, 'customer')) {
+				$json['success'] = $this->language->get('text_cancel_success');
+			} else {
+				$json['error'] = $this->language->get('error_cancel');
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -588,7 +672,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			$data['orders'][] = [
 				'total'      => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
-				'view'       => $this->url->link('account/subscription.order', 'customer_token=' . $this->session->data['customer_token'] . '&order_id=' . $result['order_id'] . '&page={page}')
+				'view'       => $this->url->link('account/order.info', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token'] . '&order_id=' . $result['order_id'])
 			] + $result;
 		}
 
@@ -604,5 +688,442 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($order_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($order_total - $limit)) ? $order_total : ((($page - 1) * $limit) + $limit), $order_total, ceil($order_total / $limit));
 
 		return $this->load->view('account/subscription_order', $data);
+	}
+
+	/**
+	 * Pause Subscription
+	 *
+	 * @return void
+	 */
+	public function pause(): void {
+		$this->load->language('account/subscription');
+
+		$json = [];
+
+		if (!$this->load->controller('account/login.validate')) {
+			$json['error'] = $this->language->get('error_login');
+		}
+
+		if (isset($this->request->post['subscription_id'])) {
+			$subscription_id = (int)$this->request->post['subscription_id'];
+		} else {
+			$subscription_id = 0;
+		}
+
+		$this->load->model('account/subscription');
+
+		$subscription_info = $this->model_account_subscription->getSubscription($subscription_id);
+
+		if (!$subscription_info) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		// Validate customer owns this subscription
+		if ($subscription_info && $subscription_info['customer_id'] != $this->customer->getId()) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if (!isset($this->request->post['paused_until']) || empty($this->request->post['paused_until'])) {
+			$json['error'] = $this->language->get('error_pause_date');
+		}
+
+		if (!$json) {
+			$this->load->model('checkout/subscription');
+
+			$paused_until = $this->request->post['paused_until'];
+			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
+
+			if ($this->model_checkout_subscription->pauseSubscription($subscription_id, $paused_until, $comment, 'customer')) {
+				$json['success'] = $this->language->get('text_pause_success');
+			} else {
+				$json['error'] = $this->language->get('error_pause');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Resume Subscription
+	 *
+	 * @return void
+	 */
+	public function resume(): void {
+		$this->load->language('account/subscription');
+
+		$json = [];
+
+		if (!$this->load->controller('account/login.validate')) {
+			$json['error'] = $this->language->get('error_login');
+		}
+
+		if (isset($this->request->post['subscription_id'])) {
+			$subscription_id = (int)$this->request->post['subscription_id'];
+		} else {
+			$subscription_id = 0;
+		}
+
+		$this->load->model('account/subscription');
+
+		$subscription_info = $this->model_account_subscription->getSubscription($subscription_id);
+
+		if (!$subscription_info) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if ($subscription_info && $subscription_info['customer_id'] != $this->customer->getId()) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if (!$json) {
+			$this->load->model('checkout/subscription');
+
+			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
+
+			if ($this->model_checkout_subscription->resumeSubscription($subscription_id, $comment, 'customer')) {
+				$json['success'] = $this->language->get('text_resume_success');
+			} else {
+				$json['error'] = $this->language->get('error_resume');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Skip Next Delivery
+	 *
+	 * @return void
+	 */
+	public function skip(): void {
+		$this->load->language('account/subscription');
+
+		$json = [];
+
+		if (!$this->load->controller('account/login.validate')) {
+			$json['error'] = $this->language->get('error_login');
+		}
+
+		if (isset($this->request->post['subscription_id'])) {
+			$subscription_id = (int)$this->request->post['subscription_id'];
+		} else {
+			$subscription_id = 0;
+		}
+
+		$this->load->model('account/subscription');
+
+		$subscription_info = $this->model_account_subscription->getSubscription($subscription_id);
+
+		if (!$subscription_info) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if ($subscription_info && $subscription_info['customer_id'] != $this->customer->getId()) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if (!$json) {
+			$this->load->model('checkout/subscription');
+
+			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
+
+			if ($this->model_checkout_subscription->skipNextDelivery($subscription_id, $comment, 'customer')) {
+				$json['success'] = $this->language->get('text_skip_success');
+			} else {
+				$json['error'] = $this->language->get('error_skip');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Change Frequency
+	 *
+	 * @return void
+	 */
+	public function changeFrequency(): void {
+		$this->load->language('account/subscription');
+
+		$json = [];
+
+		if (!$this->load->controller('account/login.validate')) {
+			$json['error'] = $this->language->get('error_login');
+		}
+
+		if (isset($this->request->post['subscription_id'])) {
+			$subscription_id = (int)$this->request->post['subscription_id'];
+		} else {
+			$subscription_id = 0;
+		}
+
+		$this->load->model('account/subscription');
+
+		$subscription_info = $this->model_account_subscription->getSubscription($subscription_id);
+
+		if (!$subscription_info) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if ($subscription_info && $subscription_info['customer_id'] != $this->customer->getId()) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if (!isset($this->request->post['frequency_id']) || empty($this->request->post['frequency_id'])) {
+			$json['error'] = $this->language->get('error_frequency');
+		}
+
+		if (!$json) {
+			$this->load->model('checkout/subscription');
+
+			$frequency_id = (int)$this->request->post['frequency_id'];
+			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
+
+			// Get frequency details
+			$frequency_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_plan_frequency` WHERE `subscription_plan_frequency_id` = '" . (int)$frequency_id . "'");
+
+			if ($frequency_query->num_rows) {
+				$frequency_data = $frequency_query->row;
+
+				if ($this->model_checkout_subscription->changeFrequency($subscription_id, $frequency_id, $frequency_data['frequency'], $frequency_data['cycle'], $comment, 'customer')) {
+					$json['success'] = $this->language->get('text_frequency_success');
+				} else {
+					$json['error'] = $this->language->get('error_frequency_change');
+				}
+			} else {
+				$json['error'] = $this->language->get('error_frequency');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Change Delivery Date
+	 *
+	 * @return void
+	 */
+	public function changeDeliveryDate(): void {
+		$this->load->language('account/subscription');
+
+		$json = [];
+
+		if (!$this->load->controller('account/login.validate')) {
+			$json['error'] = $this->language->get('error_login');
+		}
+
+		if (isset($this->request->post['subscription_id'])) {
+			$subscription_id = (int)$this->request->post['subscription_id'];
+		} else {
+			$subscription_id = 0;
+		}
+
+		$this->load->model('account/subscription');
+
+		$subscription_info = $this->model_account_subscription->getSubscription($subscription_id);
+
+		if (!$subscription_info) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if ($subscription_info && $subscription_info['customer_id'] != $this->customer->getId()) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if (!isset($this->request->post['delivery_date']) || empty($this->request->post['delivery_date'])) {
+			$json['error'] = $this->language->get('error_delivery_date');
+		}
+
+		if (!$json) {
+			$this->load->model('checkout/subscription');
+
+			$delivery_date = $this->request->post['delivery_date'];
+			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
+
+			if ($this->model_checkout_subscription->changeDeliveryDate($subscription_id, $delivery_date, $comment, 'customer')) {
+				$json['success'] = $this->language->get('text_delivery_date_success');
+			} else {
+				$json['error'] = $this->language->get('error_delivery_date_change');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Change Subscription Plan
+	 *
+	 * @return void
+	 */
+	public function changePlan(): void {
+		$this->load->language('account/subscription');
+
+		$json = [];
+
+		if (!$this->load->controller('account/login.validate')) {
+			$json['error'] = $this->language->get('error_login');
+		}
+
+		if (isset($this->request->post['subscription_id'])) {
+			$subscription_id = (int)$this->request->post['subscription_id'];
+		} else {
+			$subscription_id = 0;
+		}
+
+		$this->load->model('account/subscription');
+
+		$subscription_info = $this->model_account_subscription->getSubscription($subscription_id);
+
+		if (!$subscription_info) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if ($subscription_info && $subscription_info['customer_id'] != $this->customer->getId()) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if (!isset($this->request->post['plan_id']) || empty($this->request->post['plan_id'])) {
+			$json['error'] = $this->language->get('error_plan');
+		}
+
+		if (!$json) {
+			$this->load->model('checkout/subscription');
+			$this->load->model('catalog/subscription');
+
+			$plan_id = (int)$this->request->post['plan_id'];
+			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
+
+			// Get plan details
+			$plan_info = $this->model_catalog_subscription->getSubscriptionPlan($plan_id);
+
+			if ($plan_info) {
+				if ($this->model_checkout_subscription->changeSubscriptionPlan($subscription_id, $plan_id, $plan_info['price'], $comment, 'customer')) {
+					$json['success'] = $this->language->get('text_plan_success');
+				} else {
+					$json['error'] = $this->language->get('error_plan_change');
+				}
+			} else {
+				$json['error'] = $this->language->get('error_plan');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Change Delivery Address
+	 *
+	 * @return void
+	 */
+	public function changeAddress(): void {
+		$this->load->language('account/subscription');
+
+		$json = [];
+
+		if (!$this->load->controller('account/login.validate')) {
+			$json['error'] = $this->language->get('error_login');
+		}
+
+		if (isset($this->request->post['subscription_id'])) {
+			$subscription_id = (int)$this->request->post['subscription_id'];
+		} else {
+			$subscription_id = 0;
+		}
+
+		$this->load->model('account/subscription');
+
+		$subscription_info = $this->model_account_subscription->getSubscription($subscription_id);
+
+		if (!$subscription_info) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		if ($subscription_info && $subscription_info['customer_id'] != $this->customer->getId()) {
+			$json['error'] = $this->language->get('error_subscription');
+		}
+
+		$this->load->model('checkout/subscription');
+		$this->load->model('account/address');
+
+		// Check if user wants to update existing address or select a different one
+		if (isset($this->request->post['update_current']) && $this->request->post['update_current'] == '1') {
+			// Update current address with new details
+			$address_id = $subscription_info['shipping_address_id'];
+			
+			// Validate required fields
+			if (!isset($this->request->post['firstname']) || empty(trim($this->request->post['firstname']))) {
+				$json['error'] = 'First name is required!';
+			}
+			
+			if (!isset($this->request->post['lastname']) || empty(trim($this->request->post['lastname']))) {
+				$json['error'] = 'Last name is required!';
+			}
+			
+			if (!isset($this->request->post['address_1']) || empty(trim($this->request->post['address_1']))) {
+				$json['error'] = 'Address is required!';
+			}
+			
+			if (!isset($this->request->post['city']) || empty(trim($this->request->post['city']))) {
+				$json['error'] = 'City is required!';
+			}
+			
+			if (!isset($this->request->post['country_id']) || empty($this->request->post['country_id'])) {
+				$json['error'] = 'Country is required!';
+			}
+
+			if (!$json) {
+				// Update the address
+				$address_data = [
+					'firstname'  => $this->request->post['firstname'],
+					'lastname'   => $this->request->post['lastname'],
+					'company'    => isset($this->request->post['company']) ? $this->request->post['company'] : '',
+					'address_1'  => $this->request->post['address_1'],
+					'address_2'  => isset($this->request->post['address_2']) ? $this->request->post['address_2'] : '',
+					'city'       => $this->request->post['city'],
+					'postcode'   => isset($this->request->post['postcode']) ? $this->request->post['postcode'] : '',
+					'country_id' => $this->request->post['country_id'],
+					'zone_id'    => isset($this->request->post['zone_id']) ? $this->request->post['zone_id'] : 0
+				];
+
+				$this->model_account_address->editAddress($this->customer->getId(), $address_id, $address_data);
+
+				$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : 'Address updated';
+				$this->model_checkout_subscription->changeDeliveryAddress($subscription_id, $address_id, $comment, 'customer');
+
+				$json['success'] = $this->language->get('text_address_success');
+			}
+		} else {
+			// Select existing address
+			if (!isset($this->request->post['address_id']) || empty($this->request->post['address_id'])) {
+				$json['error'] = $this->language->get('error_address');
+			}
+
+			if (!$json) {
+				$address_id = (int)$this->request->post['address_id'];
+				$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
+
+				// Verify address belongs to customer
+				$address_info = $this->model_account_address->getAddress($this->customer->getId(), $address_id);
+
+				if ($address_info) {
+					if ($this->model_checkout_subscription->changeDeliveryAddress($subscription_id, $address_id, $comment, 'customer')) {
+						$json['success'] = $this->language->get('text_address_success');
+					} else {
+						$json['error'] = $this->language->get('error_address_change');
+					}
+				} else {
+					$json['error'] = $this->language->get('error_address');
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 }

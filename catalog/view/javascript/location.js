@@ -110,6 +110,9 @@ function attemptAutoLocation() {
                 const lon = position.coords.longitude;
                 performReverseGeocode(lat, lon);
             },
+            function (error) {
+                console.log('Geolocation error:', error.message);
+            },
             {
                 enableHighAccuracy: true,
                 timeout: 10000,
