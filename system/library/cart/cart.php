@@ -317,16 +317,16 @@ class Cart {
 								'width' => 0,
 								'height' => 0,
 								'length_class_id' => $this->config->get('config_length_class_id') ?? 0,
-								'subtract' => 0,
-								'minimum' => 1,
-								'tax_class_id' => 0,
-								'shipping' => 0,
-								'download' => [],
-								'minimum_status' => true,
-								'stock_status' => true
-							];
+							'subtract' => 0,
+							'minimum' => 1,
+							'tax_class_id' => 0,
+							'shipping' => 1,
+							'download' => [],
+							'minimum_status' => true,
+							'stock_status' => true
+						];
 
-							// Build subscription data from the plan row
+						// Build subscription data from the plan row
 							$subscription_data = ['remaining' => $sp_query->row['duration']] + $sp_query->row;
 
 							// Price selection: prefer trial price if enabled

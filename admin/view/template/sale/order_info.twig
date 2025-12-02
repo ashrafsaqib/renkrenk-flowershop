@@ -131,6 +131,39 @@
                             <div id="error-product-{{ order_product_row }}-subscription" class="invalid-feedback mt-0"></div>
                           </li>
                         {% endif %}
+                        
+                        {# Subscription options styled like customer account #}
+                        {% if order_product.subscription_options %}
+                          <li>
+                            <div class="subscription-options-box mt-2 p-2" style="background: #f8f8f8; border-left: 3px solid #2c2c2c; font-size: 11px;">
+                              {% if order_product.subscription_options.frequency %}
+                                <div class="mb-1">
+                                  <strong style="color: #2c2c2c; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Select Your Frequency:</strong>
+                                  <div style="color: #666;">{{ order_product.subscription_options.frequency }}</div>
+                                </div>
+                              {% endif %}
+                              {% if order_product.subscription_options.is_gift %}
+                                <div class="mb-1">
+                                  <strong style="color: #2c2c2c; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Is This A Gift?:</strong>
+                                  <div style="color: #666;">{{ order_product.subscription_options.is_gift }}</div>
+                                </div>
+                              {% endif %}
+                              {% if order_product.subscription_options.duration %}
+                                <div class="mb-1">
+                                  <strong style="color: #2c2c2c; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">Select Your Duration:</strong>
+                                  <div style="color: #666;">{{ order_product.subscription_options.duration }}</div>
+                                </div>
+                              {% endif %}
+                              {% if order_product.subscription_options.delivery_date %}
+                                <div>
+                                  <strong style="color: #2c2c2c; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;">First Delivery:</strong>
+                                  <div style="color: #666;">{{ order_product.subscription_options.delivery_date }}</div>
+                                </div>
+                              {% endif %}
+                            </div>
+                          </li>
+                        {% endif %}
+                        
                         {% if order_product.reward %}
                           <li>
                             <small> - {{ text_points }}: {{ order_product.reward }}</small>

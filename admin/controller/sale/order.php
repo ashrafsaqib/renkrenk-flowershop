@@ -838,7 +838,7 @@ class Order extends \Opencart\System\Engine\Controller {
 				$subscription_edit = '';
 			}
 
-			$data['order_products'][] = [
+			$product_data = [
 				'option'               => $option_data,
 				'subscription_plan'    => $subscription_plan,
 				'subscription_plan_id' => $subscription_plan_id,
@@ -847,6 +847,52 @@ class Order extends \Opencart\System\Engine\Controller {
 				'total'                => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $data['currency_code'], $currency_value),
 				'product_edit'         => $this->url->link('catalog/product.form', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $product['product_id'])
 			] + $product;
+			
+			// Add subscription options data if available
+			$subscription_info_detail = $this->model_sale_order->getSubscription($order_id, $product['order_product_id']);
+			
+			// If product name is empty and we have a subscription, use subscription plan name
+			if (empty($product_data['name']) && $subscription_info_detail && $subscription_plan_id > 0) {
+				$plan_query = $this->db->query("SELECT `name` FROM `" . DB_PREFIX . "subscription_plan_description` WHERE `subscription_plan_id` = '" . (int)$subscription_plan_id . "' AND `language_id` = '" . (int)$this->config->get('config_language_id') . "' LIMIT 1");
+				if ($plan_query->num_rows) {
+					$product_data['name'] = $plan_query->row['name'];
+				}
+			}
+			
+			$data['order_products'][] = $product_data;
+			
+			if ($subscription_info_detail) {
+				$product_index = count($data['order_products']) - 1;
+				$data['order_products'][$product_index]['subscription_options'] = [];
+				
+				// Add frequency
+				if (isset($subscription_info_detail['subscription_plan_frequency_id'])) {
+					$freq_query = $this->db->query("SELECT `frequency`, `cycle` FROM `" . DB_PREFIX . "subscription_plan_frequency` WHERE `subscription_plan_frequency_id` = '" . (int)$subscription_info_detail['subscription_plan_frequency_id'] . "' LIMIT 1");
+					if ($freq_query->num_rows) {
+						$data['order_products'][$product_index]['subscription_options']['frequency'] = 'Every ' . $freq_query->row['cycle'] . ' ' . strtoupper($freq_query->row['frequency']);
+					}
+				}
+				
+				// Add delivery date
+				if (isset($subscription_info_detail['delivery_date']) && $subscription_info_detail['delivery_date']) {
+					$data['order_products'][$product_index]['subscription_options']['delivery_date'] = date('F j, Y', strtotime($subscription_info_detail['delivery_date']));
+				}
+				
+				// Add duration
+				if (isset($subscription_info_detail['duration']) && $subscription_info_detail['duration'] > 0) {
+					$dur_query = $this->db->query("SELECT `label` FROM `" . DB_PREFIX . "subscription_plan_duration` WHERE `subscription_plan_duration_id` = '" . (int)$subscription_info_detail['duration'] . "' LIMIT 1");
+					if ($dur_query->num_rows) {
+						$data['order_products'][$product_index]['subscription_options']['duration'] = $dur_query->row['label'];
+					}
+				} elseif (isset($subscription_info_detail['duration'])) {
+					$data['order_products'][$product_index]['subscription_options']['duration'] = 'On Going';
+				}
+				
+				// Add gift status
+				if (isset($subscription_info_detail['is_gift'])) {
+					$data['order_products'][$product_index]['subscription_options']['is_gift'] = $subscription_info_detail['is_gift'] ? 'Yes' : 'No';
+				}
+			}
 		}
 
 		// Totals
