@@ -413,6 +413,16 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			// Add pause status
 			$data['paused_until'] = isset($subscription_info['paused_until']) ? date($this->language->get('date_format_short'), strtotime($subscription_info['paused_until'])) : '';
 
+			// Check if subscription is cancelled
+			$data['is_cancelled'] = ($subscription_info['subscription_status_id'] == $this->config->get('config_subscription_canceled_status_id'));
+			
+			// Get subscription plan link for resubscribe
+			if ($subscription_info['subscription_plan_id']) {
+				$data['subscription_plan_link'] = $this->url->link('product/subscription', 'language=' . $this->config->get('config_language') . '&subscription_plan_id=' . $subscription_info['subscription_plan_id']);
+			} else {
+				$data['subscription_plan_link'] = '';
+			}
+
 			// Get available frequencies for the subscription plan
 			$data['frequencies'] = [];
 			$frequency_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "subscription_plan_frequency` 

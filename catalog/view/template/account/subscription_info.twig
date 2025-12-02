@@ -134,6 +134,17 @@
           <h5 class="mb-0">Manage Your Subscription</h5>
         </div>
         <div class="card-body">
+          {% if is_cancelled %}
+            <div class="alert alert-danger">
+              <i class="fa fa-times-circle"></i> This subscription has been cancelled.
+            </div>
+            {% if subscription_plan_link %}
+              <p class="mb-3">Would you like to subscribe again?</p>
+              <a href="{{ subscription_plan_link }}" class="btn btn-primary">
+                <i class="fa fa-refresh"></i> View Subscription Plan & Subscribe Again
+              </a>
+            {% endif %}
+          {% else %}
           <div class="row g-2">
             {% if paused_until %}
               <div class="col-12 mb-2">
@@ -185,6 +196,7 @@
               </button>
             </div>
           </div>
+          {% endif %}
         </div>
       </div>
 
