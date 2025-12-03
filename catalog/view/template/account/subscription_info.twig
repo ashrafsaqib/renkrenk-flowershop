@@ -9,6 +9,13 @@
     {{ column_left }}
     <div id="content" class="col">
       {{ content_top }}
+      
+      {% if subscription_plan_name %}
+      <div class="alert alert-info mb-3">
+        <h4 class="mb-0"><i class="fa fa-cube"></i> {{ subscription_plan_name }}</h4>
+      </div>
+      {% endif %}
+      
       <div class="row">
         <div class="col mb-3">
           <div class="form-control" style="min-height: 64px;">
@@ -67,57 +74,50 @@
           </div>
         </div>
       </div>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>{{ column_product }}</th>
-            <th class="text-end">{{ column_quantity }}</th>
-            <th class="text-end">{{ column_trial_price }}</th>
-            <th class="text-end">{{ column_price }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if products %}
-            {% for product in products %}
-              <tr>
-                <td><a href="{{ product.product_edit }}" target="_blank">{{ product.name }}</a>
-                  <ul class="list-unstyled mb-0">
-                    <li>
-                      <small> - {{ text_model }}: {{ product.model }}</small>
-                    </li>
-                    {% for option in product.option %}
-                      <li>
-                        <small> - {{ option.name }}: {{ option.value }}</small>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                </td>
-                <td class="text-end">{{ product.quantity }}</td>
-                <td class="text-end">{{ product.trial_price }}</td>
-                <td class="text-end">{{ product.price }}</td>
-              </tr>
-            {% endfor %}
-          {% else %}
-            <tr>
-              <td colspan="4" class="text-center">{{ text_no_results }}</td>
-            </tr>
-          {% endif %}
-        </tbody>
-      </table>
+      
       <div class="form-control mb-3" style="min-height: 64px;">
         <strong class="lead">{{ text_subscription_plan }}</strong>
         <br/>
         {{ description }}
       </div>
+      
       <div class="row mb-3">
-        <div class="col">
+        <div class="col-md-3">
+          <div class="form-control">
+            <strong class="lead">Frequency</strong>
+            <br/>
+            {{ frequency_display }}
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-control">
+            <strong class="lead">Duration</strong>
+            <br/>
+            {{ duration_display }}
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-control">
+            <strong class="lead">Gift Subscription</strong>
+            <br/>
+            {% if is_gift %}
+              <span class="badge bg-success">Yes</span>
+            {% else %}
+              <span class="badge bg-secondary">No</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-md-3">
           <div class="form-control">
             <strong class="lead">{{ text_date_next }}</strong>
             <br/>
             {{ date_next }}
           </div>
         </div>
-        {% if duration %}
+      </div>
+      
+      {% if duration %}
+      <div class="row mb-3">
         <div class="col">
           <div class="form-control">
             <strong class="lead">{{ text_remaining }}</strong>
@@ -125,8 +125,8 @@
             {{ remaining }}
           </div>
         </div>
-        {% endif %}
       </div>
+      {% endif %}
       
       {# Subscription Management Actions #}
       <div class="card mb-3">

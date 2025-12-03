@@ -160,6 +160,19 @@ class Subscription extends \Opencart\System\Engine\Controller {
 
 			$data['heading_title'] = $heading_title;
 
+			// Get subscription plan name
+			$data['subscription_plan_name'] = '';
+			if ($subscription_info['subscription_plan_id']) {
+				$plan_query = $this->db->query("SELECT spd.name 
+					FROM `" . DB_PREFIX . "subscription_plan_description` spd 
+					WHERE spd.subscription_plan_id = '" . (int)$subscription_info['subscription_plan_id'] . "' 
+					AND spd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+				
+				if ($plan_query->num_rows) {
+					$data['subscription_plan_name'] = $plan_query->row['name'];
+				}
+			}
+
 			$url = '';
 
 			if (isset($this->request->get['page'])) {
@@ -399,6 +412,20 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			$data['duration'] = $subscription_info['duration'];
 			$data['trial_duration'] = $subscription_info['trial_duration'];
 			$data['remaining'] = $subscription_info['trial_remaining'] + $subscription_info['remaining'];
+
+			// Subscription details for display
+			$data['frequency_text'] = $this->language->get('text_' . $subscription_info['frequency']);
+			$data['cycle'] = $subscription_info['cycle'];
+			$data['frequency_display'] = 'Every ' . $subscription_info['cycle'] . ' ' . ucfirst($subscription_info['frequency']);
+			
+			if ($subscription_info['duration']) {
+				$data['duration_display'] = $subscription_info['duration'] . ' ' . ucfirst($subscription_info['frequency']) . '(s)';
+			} else {
+				$data['duration_display'] = 'Until Cancelled';
+			}
+			
+			// Check if this is a gift subscription
+			$data['is_gift'] = isset($subscription_info['is_gift']) ? $subscription_info['is_gift'] : 0;
 
 			// Orders
 			$data['history'] = $this->getHistory();
