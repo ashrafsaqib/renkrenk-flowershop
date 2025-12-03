@@ -1,24 +1,26 @@
 <div class="table-responsive">
-  <table class="table table-bordered">
+  <table class="table table-bordered table-hover">
     <thead>
       <tr>
-        <th>{{ column_date_added }}</th>
-        <th>{{ column_comment }}</th>
-        <th>{{ column_status }}</th>
+        <th>Date & Time</th>
+        <th>Action</th>
+        <th>Comment</th>
+        <th>Modified By</th>
       </tr>
     </thead>
     <tbody>
       {% if histories %}
         {% for history in histories %}
           <tr>
-            <td>{{ history.date_added }}</td>
-            <td>{{ history.comment }}</td>
-            <td>{{ history.status }}</td>
+            <td style="white-space: nowrap;">{{ history.date_added }}</td>
+            <td><strong>{{ history.action }}</strong></td>
+            <td>{{ history.comment ? history.comment : '-' }}</td>
+            <td><span class="badge bg-{% if history.modified_by == 'customer' %}primary{% elseif history.modified_by == 'admin' %}warning{% else %}secondary{% endif %}">{{ history.modified_by }}</span></td>
           </tr>
         {% endfor %}
       {% else %}
         <tr>
-          <td class="text-center" colspan="3">{{ text_no_results }}</td>
+          <td class="text-center" colspan="4">{{ text_no_results }}</td>
         </tr>
       {% endif %}
     </tbody>

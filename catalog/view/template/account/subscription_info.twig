@@ -75,12 +75,6 @@
         </div>
       </div>
       
-      <div class="form-control mb-3" style="min-height: 64px;">
-        <strong class="lead">{{ text_subscription_plan }}</strong>
-        <br/>
-        {{ description }}
-      </div>
-      
       <div class="row mb-3">
         <div class="col-md-3">
           <div class="form-control">
@@ -335,11 +329,14 @@ $('#order').on('click', '.pagination a', function(e) {
 
     // Skip Next Delivery
     $(document).on('click', '#button-skip-confirm', function() {
+        var skipCount = $('#input-skip-count').val();
+        
         $.ajax({
             url: 'index.php?route=account/subscription.skip&language={{ language }}&customer_token={{ customer_token }}',
             type: 'post',
             data: {
                 subscription_id: {{ subscription_id }},
+                skip_count: skipCount,
                 comment: $('#input-skip-comment').val()
             },
             dataType: 'json',
@@ -347,7 +344,7 @@ $('#order').on('click', '.pagination a', function(e) {
                 $('#button-skip-confirm').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
             },
             complete: function() {
-                $('#button-skip-confirm').prop('disabled', false).html('Skip Next Delivery');
+                $('#button-skip-confirm').prop('disabled', false).html('Skip Deliveries');
             },
             success: function(json) {
                 if (json['error']) {
@@ -686,15 +683,25 @@ $(document).ready(function() {
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <p>Your next delivery on <strong>{{ date_next }}</strong> will be skipped.</p>
+        <div class="mb-3">
+          <label for="input-skip-count" class="form-label">Number of Deliveries to Skip <span class="text-danger">*</span></label>
+          <select id="input-skip-count" class="form-select" required>
+            <option value="1">1 delivery</option>
+            <option value="2">2 deliveries</option>
+            <option value="3">3 deliveries</option>
+            <option value="4">4 deliveries</option>
+            <option value="5">5 deliveries</option>
+          </select>
+          <div class="form-text">Next delivery date: <strong>{{ date_next }}</strong></div>
+        </div>
         <div class="mb-3">
           <label for="input-skip-comment" class="form-label">Reason (Optional)</label>
-          <textarea id="input-skip-comment" class="form-control" rows="3" placeholder="e.g., Have too many flowers this month"></textarea>
+          <textarea id="input-skip-comment" class="form-control" rows="3" placeholder="e.g., Going on vacation for a month"></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" id="button-skip-confirm" class="btn btn-info">Skip Next Delivery</button>
+        <button type="button" id="button-skip-confirm" class="btn btn-info">Skip Deliveries</button>
       </div>
     </div>
   </div>

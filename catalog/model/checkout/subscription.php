@@ -67,7 +67,10 @@ class Subscription extends \Opencart\System\Engine\Model {
 			$remaining = 0;
 		}
 
-		if ($data['trial_status'] && $data['trial_duration']) {
+		// Use delivery_date as date_next if provided, otherwise calculate based on current date
+		if (!empty($data['delivery_date'])) {
+			$date_next = date('Y-m-d', strtotime($data['delivery_date']));
+		} elseif ($data['trial_status'] && $data['trial_duration']) {
 			$date_next = date('Y-m-d', strtotime('+' . $data['trial_cycle'] . ' ' . $data['trial_frequency']));
 		} else {
 			$date_next = date('Y-m-d', strtotime('+' . $data['cycle'] . ' ' . $data['frequency']));
@@ -338,22 +341,57 @@ class Subscription extends \Opencart\System\Engine\Model {
 	 *
 	 * @return bool
 	 */
-	public function skipNextDelivery(int $subscription_id, string $comment = '', string $modified_by = 'customer'): bool {
+	public function skipNextDelivery(int $subscription_id, int $skip_count = 1, string $comment = '', string $modified_by = 'customer'): bool {
 		$subscription = $this->getSubscription($subscription_id);
 		
 		if (!$subscription) {
 			return false;
 		}
 		
-		// Update subscription
+		// Validate skip count
+		if ($skip_count < 1) {
+			$skip_count = 1;
+		}
+		
+		// Store the current next delivery date for logging
+		$skipped_date = $subscription['date_next'];
+		
+		// Calculate the new next delivery date (skip multiple cycles)
+		$current_date = new \DateTime($subscription['date_next']);
+		
+		// Calculate total cycles to skip
+		$cycles_to_skip = (int)$subscription['cycle'] * $skip_count;
+		
+		switch ($subscription['frequency']) {
+			case 'day':
+				$current_date->modify('+' . $cycles_to_skip . ' day');
+				break;
+			case 'week':
+				$current_date->modify('+' . $cycles_to_skip . ' week');
+				break;
+			case 'month':
+				$current_date->modify('+' . $cycles_to_skip . ' month');
+				break;
+			case 'year':
+				$current_date->modify('+' . $cycles_to_skip . ' year');
+				break;
+		}
+		
+		$new_date_next = $current_date->format('Y-m-d');
+		
+		// Update subscription with new date
 		$this->db->query("UPDATE `" . DB_PREFIX . "subscription` SET 
-			`skip_next_delivery` = 1,
+			`date_next` = '" . $this->db->escape($new_date_next) . "',
 			`last_modified_by` = '" . $this->db->escape($modified_by) . "',
 			`date_modified` = NOW()
 			WHERE `subscription_id` = '" . (int)$subscription_id . "'");
 		
-		// Log the action
-		$this->addSubscriptionHistory($subscription_id, 'skip', null, $subscription['date_next'], $comment, $modified_by);
+		// Log the action with the skipped date and count
+		$log_comment = $comment;
+		if ($skip_count > 1) {
+			$log_comment = 'Skipped ' . $skip_count . ' deliveries. ' . ($comment ? $comment : '');
+		}
+		$this->addSubscriptionHistory($subscription_id, 'skip', null, $skipped_date, $log_comment, $modified_by);
 		
 		return true;
 	}

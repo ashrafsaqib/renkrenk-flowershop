@@ -637,9 +637,52 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		$results = $this->model_account_subscription->getHistories($subscription_id, ($page - 1) * $limit, $limit);
 
 		foreach ($results as $result) {
+			// Format action type into readable text
+			$action_text = '';
+			if (!empty($result['action_type'])) {
+				switch ($result['action_type']) {
+					case 'pause':
+						$action_text = 'Subscription Paused' . ($result['new_value'] ? ' until ' . date($this->language->get('date_format_short'), strtotime($result['new_value'])) : '');
+						break;
+					case 'resume':
+						$action_text = 'Subscription Resumed';
+						break;
+					case 'skip':
+						$action_text = 'Skipped Delivery' . ($result['new_value'] ? ' on ' . date($this->language->get('date_format_short'), strtotime($result['new_value'])) : '');
+						break;
+					case 'frequency_change':
+						$action_text = 'Frequency Changed';
+						if ($result['old_value'] && $result['new_value']) {
+							$action_text .= ' from ' . $result['old_value'] . ' to ' . $result['new_value'];
+						}
+						break;
+					case 'delivery_date_change':
+						$action_text = 'Delivery Date Changed';
+						if ($result['old_value'] && $result['new_value']) {
+							$action_text .= ' from ' . date($this->language->get('date_format_short'), strtotime($result['old_value'])) . ' to ' . date($this->language->get('date_format_short'), strtotime($result['new_value']));
+						}
+						break;
+					case 'plan_change':
+						$action_text = 'Subscription Plan Changed';
+						break;
+					case 'address_change':
+						$action_text = 'Delivery Address Updated';
+						break;
+					case 'cancel':
+						$action_text = 'Subscription Cancelled';
+						break;
+					default:
+						$action_text = ucfirst(str_replace('_', ' ', $result['action_type']));
+				}
+			} elseif (!empty($result['status'])) {
+				$action_text = $result['status'];
+			}
+			
 			$data['histories'][] = [
+				'action'     => $action_text,
 				'comment'    => nl2br($result['comment']),
-				'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added']))
+				'date_added' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
+				'modified_by' => ucfirst($result['modified_by'] ?? 'system')
 			] + $result;
 		}
 
@@ -865,9 +908,19 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			$this->load->model('checkout/subscription');
 
 			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
+			$skip_count = isset($this->request->post['skip_count']) ? (int)$this->request->post['skip_count'] : 1;
+			
+			// Validate skip count
+			if ($skip_count < 1 || $skip_count > 5) {
+				$skip_count = 1;
+			}
 
-			if ($this->model_checkout_subscription->skipNextDelivery($subscription_id, $comment, 'customer')) {
-				$json['success'] = $this->language->get('text_skip_success');
+			if ($this->model_checkout_subscription->skipNextDelivery($subscription_id, $skip_count, $comment, 'customer')) {
+				if ($skip_count == 1) {
+					$json['success'] = $this->language->get('text_skip_success');
+				} else {
+					$json['success'] = sprintf('Successfully skipped the next %d deliveries.', $skip_count);
+				}
 			} else {
 				$json['error'] = $this->language->get('error_skip');
 			}
