@@ -808,12 +808,12 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			$this->load->model('checkout/subscription');
+			$this->load->library('subscription_manager', $this->registry);
 
 			$paused_until = $this->request->post['paused_until'];
 			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
 
-			if ($this->model_checkout_subscription->pauseSubscription($subscription_id, $paused_until, $comment, 'customer')) {
+			if ($this->library_subscription_manager->pauseSubscription($subscription_id, $paused_until, $comment, 'customer')) {
 				$json['success'] = $this->language->get('text_pause_success');
 			} else {
 				$json['error'] = $this->language->get('error_pause');
@@ -857,11 +857,11 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			$this->load->model('checkout/subscription');
+			$this->load->library('subscription_manager', $this->registry);
 
 			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
 
-			if ($this->model_checkout_subscription->resumeSubscription($subscription_id, $comment, 'customer')) {
+			if ($this->library_subscription_manager->resumeSubscription($subscription_id, $comment, 'customer')) {
 				$json['success'] = $this->language->get('text_resume_success');
 			} else {
 				$json['error'] = $this->language->get('error_resume');
@@ -905,7 +905,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			$this->load->model('checkout/subscription');
+			$this->load->library('subscription_manager', $this->registry);
 
 			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
 			$skip_count = isset($this->request->post['skip_count']) ? (int)$this->request->post['skip_count'] : 1;
@@ -915,7 +915,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 				$skip_count = 1;
 			}
 
-			if ($this->model_checkout_subscription->skipNextDelivery($subscription_id, $skip_count, $comment, 'customer')) {
+			if ($this->library_subscription_manager->skipNextDelivery($subscription_id, $skip_count, $comment, 'customer')) {
 				if ($skip_count == 1) {
 					$json['success'] = $this->language->get('text_skip_success');
 				} else {
@@ -967,7 +967,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			$this->load->model('checkout/subscription');
+			$this->load->library('subscription_manager', $this->registry);
 
 			$frequency_id = (int)$this->request->post['frequency_id'];
 			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
@@ -978,7 +978,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			if ($frequency_query->num_rows) {
 				$frequency_data = $frequency_query->row;
 
-				if ($this->model_checkout_subscription->changeFrequency($subscription_id, $frequency_id, $frequency_data['frequency'], $frequency_data['cycle'], $comment, 'customer')) {
+				if ($this->library_subscription_manager->changeFrequency($subscription_id, $frequency_id, $frequency_data['frequency'], $frequency_data['cycle'], $comment, 'customer')) {
 					$json['success'] = $this->language->get('text_frequency_success');
 				} else {
 					$json['error'] = $this->language->get('error_frequency_change');
@@ -1029,12 +1029,12 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			$this->load->model('checkout/subscription');
+			$this->load->library('subscription_manager', $this->registry);
 
 			$delivery_date = $this->request->post['delivery_date'];
 			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
 
-			if ($this->model_checkout_subscription->changeDeliveryDate($subscription_id, $delivery_date, $comment, 'customer')) {
+			if ($this->library_subscription_manager->changeDeliveryDate($subscription_id, $delivery_date, $comment, 'customer')) {
 				$json['success'] = $this->language->get('text_delivery_date_success');
 			} else {
 				$json['error'] = $this->language->get('error_delivery_date_change');
@@ -1082,17 +1082,17 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		}
 
 		if (!$json) {
-			$this->load->model('checkout/subscription');
-			$this->load->model('catalog/subscription');
+			$this->load->library('subscription_manager', $this->registry);
+			$this->load->model('catalog/subscription_plan');
 
 			$plan_id = (int)$this->request->post['plan_id'];
 			$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
 
 			// Get plan details
-			$plan_info = $this->model_catalog_subscription->getSubscriptionPlan($plan_id);
+			$plan_info = $this->model_catalog_subscription_plan->getSubscriptionPlan($plan_id);
 
 			if ($plan_info) {
-				if ($this->model_checkout_subscription->changeSubscriptionPlan($subscription_id, $plan_id, $plan_info['price'], $comment, 'customer')) {
+				if ($this->library_subscription_manager->changeSubscriptionPlan($subscription_id, $plan_id, $plan_info['price'], $comment, 'customer')) {
 					$json['success'] = $this->language->get('text_plan_success');
 				} else {
 					$json['error'] = $this->language->get('error_plan_change');
@@ -1183,8 +1183,9 @@ class Subscription extends \Opencart\System\Engine\Controller {
 
 				$this->model_account_address->editAddress($this->customer->getId(), $address_id, $address_data);
 
+				$this->load->library('subscription_manager', $this->registry);
 				$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : 'Address updated';
-				$this->model_checkout_subscription->changeDeliveryAddress($subscription_id, $address_id, $comment, 'customer');
+				$this->library_subscription_manager->changeDeliveryAddress($subscription_id, $address_id, $comment, 'customer');
 
 				$json['success'] = $this->language->get('text_address_success');
 			}
@@ -1195,6 +1196,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 			}
 
 			if (!$json) {
+				$this->load->library('subscription_manager', $this->registry);
 				$address_id = (int)$this->request->post['address_id'];
 				$comment = isset($this->request->post['comment']) ? $this->request->post['comment'] : '';
 
@@ -1202,7 +1204,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 				$address_info = $this->model_account_address->getAddress($this->customer->getId(), $address_id);
 
 				if ($address_info) {
-					if ($this->model_checkout_subscription->changeDeliveryAddress($subscription_id, $address_id, $comment, 'customer')) {
+					if ($this->library_subscription_manager->changeDeliveryAddress($subscription_id, $address_id, $comment, 'customer')) {
 						$json['success'] = $this->language->get('text_address_success');
 					} else {
 						$json['error'] = $this->language->get('error_address_change');

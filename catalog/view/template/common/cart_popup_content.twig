@@ -23,6 +23,17 @@
             <span>Quantity: {{ product.quantity }}</span>
           </div>
           
+          {# Product Options #}
+          {% if product.options %}
+            <div class="product-options-meta">
+              {% for option in product.options %}
+                <div class="product-option">
+                  <strong>{{ option.name }}:</strong> {{ option.value }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+          
           {# Subscription Options #}
           {% if subscription_options %}
             <div class="subscription-options-meta">

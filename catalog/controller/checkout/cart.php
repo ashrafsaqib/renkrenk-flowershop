@@ -447,6 +447,87 @@ class Cart extends \Opencart\System\Engine\Controller {
 						'price' => $this->currency->format($this->tax->calculate($full_product['price'], $full_product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
 						'href' => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $full_product['product_id'])
 					];
+					
+					// Add selected product options to popup data
+					if (!empty($option)) {
+						$popup_product['options'] = [];
+						$product_options = $this->model_catalog_product->getOptions($product_id);
+						
+						foreach ($product_options as $product_option) {
+							if (isset($option[$product_option['product_option_id']])) {
+								$option_value = $option[$product_option['product_option_id']];
+								
+								if ($product_option['type'] == 'select' || $product_option['type'] == 'radio') {
+									// Find the selected option value name
+									foreach ($product_option['product_option_value'] as $option_value_data) {
+										if ($option_value_data['product_option_value_id'] == $option_value) {
+											$display_value = $option_value_data['name'];
+											if ($option_value_data['price']) {
+												$display_value .= ' (' . $option_value_data['price_prefix'] . $option_value_data['price'] . ')';
+											}
+											$popup_product['options'][] = [
+												'name' => $product_option['name'],
+												'value' => $display_value
+											];
+											break;
+										}
+									}
+								} elseif ($product_option['type'] == 'checkbox') {
+									// Handle multiple checkbox selections
+									$checkbox_values = [];
+									foreach ($product_option['product_option_value'] as $option_value_data) {
+										if (is_array($option_value) && in_array($option_value_data['product_option_value_id'], $option_value)) {
+											$display_value = $option_value_data['name'];
+											if ($option_value_data['price']) {
+												$display_value .= ' (' . $option_value_data['price_prefix'] . $option_value_data['price'] . ')';
+											}
+											$checkbox_values[] = $display_value;
+										}
+									}
+									if (!empty($checkbox_values)) {
+										$popup_product['options'][] = [
+											'name' => $product_option['name'],
+											'value' => implode(', ', $checkbox_values)
+										];
+									}
+								} elseif ($product_option['type'] == 'text' || $product_option['type'] == 'textarea') {
+									// Text and textarea options
+									$popup_product['options'][] = [
+										'name' => $product_option['name'],
+										'value' => $option_value
+									];
+								} elseif ($product_option['type'] == 'file') {
+									// File upload option
+									$this->load->model('tool/upload');
+									$upload_info = $this->model_tool_upload->getUploadByCode($option_value);
+									if ($upload_info) {
+										$popup_product['options'][] = [
+											'name' => $product_option['name'],
+											'value' => $upload_info['name']
+										];
+									}
+								} elseif ($product_option['type'] == 'date') {
+									// Date option
+									$popup_product['options'][] = [
+										'name' => $product_option['name'],
+										'value' => date('F j, Y', strtotime($option_value))
+									];
+								} elseif ($product_option['type'] == 'datetime') {
+									// DateTime option
+									$popup_product['options'][] = [
+										'name' => $product_option['name'],
+										'value' => date('F j, Y g:i A', strtotime($option_value))
+									];
+								} elseif ($product_option['type'] == 'time') {
+									// Time option
+									$popup_product['options'][] = [
+										'name' => $product_option['name'],
+										'value' => date('g:i A', strtotime($option_value))
+									];
+								}
+							}
+						}
+					}
 				}
 			} elseif ($subscription_plan_id) {
 				// Build popup data for subscription-only adds - fetch subscription plan details
