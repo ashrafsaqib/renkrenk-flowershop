@@ -343,9 +343,9 @@ class Address extends \Opencart\System\Engine\Controller {
 				$json['error']['address_1'] = $this->language->get('error_address_1');
 			}
 
-			if (!oc_validate_length((string)$post_info['city'], 2, 128)) {
-				$json['error']['city'] = $this->language->get('error_city');
-			}
+			// if (!oc_validate_length((string)$post_info['city'], 2, 128)) {
+			// 	$json['error']['city'] = $this->language->get('error_city');
+			// }
 
 			// Country
 			$this->load->model('localisation/country');

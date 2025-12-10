@@ -46,9 +46,9 @@ class ShippingAddress extends \Opencart\System\Engine\Controller {
 				$output['error']['shipping_address_1'] = $this->language->get('error_address_1');
 			}
 
-			if (!oc_validate_length($post_info['shipping_city'], 2, 128)) {
-				$output['error']['shipping_city'] = $this->language->get('error_city');
-			}
+			// if (!oc_validate_length($post_info['shipping_city'], 2, 128)) {
+			// 	$output['error']['shipping_city'] = $this->language->get('error_city');
+			// }
 
 			// Country
 			$this->load->model('localisation/country');

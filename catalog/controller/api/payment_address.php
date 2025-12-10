@@ -45,9 +45,9 @@ class PaymentAddress extends \Opencart\System\Engine\Controller {
 			$output['error']['payment_address_1'] = $this->language->get('error_address_1');
 		}
 
-		if (!oc_validate_length((string)$post_info['payment_city'], 2, 128)) {
-			$output['error']['payment_city'] = $this->language->get('error_city');
-		}
+		// if (!oc_validate_length((string)$post_info['payment_city'], 2, 128)) {
+		// 	$output['error']['payment_city'] = $this->language->get('error_city');
+		// }
 
 		// Country
 		$this->load->model('localisation/country');
