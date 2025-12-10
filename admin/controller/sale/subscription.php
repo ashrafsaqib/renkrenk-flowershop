@@ -1103,19 +1103,98 @@ class Subscription extends \Opencart\System\Engine\Controller {
 		// Subscription
 		$this->load->model('sale/subscription');
 
-		$results = $this->model_sale_subscription->getHistories($subscription_id, ($page - 1) * $limit, $limit);
+	$results = $this->model_sale_subscription->getHistories($subscription_id, ($page - 1) * $limit, $limit);
 
-		foreach ($results as $result) {
-			$data['histories'][] = [
-				'comment'    => nl2br($result['comment']),
-				'notify'     => $result['notify'] ? $this->language->get('text_yes') : $this->language->get('text_no'),
-				'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added']))
-			] + $result;
+	foreach ($results as $result) {
+		// Format action type into readable text
+		$action_text = '';
+		if (!empty($result['action_type'])) {
+			switch ($result['action_type']) {
+				case 'pause':
+					$action_text = 'Subscription Paused' . ($result['new_value'] ? ' until ' . date($this->language->get('date_format_short'), strtotime($result['new_value'])) : '');
+					break;
+				case 'resume':
+					$action_text = 'Subscription Resumed';
+					break;
+				case 'skip':
+					$action_text = 'Skipped Delivery' . ($result['new_value'] ? ' on ' . date($this->language->get('date_format_short'), strtotime($result['new_value'])) : '');
+					break;
+				case 'frequency_change':
+					$action_text = 'Frequency Changed';
+					if ($result['old_value'] && $result['new_value']) {
+						// Parse JSON values to make them human-readable
+						$old_data = json_decode($result['old_value'], true);
+						$new_data = json_decode($result['new_value'], true);
+
+						$old_readable = '';
+						$new_readable = '';
+
+						if ($old_data && isset($old_data['cycle'], $old_data['frequency'])) {
+							$old_readable = 'Every ' . $old_data['cycle'] . ' ' . ucfirst($old_data['frequency']);
+							if ($old_data['cycle'] > 1) {
+								$old_readable .= 's';
+							}
+						}
+
+						if ($new_data && isset($new_data['cycle'], $new_data['frequency'])) {
+							$new_readable = 'Every ' . $new_data['cycle'] . ' ' . ucfirst($new_data['frequency']);
+							if ($new_data['cycle'] > 1) {
+								$new_readable .= 's';
+							}
+						}
+
+						if ($old_readable && $new_readable) {
+							$action_text .= ' from ' . $old_readable . ' to ' . $new_readable;
+						}
+					}
+					break;
+				case 'delivery_date_change':
+					$action_text = 'Delivery Date Changed';
+					if ($result['old_value'] && $result['new_value']) {
+						$action_text .= ' from ' . date($this->language->get('date_format_short'), strtotime($result['old_value'])) . ' to ' . date($this->language->get('date_format_short'), strtotime($result['new_value']));
+					}
+					break;
+				case 'plan_change':
+					$action_text = 'Subscription Plan Changed';
+					break;
+				case 'address_change':
+					$action_text = 'Delivery Address Updated';
+					break;
+				case 'cancel':
+					$action_text = 'Subscription Cancelled';
+					break;
+				default:
+					$action_text = ucfirst(str_replace('_', ' ', $result['action_type']));
+			}
+		} elseif (!empty($result['subscription_status'])) {
+			$action_text = $result['subscription_status'];
 		}
-
-		$subscription_total = $this->model_sale_subscription->getTotalHistories($subscription_id);
-
-		$data['pagination'] = $this->load->controller('common/pagination', [
+		
+		// Format comment to make JSON values human-readable
+		$comment = $result['comment'];
+		
+		// Check if comment contains JSON and decode it
+		if (strpos($comment, 'from {') !== false || strpos($comment, 'to {') !== false) {
+			$comment = preg_replace_callback('/\{[^}]+\}/', function($matches) {
+				$json_data = json_decode($matches[0], true);
+				if ($json_data && isset($json_data['cycle'], $json_data['frequency'])) {
+					$readable = 'Every ' . $json_data['cycle'] . ' ' . ucfirst($json_data['frequency']);
+					if ($json_data['cycle'] > 1) {
+						$readable .= 's';
+					}
+					return $readable;
+				}
+				return $matches[0];
+			}, $comment);
+		}
+		
+		$data['histories'][] = [
+			'action'     => $action_text,
+			'comment'    => nl2br($comment),
+			'notify'     => $result['notify'] ? $this->language->get('text_yes') : $this->language->get('text_no'),
+			'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added']))
+		] + $result;
+	}$subscription_total = $this->model_sale_subscription->getTotalHistories($subscription_id);		$data['pagination'] = $this->load->controller('common/pagination', [
 			'total' => $subscription_total,
 			'page'  => $page,
 			'limit' => $limit,

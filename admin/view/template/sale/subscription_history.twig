@@ -3,8 +3,8 @@
     <thead>
       <tr>
         <th>{{ column_date_added }}</th>
+        <th>Action</th>
         <th>{{ column_comment }}</th>
-        <th>{{ column_status }}</th>
         <th>{{ column_notify }}</th>
       </tr>
     </thead>
@@ -13,8 +13,8 @@
         {% for history in histories %}
           <tr>
             <td>{{ history.date_added }}</td>
+            <td>{{ history.action }}</td>
             <td>{{ history.comment }}</td>
-            <td>{{ history.subscription_status }}</td>
             <td>{{ history.notify }}</td>
           </tr>
         {% endfor %}

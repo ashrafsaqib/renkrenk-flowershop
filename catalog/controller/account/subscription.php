@@ -653,7 +653,30 @@ class Subscription extends \Opencart\System\Engine\Controller {
 					case 'frequency_change':
 						$action_text = 'Frequency Changed';
 						if ($result['old_value'] && $result['new_value']) {
-							$action_text .= ' from ' . $result['old_value'] . ' to ' . $result['new_value'];
+							// Parse JSON values to make them human-readable
+							$old_data = json_decode($result['old_value'], true);
+							$new_data = json_decode($result['new_value'], true);
+
+							$old_readable = '';
+							$new_readable = '';
+
+							if ($old_data && isset($old_data['cycle'], $old_data['frequency'])) {
+								$old_readable = 'Every ' . $old_data['cycle'] . ' ' . ucfirst($old_data['frequency']);
+								if ($old_data['cycle'] > 1) {
+									$old_readable .= 's';
+								}
+							}
+
+							if ($new_data && isset($new_data['cycle'], $new_data['frequency'])) {
+								$new_readable = 'Every ' . $new_data['cycle'] . ' ' . ucfirst($new_data['frequency']);
+								if ($new_data['cycle'] > 1) {
+									$new_readable .= 's';
+								}
+							}
+
+							if ($old_readable && $new_readable) {
+								$action_text .= ' from ' . $old_readable . ' to ' . $new_readable;
+							}
 						}
 						break;
 					case 'delivery_date_change':
@@ -678,9 +701,25 @@ class Subscription extends \Opencart\System\Engine\Controller {
 				$action_text = $result['status'];
 			}
 			
+			// Parse JSON frequency data in comments to make them human-readable
+			$comment = $result['comment'];
+			if (strpos($comment, 'from {') !== false || strpos($comment, 'to {') !== false) {
+				$comment = preg_replace_callback('/\{[^}]+\}/', function($matches) {
+					$json_data = json_decode($matches[0], true);
+					if ($json_data && isset($json_data['cycle'], $json_data['frequency'])) {
+						$readable = 'Every ' . $json_data['cycle'] . ' ' . ucfirst($json_data['frequency']);
+						if ($json_data['cycle'] > 1) {
+							$readable .= 's';
+						}
+						return $readable;
+					}
+					return $matches[0];
+				}, $comment);
+			}
+			
 			$data['histories'][] = [
 				'action'     => $action_text,
-				'comment'    => nl2br($result['comment']),
+				'comment'    => nl2br($comment),
 				'date_added' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'modified_by' => ucfirst($result['modified_by'] ?? 'system')
 			] + $result;
