@@ -15,9 +15,9 @@ $_['entry_company']         = 'Company';
 $_['entry_address_1']       = 'Address 1';
 $_['entry_address_2']       = 'Address 2';
 $_['entry_postcode']        = 'Post Code';
-$_['entry_city']            = 'City';
-$_['entry_country']         = 'Country';
-$_['entry_zone']            = 'Region / State';
+$_['entry_city']            = 'Address 3';
+$_['entry_country']         = 'City';
+$_['entry_zone']            = 'District';
 
 // Error
 $_['error_customer']        = 'Customer required!';
