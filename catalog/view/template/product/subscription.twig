@@ -29,12 +29,11 @@
           <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
         {% endfor %}
       </ul>
-          <h1>{{ heading_title }}</h1>
+          <h1 id="titleHeading">{{ heading_title }}</h1>
           
           {% if price_formatted %}
-            <ul class="list-unstyled">
-              <li><h2><span class="price-new">{{ price_formatted }}</span></h2></li>
-            </ul>
+            <h4 ><span class="price-new">{{ price_formatted }}</span> PER DELIVERY</h4>
+          
           {% endif %}
 
           <div class="mb-2">
@@ -44,7 +43,7 @@
                 {% set current_name = subscription.name %}
               {% endif %}
             {% endfor %}
-            <label class="form-label">Select your subscription: <small class="text-muted">{{ current_name|default('none selected') }}</small></label>
+            <label class="form-label">Select your subscription: <small>{{ current_name|default('none selected') }}</small></label>
           </div>
 
             <div class="mb-3">
@@ -69,7 +68,7 @@
                   {% set current_freq_name = frequency.name %}
                 {% endif %}
               {% endfor %}
-              <label class="form-label">Select payment frequency: <small id="selectedFrequency" class="text-muted"></small></label>
+              <label class="form-label">Select payment frequency: <small id="selectedFrequency" class="fw-bold"></small></label>
             </div>
 
             <div class="d-flex flex-wrap gap-2" role="group" aria-label="Payment frequencies">
@@ -116,7 +115,7 @@
                   {% set current_duration_name = duration.name %}
                 {% endif %}
               {% endfor %}
-              <label class="form-label">Select duration: <small id="selectedDuration" class="text-muted">{{ current_duration_name|default('none selected') }}</small></label>
+              <label class="form-label">Select duration: <small id="selectedDuration" class="fw-bold">{{ current_duration_name|default('none selected') }}</small></label>
             </div>
 
             <div class="d-flex flex-wrap gap-2" role="group" aria-label="Durations">
@@ -153,7 +152,7 @@
                   {% set current_gift_name = gift.name %}
                 {% endif %}
               {% endfor %}
-              <label class="form-label">Select gift: <small id="selectedGift" class="text-muted">{{ current_gift_name|default('None') }}</small></label>
+              <label class="form-label d-flex align-items-center">Select gift: <small id="selectedGiftName" class="fw-bold fw-bold ms-1">{{ current_gift_name|default('None') }}</small><small id="selectedGiftPrice" class="fw-bold fw-bold ms-auto"></small></label>
             </div>
 
             <div class="d-flex flex-wrap image-btns" role="group" aria-label="Gifts">
@@ -161,6 +160,7 @@
                 class="btn-gift btn active"
                 data-id="0"
                 data-name="None"
+                data-price=""
                 aria-pressed="true"
                 title="None"
               >
@@ -176,6 +176,7 @@
                   class="btn-gift btn"
                   data-id="{{ gift.product_id|default(gift.id) }}"
                   data-name="{{ gift.name }}"
+                  data-price="{{ gift.price }}"
                   aria-pressed="false"
                   title="{{ gift.name }}"
                 >
@@ -202,7 +203,7 @@
                   {% set current_vase_name = vase.name %}
                 {% endif %}
               {% endfor %}
-              <label class="form-label">Select vase: <small id="selectedVase" class="text-muted">{{ current_vase_name|default('None') }}</small></label>
+              <label class="form-label d-flex align-items-center">Select vase: <small id="selectedVaseName" class="fw-bold fw-bold ms-1">{{ current_vase_name|default('None') }}</small><small id="selectedVasePrice" class="fw-bold fw-bold ms-auto"></small></label>
             </div>
 
             <div class="d-flex flex-wrap image-btns" role="group" aria-label="Vases">
@@ -225,6 +226,7 @@
                   class="btn-vase btn"
                   data-id="{{ vase.product_id|default(vase.id) }}"
                   data-name="{{ vase.name }}"
+                  data-price="{{ vase.price }}"
                   aria-pressed="false"
                   title="{{ vase.name }}"
                 >
@@ -264,6 +266,15 @@
             </div>
 
             <style>
+
+              #titleHeading {
+                border-bottom: 3px solid black;
+                padding-bottom: 0.5rem;
+                display: inline-block;
+                letter-spacing: 0.1rem;
+                font-weight: 700;
+                text-transform: uppercase;
+            }
               #button-add-to-cart {
                 font-size: small;
               }
@@ -342,6 +353,18 @@
             #date-selection-container .card-title {
               text-transform: uppercase;
             }
+            .btn {
+              text-transform: uppercase;
+              font-weight: 700;
+              letter-spacing: .05em;
+              padding-top: 20px;
+              padding-bottom: 20px;
+              font-size: .73rem;
+            line-height: 1rem;
+            }
+            .btn-vase,.btn-gift{
+              padding:0px;
+            }
             </style>
 
           </div>
@@ -394,6 +417,20 @@
 
 <script type="text/javascript"><!--
 $(document).ready(function() {
+  // Price tracking
+  var basePrice = {{ price }};
+  var giftPriceRaw = 0;
+  var vasePriceRaw = 0;
+
+  function updateFinalPrice() {
+    var total = basePrice + giftPriceRaw + vasePriceRaw;
+    // Format using the currency
+    var formattedPrice = '{{ price_formatted }}'.replace(/[\d,\.]+/, total.toFixed(2));
+    document.querySelectorAll('.priceFinal').forEach(function(el) {
+      el.textContent = formattedPrice;
+    });
+  }
+
   // Magnific Popup for images
   $('.image').magnificPopup({
     type: 'image',
@@ -452,15 +489,36 @@ $(document).ready(function() {
         });
         this.classList.add('active');
 
+        // Reset gift selection to None
+        var noneGiftBtn = document.querySelector('.btn-gift[data-id="0"]');
+        if (noneGiftBtn) {
+          noneGiftBtn.click();
+        }
+
+        // Reset vase selection to None
+        var noneVaseBtn = document.querySelector('.btn-vase[data-id="0"]');
+        if (noneVaseBtn) {
+          noneVaseBtn.click();
+        }
+
         if (radio.value === 'yes') {
           durationSection.show();
           if (giftsSection) giftsSection.style.display = 'block';
           ongoingDurationBtn.classList.remove('active');
           ongoingDurationBtn.style.display = 'none';
+          // umselect other durations
+          document.querySelectorAll('.btn-duration').forEach(function(b){
+            b.classList.remove('active');
+          });
+          
           durationSection[0].classList.add('active');
           var firstGiftDuration = durationSection[0].querySelector('input[type="radio"]');
-          if (firstGiftDuration) firstGiftDuration.checked = true;
+          firstGiftDuration.checked = true;
+          firstGiftDuration.parentElement.click();
+
           if (vasesSection) vasesSection.style.display = 'none';
+          vasePriceRaw = 0;
+          updateFinalPrice();
         } else {
           durationSection.hide();
           if (giftsSection) giftsSection.style.display = 'none';
@@ -469,6 +527,9 @@ $(document).ready(function() {
           ongoingDurationBtn.style.display = 'block';
           var ongoingRadio = ongoingDurationBtn.querySelector('input[type="radio"]');
           if (ongoingRadio) ongoingRadio.checked = true;
+          ongoingDurationBtn.click();
+          giftPriceRaw = 0;
+          updateFinalPrice();
         }
       });
     });
@@ -497,11 +558,12 @@ $(document).ready(function() {
 
   // Gift selection
   (function(){
-    var label = document.getElementById('selectedGift');
+    var labelName = document.getElementById('selectedGiftName');
+    var labelPrice = document.getElementById('selectedGiftPrice');
     var hidden = document.getElementById('gift_id');
 
-    if (label && !label.textContent.trim()) {
-      label.textContent = 'None';
+    if (labelName && !labelName.textContent.trim()) {
+      labelName.textContent = 'None';
     }
     if (hidden) hidden.value = '0';
 
@@ -514,19 +576,36 @@ $(document).ready(function() {
         this.classList.add('active');
         this.setAttribute('aria-pressed','true');
 
-        if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
+        var giftName = this.getAttribute('data-name') || this.getAttribute('title');
+        var giftPrice = this.getAttribute('data-price');
+        
+        if (labelName) {
+          labelName.textContent = giftName;
+        }
+        if (labelPrice) {
+          if (giftPrice && giftPrice.trim() !== '') {
+            labelPrice.textContent = '+' + giftPrice;
+            // Extract numeric value from formatted price
+            giftPriceRaw = parseFloat(giftPrice.replace(/[^\d.]/g, '')) || 0;
+          } else {
+            labelPrice.textContent = '';
+            giftPriceRaw = 0;
+          }
+        }
         if (hidden) hidden.value = this.getAttribute('data-id');
+        updateFinalPrice();
       });
     });
   })();
 
   // Vase selection
   (function(){
-    var label = document.getElementById('selectedVase');
+    var labelName = document.getElementById('selectedVaseName');
+    var labelPrice = document.getElementById('selectedVasePrice');
     var hidden = document.getElementById('vase_id');
 
-    if (label && !label.textContent.trim()) {
-      label.textContent = 'None';
+    if (labelName && !labelName.textContent.trim()) {
+      labelName.textContent = 'None';
     }
     if (hidden) hidden.value = '0';
 
@@ -539,9 +618,25 @@ $(document).ready(function() {
         this.classList.add('active');
         this.setAttribute('aria-pressed','true');
 
-        if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
+        var vaseName = this.getAttribute('data-name') || this.getAttribute('title');
+        var vasePrice = this.getAttribute('data-price');
+        
+        if (labelName) {
+          labelName.textContent = vaseName;
+        }
+        if (labelPrice) {
+          if (vasePrice && vasePrice.trim() !== '') {
+            labelPrice.textContent = '+' + vasePrice;
+            // Extract numeric value from formatted price
+            vasePriceRaw = parseFloat(vasePrice.replace(/[^\d.]/g, '')) || 0;
+          } else {
+            labelPrice.textContent = '';
+            vasePriceRaw = 0;
+          }
+        }
         if (hidden) hidden.value = this.getAttribute('data-id');
         this.querySelector('input[type="radio"]').checked = true;
+        updateFinalPrice();
       });
     });
   })();

@@ -151,10 +151,14 @@ class Subscription extends \Opencart\System\Engine\Controller {
 					$image = $this->model_tool_image->resize('placeholder.png', 100, 100);
 				}
 				
+				$price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				
 				$data['gifts'][] = [
 					'product_id' => $gift['product_id'],
 					'name' => $gift['name'],
-					'image' => $image
+					'image' => $image,
+					'price' => $price,
+					'price_raw' => $product_info['price']
 				];
 			}
 		}
@@ -173,10 +177,14 @@ class Subscription extends \Opencart\System\Engine\Controller {
 					$image = $this->model_tool_image->resize('placeholder.png', 100, 100);
 				}
 				
+				$price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				
 				$data['vases'][] = [
 					'product_id' => $vase['product_id'],
 					'name' => $vase['name'],
-					'image' => $image
+					'image' => $image,
+					'price' => $price,
+					'price_raw' => $product_info['price']
 				];
 			}
 		}
