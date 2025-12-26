@@ -222,6 +222,17 @@ button:focus {
   border-top-right-radius: 0;
 }
 
+#menu .dropdown-menu-fullwidth {
+  position: absolute !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  width: 100vw !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
 #menu .dropdown-inner {
   display: flex;
   flex-direction: column;
