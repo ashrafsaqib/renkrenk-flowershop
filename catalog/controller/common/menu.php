@@ -69,6 +69,9 @@ class Menu extends \Opencart\System\Engine\Controller {
 
 		// Link to all subscriptions page
 		$data['all_subscriptions_href'] = $this->url->link('product/subscription_list', 'language=' . $this->config->get('config_language'));
+		
+		// Link to what to expect page
+		$data['what_to_expect_href'] = $this->url->link('product/subscription_expect', 'language=' . $this->config->get('config_language'));
 
 		return $this->load->view('common/menu', $data);
 	}

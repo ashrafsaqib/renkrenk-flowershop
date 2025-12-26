@@ -1,0 +1,222 @@
+{{ header }}
+<div id="subscription-expect" class="container">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+      <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+  
+  <div class="row">{{ column_left }}
+    <div id="content" class="col">
+      {{ content_top }}
+      
+      <!-- Hero Section -->
+      <div class="text-center mb-5">
+        <h1 class="mb-3">{{ heading_title }}</h1>
+        <p class="lead">{{ text_intro }}</p>
+      </div>
+
+      <!-- Seasonal Sections -->
+      <div class="seasons-content mb-5">
+        
+        <!-- Spring -->
+        <div class="season-section mb-5">
+          <h2 class="text-center mb-3">{{ text_spring }}</h2>
+          <p class="text-center text-muted mb-4">{{ text_spring_desc }}</p>
+          <div class="row row-cols-2 row-cols-md-5 g-3 justify-content-center">
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/hyacinths.jpg" alt="Hyacinths" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>HYACINTHS</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/iris.jpg" alt="Iris" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>IRIS</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/daffodils.jpg" alt="Daffodils" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>DAFFODILS</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/roses.jpg" alt="Petite Roses" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>PETITE ROSES</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/tulips.jpg" alt="Tulips" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>TULIPS</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summer -->
+        <div class="season-section mb-5 bg-light py-4">
+          <h2 class="text-center mb-3">{{ text_summer }}</h2>
+          <p class="text-center text-muted mb-4">{{ text_summer_desc }}</p>
+          <div class="row row-cols-2 row-cols-md-5 g-3 justify-content-center">
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/lavender.jpg" alt="Snapdragons" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>SNAPDRAGONS</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/hydrangeas.jpg" alt="Hydrangeas" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>HYDRANGEAS</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/peonies.jpg" alt="Peonies" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>PEONIES</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/orchids.jpg" alt="Campanula" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>CAMPANULA</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/sunflowers.jpg" alt="Sunflowers" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>SUNFLOWERS</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Autumn -->
+        <div class="season-section mb-5">
+          <h2 class="text-center mb-3">{{ text_autumn }}</h2>
+          <p class="text-center text-muted mb-4">{{ text_autumn_desc }}</p>
+          <div class="row row-cols-2 row-cols-md-5 g-3 justify-content-center">
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/lilies.jpg" alt="Gladioli" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>GLADIOLI</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/gerbera.jpg" alt="Lisianthus" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>LISIANTHUS</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/roses.jpg" alt="Roses" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>ROSES</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/dahlias.jpg" alt="Stocks" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>STOCKS</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/hydrangeas.jpg" alt="Hydrangeas" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>HYDRANGEAS</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Winter -->
+        <div class="season-section mb-5 bg-light py-4">
+          <h2 class="text-center mb-3">{{ text_winter }}</h2>
+          <p class="text-center text-muted mb-4">{{ text_winter_desc }}</p>
+          <div class="row row-cols-2 row-cols-md-5 g-3 justify-content-center">
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/tulips.jpg" alt="Tulips" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>TULIPS</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/chrysanthemums.jpg" alt="Hypericum" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>HYPERICUM</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/carnations.jpg" alt="Carnations" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>CARNATIONS</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/orchids.jpg" alt="Skimmia" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>SKIMMIA</strong></p>
+              </div>
+            </div>
+            <div class="col text-center">
+              <div class="p-3">
+                <img src="image/catalog/flowers/roses.jpg" alt="Roses" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                <p class="small mb-0"><strong>ROSES</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscriptions Section -->
+      <div class="subscriptions-section mt-5 pt-5 border-top">
+        <h2 class="text-center mb-4">{{ text_shop_subscriptions }}</h2>
+        
+        {% if subscriptions %}
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            {% for subscription in subscriptions %}
+              <div class="col">
+                <div class="card h-100 border-0 text-center">
+                  <a href="{{ subscription.href }}">
+                    <img src="{{ subscription.image }}" class="card-img-top" alt="{{ subscription.name }}" style="height: 250px; object-fit: cover;">
+                  </a>
+                  <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-3">
+                      <a href="{{ subscription.href }}" class="text-decoration-none text-dark text-uppercase">THE {{ subscription.name }} SUBSCRIPTION</a>
+                    </h5>
+                    
+                    <div class="mt-auto">
+                      {% if subscription.price %}
+                        <p class="h5 mb-3">{{ subscription.price }}</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      
+      {{ content_bottom }}
+    </div>
+    {{ column_right }}
+  </div>
+</div>
+
+<style>
+.season-section {
+  padding: 2rem 0;
+}
+.season-section h2 {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+</style>
+
+{{ footer }}
