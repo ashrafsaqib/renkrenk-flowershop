@@ -12,6 +12,8 @@
                   <div class="dropdown-inner">
                     <ul class="list-unstyled">
                       <li class="dropdown-header">Discover FLOWERBX Subscriptions</li>
+                      <li><a href="{{ all_subscriptions_href }}" class="dropdown-item">Discover All </a></li>
+                      
                       {% for subscription in subscriptions %}
                         <li><a href="{{ subscription.href }}" class="dropdown-item">{{ subscription.name }}</a></li>
                       {% endfor %}
@@ -19,7 +21,6 @@
                     <ul class="list-unstyled">
                       <li class="dropdown-header">Subscription Gifts</li>
                       <li><a href="{{ all_subscriptions_href }}" class="dropdown-item">Gift Subscriptions</a></li>
-                      <li><a href="{{ all_subscriptions_href }}" class="dropdown-item">Corporate Gifts</a></li>
                     </ul>
                     <ul class="list-unstyled">
                       <li class="dropdown-header">Find out More</li>
