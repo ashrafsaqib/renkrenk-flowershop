@@ -10804,11 +10804,11 @@ header {
   border-top-right-radius: 0;
 }
 #menu .dropdown-menu-fullwidth {
-  position: absolute !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
-  width: 100vw !important;
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+  width: 100% !important;
   max-width: none !important;
   margin: 0 !important;
   border-radius: 0 !important;
