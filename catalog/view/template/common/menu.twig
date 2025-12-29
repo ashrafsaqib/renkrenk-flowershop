@@ -43,7 +43,7 @@
                 {% set column = (total / 5)|round(0, 'ceil') %}
               {% endif %}
               <li class="nav-item dropdown"><a href="{{ category.href }}" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">{{ category.name }}</a>
-                <div class="dropdown-menu dropdown-column-{{ column }}">
+                <div class="dropdown-menu dropdown-menu-fullwidth dropdown-column-{{ column }}">
                   <div class="dropdown-inner">
                     {% for children in category.children|batch(batch) %}
                       <ul class="list-unstyled">
