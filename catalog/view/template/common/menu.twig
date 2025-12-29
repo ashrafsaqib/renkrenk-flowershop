@@ -47,18 +47,14 @@
                   <div class="dropdown-inner">
                     {% for children in category.children|batch(batch) %}
                       <ul class="list-unstyled">
+                        <li><a href="{{ category.href }}" class="dropdown-item">Discover All</a></li>
+
                         {% for child in children %}
                           <li><a href="{{ child.href }}" class="dropdown-item">{{ child.name }}</a></li>
                         {% endfor %}
                       </ul>
                     {% endfor %}
                   </div>
-                  <ul class="list-unstyled">
-                    <li>
-                      <hr class="dropdown-divider">
-                    </li>
-                    <li><a href="{{ category.href }}" class="dropdown-item">{{ text_all }} {{ category.name }}</a></li>
-                  </ul>
                 </div>
               </li>
             {% else %}
