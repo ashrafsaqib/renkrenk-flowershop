@@ -10698,12 +10698,12 @@ button:focus {
   box-shadow: 0 0 0 5px rgb(var(--bs-dark-rgb), 0.1);
 }
 /* top */
-#top {
-  background-color: var(--bs-tertiary-bg);
+header {
+  /* background-color: var(--bs-tertiary-bg); */
   border-bottom: 1px solid var(--bs-border-color);
   margin-bottom: 20px;
   position: relative;
-  padding-bottom: 5px;
+  padding-top: 10px;
 }
 #top .text-end{
   line-height: 78px;
@@ -10784,14 +10784,17 @@ button:focus {
   min-height: 40px;
   border-radius: 4px;
   padding: 0 1rem;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 #menu .navbar-nav > li > a {
   color: #212529;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   padding: 10px 15px 10px 15px;
   background-color: transparent;
   text-transform: uppercase;
+  font-weight: bold;
+  font-size: .93rem;
+  line-height: 1.2rem;
+  letter-spacing: .05em;
 }
 #menu .navbar-nav > li > a:hover {
   background-color: rgba(0, 0, 0, 0.1);

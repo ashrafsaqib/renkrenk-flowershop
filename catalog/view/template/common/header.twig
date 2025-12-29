@@ -16,7 +16,7 @@
   <script src="{{ jquery }}" type="text/javascript"></script>
   <link href="{{ bootstrap }}" type="text/css" rel="stylesheet" media="screen" />
   <link href="{{ icons }}" rel="stylesheet" type="text/css" />
-  <link href="{{ stylesheet }}?v=3.1" type="text/css" rel="stylesheet" />
+  <link href="{{ stylesheet }}?v=3.2" type="text/css" rel="stylesheet" />
   <script src="catalog/view/javascript/common.js" type="text/javascript"></script>
   <script src="catalog/view/javascript/location.js?v=2" type="text/javascript"></script>
 
@@ -129,6 +129,7 @@
   </div>
 
   <div id="container" class="d-flex flex-column min-vh-100">
+    <header>
     <div id="alert"></div>
     <nav id="top">
       <div class="container-fluid">
@@ -198,13 +199,14 @@
         </div>
       </div>
     </nav>
-    <header>
       <div class="container">
         <div class="row">
           <div class="col">
             {{ search }}
           </div>
         </div>
+      {{ menu }}
+        
     </header>
     <style>
       /* CRITICAL FIX: Increased z-index significantly to ensure Google Autocomplete suggestions show on top of the Bootstrap modal (which uses z-index 1050). */
@@ -251,8 +253,6 @@
         font-weight: 500;
       }
     </style>
-    <main class="flex-grow-1 mb-4">
-      {{ menu }}
 
       <script>
         // CRITICAL: Replace THIS_IS_YOUR_GOOGLE_MAPS_API_KEY with your actual API key
@@ -362,3 +362,5 @@
           });
         }
       </script>
+
+    <main class="flex-grow-1 mb-4">
