@@ -16,7 +16,7 @@ class Security extends \Opencart\System\Engine\Controller {
 	public function index(): string {
 		$this->load->language('common/security');
 
-		$data['list'] = $this->load->controller('common/security.getList');
+		$data['list'] = '';
 
 		$data['user_token'] = $this->session->data['user_token'];
 
