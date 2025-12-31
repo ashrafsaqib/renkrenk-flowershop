@@ -11,7 +11,7 @@
     </div>
   </div>
   
-  <div id="featured-carousel-{{ module }}" class="carousel slide" data-bs-ride="carousel">
+  <div id="featured-carousel-{{ module }}" class="carousel slide">
     <div class="carousel-inner">
       {% for chunk in products|batch(4) %}
       <div class="carousel-item{% if loop.first %} active{% endif %}">
