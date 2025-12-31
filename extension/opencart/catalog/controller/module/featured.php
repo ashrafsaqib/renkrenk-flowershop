@@ -16,6 +16,9 @@ class Featured extends \Opencart\System\Engine\Controller {
 	public function index(array $setting): string {
 		$this->load->language('extension/opencart/module/featured');
 
+		$data['heading_title'] = $setting['name'];
+		
+
 		$data['axis'] = $setting['axis'];
 
 		$data['products'] = [];
