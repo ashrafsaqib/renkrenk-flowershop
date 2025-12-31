@@ -10709,7 +10709,7 @@ button:focus {
 header {
   /* background-color: var(--bs-tertiary-bg); */
   border-bottom: 1px solid var(--bs-border-color);
-  margin-bottom: 20px;
+  padding-bottom: 5px;
   position: relative;
   padding-top: 10px;
 }
@@ -10800,7 +10800,7 @@ header {
   background-color: transparent;
   text-transform: uppercase;
   font-weight: bold;
-  font-size: .93rem;
+  font-size: .90rem;
   line-height: 1.2rem;
   letter-spacing: .05em;
 }
