@@ -497,3 +497,141 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+function closeCartPopup() {
+  const modal = document.getElementById('cart-popup-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
+function showCartPopup(popupHtml) {
+  const modal = document.getElementById('cart-popup-modal');
+  const container = document.getElementById('cart-popup-content');
+  
+  if (!modal || !container || !popupHtml) return;
+
+  // Inject server-rendered HTML
+  container.innerHTML = popupHtml;
+
+  // Show modal
+  modal.style.display = 'flex';
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+// Close modal on overlay click
+document.addEventListener('click', function(e) {
+  const modal = document.getElementById('cart-popup-modal');
+  if (e.target === modal) {
+    closeCartPopup();
+  }
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeCartPopup();
+  }
+});
+ // Load cart contents when offcanvas is opened
+        document.addEventListener('DOMContentLoaded', function() {
+          const cartModal = document.getElementById('cartModal');
+          const cartToggle = document.getElementById('cart-toggle');
+          
+          if (cartModal && cartToggle) {
+            cartModal.addEventListener('show.bs.offcanvas', function () {
+              loadCartContents();
+            });
+          }
+        });
+
+        function loadCartContents() {
+          const cartContentDiv = document.getElementById('cart-content-offcanvas');
+          
+          // Show loading spinner
+          cartContentDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+          
+          // Fetch cart contents via AJAX
+          fetch('index.php?route=common/cart.info&language={{ config_language }}', {
+            method: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => response.text())
+          .then(html => {
+            cartContentDiv.innerHTML = html;
+            
+            // Re-attach form submission handlers for cart updates
+            const forms = cartContentDiv.querySelectorAll('form[data-oc-target="#cart-content-offcanvas"]');
+            forms.forEach(form => {
+              form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const submitButton = e.submitter || form.querySelector('button[type="submit"]');
+                const actionUrl = submitButton ? submitButton.getAttribute('formaction') : form.getAttribute('action');
+                
+                if (actionUrl) {
+                  fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                      'X-Requested-With': 'XMLHttpRequest'
+                    }
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    // Reload cart contents after update
+                    loadCartContents();
+                    
+                    // Update cart total in header if exists
+                    if (typeof cart === 'object' && typeof cart.update === 'function') {
+                      cart.update();
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error updating cart:', error);
+                    loadCartContents();
+                  });
+                }
+              });
+            });
+
+            // Handle remove buttons (forms)
+            const removeForms = cartContentDiv.querySelectorAll('form[action*="common/cart.remove"]');
+            removeForms.forEach(form => {
+              form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                
+                fetch(form.action, {
+                  method: 'POST',
+                  body: formData,
+                  headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                  }
+                })
+                .then(response => response.json())
+                .then(data => {
+                  // Reload cart contents after removal
+                  loadCartContents();
+                  
+                  // Update cart total in header if exists
+                  if (typeof cart === 'object' && typeof cart.update === 'function') {
+                    cart.update();
+                  }
+                })
+                .catch(error => {
+                  console.error('Error removing item:', error);
+                  loadCartContents();
+                });
+              });
+            });
+          })
+          .catch(error => {
+            console.error('Error loading cart:', error);
+            cartContentDiv.innerHTML = '<div class="alert alert-danger">Error loading cart contents. Please try again.</div>';
+          });
+        }

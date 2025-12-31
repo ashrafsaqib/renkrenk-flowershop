@@ -16,8 +16,8 @@
   <script src="{{ jquery }}" type="text/javascript"></script>
   <link href="{{ bootstrap }}" type="text/css" rel="stylesheet" media="screen" />
   <link href="{{ icons }}" rel="stylesheet" type="text/css" />
-  <link href="{{ stylesheet }}?v=3.4" type="text/css" rel="stylesheet" />
-  <script src="catalog/view/javascript/common.js" type="text/javascript"></script>
+  <link href="{{ stylesheet }}?v=3.6" type="text/css" rel="stylesheet" />
+  <script src="catalog/view/javascript/common.js?v=1.1" type="text/javascript"></script>
   <script src="catalog/view/javascript/location.js?v=2" type="text/javascript"></script>
 
   {% if icon %}
@@ -128,7 +128,7 @@
     </div>
   </div>
 
-  <div id="container" class="container-fluid">
+  <div id="container">
     <header>
     <div id="alert"></div>
     <nav id="top">
@@ -208,52 +208,7 @@
         </div>
         
     </header>
-    <style>
-      /* CRITICAL FIX: Increased z-index significantly to ensure Google Autocomplete suggestions show on top of the Bootstrap modal (which uses z-index 1050). */
-      .pac-container {
-        z-index: 9999 !important;
-      }
-
-      /* Cart Offcanvas Styles */
-      #cartModal .offcanvas-body {
-        padding: 1.5rem;
-      }
-
-      #cartModal .cart-item {
-        transition: background-color 0.2s;
-      }
-
-      #cartModal .cart-item:hover {
-        background-color: #f8f9fa;
-      }
-
-      #cartModal .cart-item img {
-        max-width: 100%;
-        height: auto;
-        object-fit: cover;
-      }
-
-      #cartModal .cart-totals {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 0.5rem;
-      }
-
-      #cartModal .cart-update-form .input-group {
-        max-width: 120px;
-      }
-
-      #cartModal h6 a {
-        font-size: 0.9rem;
-        line-height: 1.3;
-      }
-
-      #cartModal .cart-actions .btn {
-        padding: 0.75rem 1rem;
-        font-weight: 500;
-      }
-    </style>
-
+   
       <script>
         // CRITICAL: Replace THIS_IS_YOUR_GOOGLE_MAPS_API_KEY with your actual API key
         // Ensure the Google Maps API key has the 'Places API' enabled.
@@ -261,106 +216,7 @@
         // JSON list of cities and common districts for manual selection
         const turkishCitiesAndDistricts = {{ turkish_cities_and_districts_json|raw }};
 
-        // Load cart contents when offcanvas is opened
-        document.addEventListener('DOMContentLoaded', function() {
-          const cartModal = document.getElementById('cartModal');
-          const cartToggle = document.getElementById('cart-toggle');
-          
-          if (cartModal && cartToggle) {
-            cartModal.addEventListener('show.bs.offcanvas', function () {
-              loadCartContents();
-            });
-          }
-        });
-
-        function loadCartContents() {
-          const cartContentDiv = document.getElementById('cart-content-offcanvas');
-          
-          // Show loading spinner
-          cartContentDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
-          
-          // Fetch cart contents via AJAX
-          fetch('index.php?route=common/cart.info&language={{ config_language }}', {
-            method: 'GET',
-            headers: {
-              'X-Requested-With': 'XMLHttpRequest'
-            }
-          })
-          .then(response => response.text())
-          .then(html => {
-            cartContentDiv.innerHTML = html;
-            
-            // Re-attach form submission handlers for cart updates
-            const forms = cartContentDiv.querySelectorAll('form[data-oc-target="#cart-content-offcanvas"]');
-            forms.forEach(form => {
-              form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(form);
-                const submitButton = e.submitter || form.querySelector('button[type="submit"]');
-                const actionUrl = submitButton ? submitButton.getAttribute('formaction') : form.getAttribute('action');
-                
-                if (actionUrl) {
-                  fetch(actionUrl, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                      'X-Requested-With': 'XMLHttpRequest'
-                    }
-                  })
-                  .then(response => response.json())
-                  .then(data => {
-                    // Reload cart contents after update
-                    loadCartContents();
-                    
-                    // Update cart total in header if exists
-                    if (typeof cart === 'object' && typeof cart.update === 'function') {
-                      cart.update();
-                    }
-                  })
-                  .catch(error => {
-                    console.error('Error updating cart:', error);
-                    loadCartContents();
-                  });
-                }
-              });
-            });
-
-            // Handle remove buttons (forms)
-            const removeForms = cartContentDiv.querySelectorAll('form[action*="common/cart.remove"]');
-            removeForms.forEach(form => {
-              form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(form);
-                
-                fetch(form.action, {
-                  method: 'POST',
-                  body: formData,
-                  headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                  }
-                })
-                .then(response => response.json())
-                .then(data => {
-                  // Reload cart contents after removal
-                  loadCartContents();
-                  
-                  // Update cart total in header if exists
-                  if (typeof cart === 'object' && typeof cart.update === 'function') {
-                    cart.update();
-                  }
-                })
-                .catch(error => {
-                  console.error('Error removing item:', error);
-                  loadCartContents();
-                });
-              });
-            });
-          })
-          .catch(error => {
-            console.error('Error loading cart:', error);
-            cartContentDiv.innerHTML = '<div class="alert alert-danger">Error loading cart contents. Please try again.</div>';
-          });
-        }
+       
       </script>
 
     <main class="flex-grow-1 mb-4">
