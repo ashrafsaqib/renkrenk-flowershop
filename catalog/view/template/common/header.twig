@@ -14,9 +14,8 @@
   <meta name="keywords" content="{{ keywords }}" />
   {% endif %}
   <script src="{{ jquery }}" type="text/javascript"></script>
-  <link href="{{ bootstrap }}" type="text/css" rel="stylesheet" media="screen" />
   <link href="{{ icons }}" rel="stylesheet" type="text/css" />
-  <link href="{{ stylesheet }}?v=3.6" type="text/css" rel="stylesheet" />
+  <link href="{{ stylesheet }}?v=3.7" type="text/css" rel="stylesheet" />
   <script src="catalog/view/javascript/common.js?v=1.1" type="text/javascript"></script>
   <script src="catalog/view/javascript/location.js?v=2" type="text/javascript"></script>
 
@@ -134,7 +133,7 @@
     <nav id="top">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-4 pt-1 pl-2" id="top-left">
+          <div class="col-4 pt-1 pl-2 px-5" id="top-left">
                  <a id="openLocationModalBtn" {% if user_city and user_district %} data-location-set="true" {% endif %} href="#" class="dropdown-toggle" data-bs-toggle="offcanvas" data-bs-target="#locationModal" aria-label="Select location">
                     <i class="fa-solid fa-location-dot"></i>
                   {% if user_city and user_district %}
@@ -166,7 +165,7 @@
             </a>
           </div>
 
-          <div class="col-2 text-end">
+          <div class="col-3 text-end">
             <ul class="list-inline">
               <li class="list-inline-item">
                 <a href="#" id="toggle-search" aria-label="Toggle search"><i class="fa-solid fa-search"></i></a>

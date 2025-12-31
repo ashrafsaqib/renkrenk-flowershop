@@ -605,8 +605,8 @@ progress {
   --bs-gutter-x: 1.5rem;
   --bs-gutter-y: 0;
   width: 100%;
-  padding-right: calc(var(--bs-gutter-x) * .5);
-  padding-left: calc(var(--bs-gutter-x) * .5);
+  /* padding-right: calc(var(--bs-gutter-x) * .5); */
+  /* padding-left: calc(var(--bs-gutter-x) * .5); */
   margin-right: auto;
   margin-left: auto;
 }
@@ -11093,9 +11093,9 @@ footer h5, footer .h5 {
   --bs-btn-border-color: var(--bs-gray-300);
 }
 .carousel {
-  border: 4px solid #fff;
+  /* border: 4px solid #fff; */
   border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  /* box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); */
   margin-bottom: 50px;
 }
 .carousel-control-prev, .carousel-control-next {
@@ -11715,46 +11715,46 @@ footer h5, footer .h5 {
   display: flex !important;
   animation: fadeIn 0.4s ease;
 }
-     /* CRITICAL FIX: Increased z-index significantly to ensure Google Autocomplete suggestions show on top of the Bootstrap modal (which uses z-index 1050). */
-      .pac-container {
-        z-index: 9999 !important;
-      }
+/* CRITICAL FIX: Increased z-index significantly to ensure Google Autocomplete suggestions show on top of the Bootstrap modal (which uses z-index 1050). */
+.pac-container {
+  z-index: 9999 !important;
+}
 
-      /* Cart Offcanvas Styles */
-      #cartModal .offcanvas-body {
-        padding: 1.5rem;
-      }
+/* Cart Offcanvas Styles */
+#cartModal .offcanvas-body {
+  padding: 1.5rem;
+}
 
-      #cartModal .cart-item {
-        transition: background-color 0.2s;
-      }
+#cartModal .cart-item {
+  transition: background-color 0.2s;
+}
 
-      #cartModal .cart-item:hover {
-        background-color: #f8f9fa;
-      }
+#cartModal .cart-item:hover {
+  background-color: #f8f9fa;
+}
 
-      #cartModal .cart-item img {
-        max-width: 100%;
-        height: auto;
-        object-fit: cover;
-      }
+#cartModal .cart-item img {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
 
-      #cartModal .cart-totals {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 0.5rem;
-      }
+#cartModal .cart-totals {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
 
-      #cartModal .cart-update-form .input-group {
-        max-width: 120px;
-      }
+#cartModal .cart-update-form .input-group {
+  max-width: 120px;
+}
 
-      #cartModal h6 a {
-        font-size: 0.9rem;
-        line-height: 1.3;
-      }
+#cartModal h6 a {
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
 
-      #cartModal .cart-actions .btn {
-        padding: 0.75rem 1rem;
-        font-weight: 500;
-      }
+#cartModal .cart-actions .btn {
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+}
