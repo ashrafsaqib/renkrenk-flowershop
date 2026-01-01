@@ -11775,3 +11775,6 @@ footer h5, footer .h5 {
 .carousel .img-fluid {
   width:100% !important;
 }
+#common-home .carousel {
+  margin-top: -1.5rem;
+}
