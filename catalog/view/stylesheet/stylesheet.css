@@ -11772,3 +11772,6 @@ footer h5, footer .h5 {
         font-weight: 600;
         letter-spacing: .05em;
 }
+.carousel .img-fluid {
+  width:100% !important;
+}
