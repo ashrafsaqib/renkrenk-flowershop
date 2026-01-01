@@ -11,50 +11,54 @@ class Topic extends \Opencart\System\Engine\Controller {
 	 *
 	 * @return string
 	 */
-	public function index(): string {
+	public function index(array $setting = []): string {
 		$this->load->language('extension/opencart/module/topic');
 
-		if (isset($this->request->get['topic_id'])) {
-			$data['topic_id'] = (int)$this->request->get['topic_id'];
-		} else {
-			$data['topic_id'] = 0;
-		}
-
-		$url = '';
-
-		if (isset($this->request->get['sort'])) {
-			$url .= '&sort=' . $this->request->get['sort'];
-		}
-
-		if (isset($this->request->get['order'])) {
-			$url .= '&order=' . $this->request->get['order'];
-		}
-
-		$data['topics'] = [];
-
-		// Topic
 		$this->load->model('cms/topic');
-
-		// Article
 		$this->load->model('cms/article');
+		$this->load->model('tool/image');
 
-		$topics = $this->model_cms_topic->getTopics();
+		$data['items'] = [];
 
-		if ($topics) {
-			$data['topics'][] = [
-				'topic_id' => 0,
-				'name'     => $this->language->get('text_all') . ($this->config->get('config_article_count') ? ' (' . $this->model_cms_article->getTotalArticles() . ')' : ''),
-				'href'     => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language') . $url)
-			];
+		if (!empty($setting['items'])) {
+			foreach ($setting['items'] as $item) {
+				if ($item['type'] == 'topic') {
+					$id = explode('-', $item['id'])[1];
+					$topic_info = $this->model_cms_topic->getTopic((int)$id);
 
-			foreach ($topics as $topic) {
-				$data['topics'][] = [
-					'topic_id' => $topic['topic_id'],
-					'name'     => $topic['name'] . ($this->config->get('config_article_count') ? ' (' . $this->model_cms_article->getTotalArticles(['filter_topic_id' => $data['topic_id']]) . ')' : ''),
-					'href'     => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language') . '&topic_id=' . $topic['topic_id'] . $url)
-				];
+					if ($topic_info && $topic_info['status']) {
+						// Use custom image if set, otherwise use topic's image
+						$image = !empty($item['custom_image']) ? $item['custom_image'] : $topic_info['image'];
+						
+						$data['items'][] = [
+							'type'        => 'topic',
+							'name'        => $topic_info['name'],
+							'image'       => $image ? $this->model_tool_image->resize($image, 400, 400) : $this->model_tool_image->resize('placeholder.png', 400, 400),
+							'href'        => $this->url->link('cms/topic.info', 'topic_id=' . $topic_info['topic_id']),
+							'description' => $item['description'] ?? ''
+						];
+					}
+				} elseif ($item['type'] == 'article') {
+					$id = explode('-', $item['id'])[1];
+					$article_info = $this->model_cms_article->getArticle((int)$id);
+
+					if ($article_info && $article_info['status']) {
+						// Use custom image if set, otherwise use article's image
+						$image = !empty($item['custom_image']) ? $item['custom_image'] : $article_info['image'];
+						
+						$data['items'][] = [
+							'type'        => 'article',
+							'name'        => $article_info['name'],
+							'image'       => $image ? $this->model_tool_image->resize($image, 400, 400) : $this->model_tool_image->resize('placeholder.png', 400, 400),
+							'href'        => $this->url->link('cms/article.info', 'article_id=' . $article_info['article_id']),
+							'description' => $item['description'] ?? ''
+						];
+					}
+				}
 			}
+		}
 
+		if (!empty($data['items'])) {
 			return $this->load->view('extension/opencart/module/topic', $data);
 		}
 

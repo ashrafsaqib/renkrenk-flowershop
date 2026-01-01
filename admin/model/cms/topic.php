@@ -222,6 +222,10 @@ class Topic extends \Opencart\System\Engine\Model {
 	public function getTopics(array $data = []): array {
 		$sql = "SELECT * FROM `" . DB_PREFIX . "topic` `t` LEFT JOIN `" . DB_PREFIX . "topic_description` `td` ON (`t`.`topic_id` = `td`.`topic_id`) WHERE `td`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'";
 
+		if (!empty($data['filter_name'])) {
+			$sql .= " AND LCASE(`td`.`name`) LIKE '%" . $this->db->escape(oc_strtolower($data['filter_name'])) . "%'";
+		}
+
 		$sort_data = [
 			'td.name',
 			't.sort_order'

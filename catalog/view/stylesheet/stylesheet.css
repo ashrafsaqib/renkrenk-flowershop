@@ -11758,3 +11758,17 @@ footer h5, footer .h5 {
   padding: 0.75rem 1rem;
   font-weight: 500;
 }
+
+.topics-module .readmore {
+    text-decoration: underline;
+    font-size: 15px;
+}
+.topics-module p{
+  font-size: 15px;
+}
+.topics-module h2 {
+          font-size: 1.33rem;
+        line-height: 1.73rem;
+        font-weight: 600;
+        letter-spacing: .05em;
+}

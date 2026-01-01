@@ -19,17 +19,142 @@
       <div class="card-body">
         <form id="form-module" action="{{ save }}" method="post" data-oc-toggle="ajax">
           <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-name">{{ entry_name }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control"/>
+              <div id="error-name" class="invalid-feedback"></div>
+            </div>
+          </div>
+          <div class="row mb-3">
             <label class="col-sm-2 col-form-label">{{ entry_status }}</label>
             <div class="col-sm-10">
               <div class="form-check form-switch form-switch-lg">
-                <input type="hidden" name="module_topic_status" value="0"/>
-                <input type="checkbox" name="module_topic_status" value="1" id="input-status" class="form-check-input"{% if module_topic_status %} checked{% endif %}/>
+                <input type="hidden" name="status" value="0"/>
+                <input type="checkbox" name="status" value="1" id="input-status" class="form-check-input"{% if status %} checked{% endif %}/>
               </div>
             </div>
           </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-item">{{ entry_item }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="item_autocomplete" value="" placeholder="{{ entry_item }}" id="input-item" data-oc-target="autocomplete-item" class="form-control" autocomplete="off"/>
+              <ul id="autocomplete-item" class="dropdown-menu"></ul>
+              <div id="item-list" class="help-block">{{ help_item }}</div>
+              <div class="table-responsive mt-3">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-center">{{ column_image }}</td>
+                      <td>{{ column_name }}</td>
+                      <td>{{ column_type }}</td>
+                      <td class="text-center">{{ entry_custom_image }}</td>
+                      <td>{{ entry_description }}</td>
+                      <td class="text-end">{{ column_action }}</td>
+                    </tr>
+                  </thead>
+                  <tbody id="item-row">
+                    {% set item_row = 0 %}
+                    {% for item in items %}
+                      <tr id="item-row-{{ item_row }}">
+                        <td class="text-center">
+                          {% if item.image %}
+                            <img src="{{ item.image }}" alt="" class="img-thumbnail"/>
+                          {% endif %}
+                        </td>
+                        <td>{{ item.name }}
+                          <input type="hidden" name="items[{{ item_row }}][id]" value="{{ item.id }}"/>
+                          <input type="hidden" name="items[{{ item_row }}][type]" value="{{ item.type }}"/>
+                        </td>
+                        <td><span class="badge bg-{{ item.type == 'topic' ? 'primary' : 'success' }}">{{ item.type|capitalize }}</span></td>
+                        <td class="text-center">
+                          <div class="card image">
+                            <img src="{{ item.thumb|default('https://placehold.co/100x100?text=No+Image') }}" alt="" title="" id="thumb-image-{{ item_row }}" data-oc-placeholder="https://placehold.co/100x100?text=No+Image" class="card-img-top"/> <input type="hidden" name="items[{{ item_row }}][custom_image]" value="{{ item.custom_image }}" id="input-image-{{ item_row }}"/>
+                            <div class="card-body">
+                              <button type="button" data-oc-toggle="image" data-oc-target="#input-image-{{ item_row }}" data-oc-thumb="#thumb-image-{{ item_row }}" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                              <button type="button" data-oc-toggle="clear" data-oc-target="#input-image-{{ item_row }}" data-oc-thumb="#thumb-image-{{ item_row }}" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <textarea name="items[{{ item_row }}][description]" rows="3" placeholder="{{ entry_description }}" class="form-control">{{ item.description }}</textarea>
+                        </td>
+                        <td class="text-end"><button type="button" onclick="$('#item-row-{{ item_row }}').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>
+                      </tr>
+                      {% set item_row = item_row + 1 %}
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" name="module_id" value="{{ module_id }}" id="input-module-id"/>
         </form>
       </div>
     </div>
   </div>
 </div>
+
+<script type="text/javascript"><!--
+var item_row = {{ items|length }};
+
+// Autocomplete for items
+$('#input-item').autocomplete({
+    'source': function(request, response) {
+        $.ajax({
+            url: 'index.php?route=extension/opencart/module/topic.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function(json) {
+                response($.map(json, function(item) {
+                    return {
+                        label: item['name'] + ' (' + item['type'].charAt(0).toUpperCase() + item['type'].slice(1) + ')',
+                        value: item['type'].charAt(0).toUpperCase() + '-' + item['id'],
+                        type: item['type'],
+                        name: item['name'],
+                        image: item['image']
+                    }
+                }));
+            }
+        });
+    },
+    'select': function(item) {
+        $('#input-item').val('');
+        
+        console.log('Selected item:', item);
+        
+        var html = '';
+        
+        html += '<tr id="item-row-' + item_row + '">';
+        html += '  <td class="text-center">';
+        if (item.image) {
+            html += '<img src="' + item.image + '" alt="" class="img-thumbnail"/>';
+        }
+        html += '  </td>';
+        html += '  <td>' + item.name;
+        html += '    <input type="hidden" name="items[' + item_row + '][id]" value="' + item.value + '"/>';
+        html += '    <input type="hidden" name="items[' + item_row + '][type]" value="' + item.type + '"/>';
+        html += '  </td>';
+        html += '  <td><span class="badge bg-' + (item.type == 'topic' ? 'primary' : 'success') + '">' + item.type.charAt(0).toUpperCase() + item.type.slice(1) + '</span></td>';
+        html += '  <td class="text-center">';
+        html += '    <div class="card image">';
+        html += '      <img src="' + (item.image ? item.image : 'https://placehold.co/100x100?text=No+Image') + '" alt="" title="" id="thumb-image-' + item_row + '" data-oc-placeholder="https://placehold.co/100x100?text=No+Image" class="card-img-top"/>';
+        html += '      <input type="hidden" name="items[' + item_row + '][custom_image]" value="" id="input-image-' + item_row + '"/>';
+        html += '      <div class="card-body">';
+        html += '        <button type="button" data-oc-toggle="image" data-oc-target="#input-image-' + item_row + '" data-oc-thumb="#thumb-image-' + item_row + '" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>';
+        html += '        <button type="button" data-oc-toggle="clear" data-oc-target="#input-image-' + item_row + '" data-oc-thumb="#thumb-image-' + item_row + '" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>';
+        html += '      </div>';
+        html += '    </div>';
+        html += '  </td>';
+        html += '  <td>';
+        html += '    <textarea name="items[' + item_row + '][description]" rows="3" placeholder="{{ entry_description }}" class="form-control"></textarea>';
+        html += '  </td>';
+        html += '  <td class="text-end"><button type="button" onclick="$(\'#item-row-' + item_row + '\').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+        html += '</tr>';
+        
+        $('#item-row').append(html);
+        
+        item_row++;
+    }
+});
+//--></script>
+
 {{ footer }}
