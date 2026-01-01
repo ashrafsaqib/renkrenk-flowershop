@@ -34,7 +34,7 @@ class Topic extends \Opencart\System\Engine\Controller {
 							'type'        => 'topic',
 							'name'        => $topic_info['name'],
 							'image'       => $image ? $this->model_tool_image->resize($image, 400, 400) : $this->model_tool_image->resize('placeholder.png', 400, 400),
-							'href'        => $this->url->link('cms/topic.info', 'topic_id=' . $topic_info['topic_id']),
+							'href'        => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language') . '&topic_id=' . $topic_info['topic_id']),
 							'description' => $item['description'] ?? ''
 						];
 					}
@@ -50,7 +50,7 @@ class Topic extends \Opencart\System\Engine\Controller {
 							'type'        => 'article',
 							'name'        => $article_info['name'],
 							'image'       => $image ? $this->model_tool_image->resize($image, 400, 400) : $this->model_tool_image->resize('placeholder.png', 400, 400),
-							'href'        => $this->url->link('cms/article.info', 'article_id=' . $article_info['article_id']),
+							'href'        => $this->url->link('cms/blog.info', 'language=' . $this->config->get('config_language') . '&article_id=' . $article_info['article_id']),
 							'description' => $item['description'] ?? ''
 						];
 					}
