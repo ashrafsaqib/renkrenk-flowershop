@@ -59,6 +59,16 @@
               </div>
             </div>
           </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label">Source Mode</label>
+            <div class="col-sm-10">
+              <div class="form-check form-switch form-switch-lg">
+                <input type="hidden" name="source_mode" value="0"/>
+                <input type="checkbox" name="source_mode" value="1" id="input-source-mode" class="form-check-input"{% if source_mode %} checked{% endif %}/>
+                <label class="form-check-label" for="input-source-mode">Enable source mode (plain textarea)</label>
+              </div>
+            </div>
+          </div>
           <input type="hidden" name="module_id" value="{{ module_id }}" id="input-module-id"/>
         </form>
       </div>
@@ -66,8 +76,44 @@
   </div>
 </div>
 <script type="text/javascript"><!--
-$('textarea[data-oc-toggle=\'ckeditor\']').ckeditor({
-    language:'{{ ckeditor }}'
+var editors = {};
+var sourceMode = {{ source_mode ? 'true' : 'false' }};
+
+function initEditors() {
+    if (!sourceMode) {
+        $('textarea[data-oc-toggle="ckeditor"]').each(function() {
+            var id = $(this).attr('id');
+            if (!editors[id]) {
+                editors[id] = $(this).ckeditor({
+                    language: '{{ ckeditor }}'
+                });
+            }
+        });
+    }
+}
+
+function destroyEditors() {
+    $('textarea[data-oc-toggle="ckeditor"]').each(function() {
+        var id = $(this).attr('id');
+        if (CKEDITOR.instances[id]) {
+            CKEDITOR.instances[id].destroy();
+            delete editors[id];
+        }
+    });
+}
+
+// Initialize editors on page load
+initEditors();
+
+// Handle source mode toggle
+$('#input-source-mode').on('change', function() {
+    sourceMode = $(this).is(':checked');
+    
+    if (sourceMode) {
+        destroyEditors();
+    } else {
+        initEditors();
+    }
 });
 //--></script>
 {{ footer }}

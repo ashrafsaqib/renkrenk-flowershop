@@ -81,6 +81,12 @@ class HTML extends \Opencart\System\Engine\Controller {
 			$data['status'] = '';
 		}
 
+		if (isset($module_info['source_mode'])) {
+			$data['source_mode'] = $module_info['source_mode'];
+		} else {
+			$data['source_mode'] = 0;
+		}
+
 		if (isset($this->request->get['module_id'])) {
 			$data['module_id'] = (int)$this->request->get['module_id'];
 		} else {
