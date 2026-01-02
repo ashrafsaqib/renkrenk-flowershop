@@ -107,7 +107,8 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 		$meet_image = $this->config->get('homepage_meet_image');
 		$data['meet_image'] = $meet_image ? $this->model_tool_image->resize($meet_image, 600, 600) : '';
 		$data['meet_header'] = $this->config->get('homepage_meet_header');
-		$data['meet_paragraph'] = $this->config->get('homepage_meet_paragraph');
+        //nl2br
+		$data['meet_paragraph'] =  nl2br($this->config->get('homepage_meet_paragraph'));
 
 		// Section 7: Full Width Banner
 		$banner_image = $this->config->get('homepage_banner_image');
