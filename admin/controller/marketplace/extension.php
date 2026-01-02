@@ -31,7 +31,7 @@ class Extension extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->get['type'])) {
 			$data['type'] = $this->request->get['type'];
 		} else {
-			$data['type'] = '';
+			$data['type'] = 'module';
 		}
 
 		$data['categories'] = [];
@@ -57,10 +57,8 @@ class Extension extends \Opencart\System\Engine\Controller {
 
 		if (isset($this->request->get['type'])) {
 			$data['extension'] = $this->load->controller('extension/' . basename($this->request->get['type']) . '.getList');
-		} elseif ($data['categories']) {
-			$data['extension'] = $this->load->controller('extension/' . $data['categories'][0]['code'] . '.getList');
 		} else {
-			$data['extension'] = '';
+			$data['extension'] = $this->load->controller('extension/module.getList');
 		}
 
 		$data['user_token'] = $this->session->data['user_token'];
