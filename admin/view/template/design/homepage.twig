@@ -1,0 +1,390 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-homepage" data-bs-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa-solid fa-save"></i></button>
+        <a href="{{ back }}" data-bs-toggle="tooltip" title="{{ button_back }}" class="btn btn-light"><i class="fa-solid fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-pencil"></i> {{ text_edit }}</div>
+      <div class="card-body">
+        <form id="form-homepage" action="{{ save }}" method="post" data-oc-toggle="ajax">
+          
+          <!-- Section 1: Text Block -->
+          <fieldset>
+            <legend>Section 1: Text Block</legend>
+            <div class="row mb-3">
+              <label for="input-text-block-heading" class="col-sm-2 col-form-label">{{ entry_text_block_heading }}</label>
+              <div class="col-sm-10">
+                <input type="text" name="homepage_text_block_heading" value="{{ homepage_text_block_heading }}" placeholder="{{ entry_text_block_heading }}" id="input-text-block-heading" class="form-control"/>
+                <div class="form-text">{{ help_text_block_heading }}</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="input-text-block" class="col-sm-2 col-form-label">{{ entry_text_block }}</label>
+              <div class="col-sm-10">
+                <textarea name="homepage_text_block" rows="5" placeholder="{{ entry_text_block }}" id="input-text-block" class="form-control">{{ homepage_text_block }}</textarea>
+                <div class="form-text">{{ help_text_block }}</div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 2: Featured Categories -->
+          <fieldset>
+            <legend>Section 2: Featured Categories</legend>
+            <div class="row mb-3">
+              <label class="col-sm-2 col-form-label" for="input-category">{{ entry_featured_categories }}</label>
+              <div class="col-sm-10">
+                <input type="text" name="category_autocomplete" value="" placeholder="{{ entry_featured_categories }}" id="input-category" data-oc-target="autocomplete-category" class="form-control" autocomplete="off"/>
+                <ul id="autocomplete-category" class="dropdown-menu"></ul>
+                <div class="form-text">{{ help_featured_categories }}</div>
+                <div class="table-responsive mt-3">
+                  <table class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <td class="text-center">{{ column_image }}</td>
+                        <td>{{ column_name }}</td>
+                        <td class="text-center">{{ entry_custom_image }}</td>
+                        <td class="text-end">{{ column_action }}</td>
+                      </tr>
+                    </thead>
+                    <tbody id="category-row">
+                      {% set category_row = 0 %}
+                      {% for category in categories %}
+                        <tr id="category-row-{{ category_row }}">
+                          <td class="text-center">
+                            {% if category.image %}
+                              <img src="{{ category.image }}" alt="" class="img-thumbnail"/>
+                            {% endif %}
+                          </td>
+                          <td>{{ category.name }}
+                            <input type="hidden" name="homepage_featured_categories[{{ category_row }}][category_id]" value="{{ category.category_id }}"/>
+                          </td>
+                          <td class="text-center">
+                            <div class="card image">
+                              <img src="{{ category.thumb|default('https://placehold.co/100x100?text=No+Image') }}" alt="" title="" id="thumb-category-image-{{ category_row }}" data-oc-placeholder="https://placehold.co/100x100?text=No+Image" class="card-img-top"/> 
+                              <input type="hidden" name="homepage_featured_categories[{{ category_row }}][custom_image]" value="{{ category.custom_image }}" id="input-category-image-{{ category_row }}"/>
+                              <div class="card-body">
+                                <button type="button" data-oc-toggle="image" data-oc-target="#input-category-image-{{ category_row }}" data-oc-thumb="#thumb-category-image-{{ category_row }}" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                                <button type="button" data-oc-toggle="clear" data-oc-target="#input-category-image-{{ category_row }}" data-oc-thumb="#thumb-category-image-{{ category_row }}" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="text-end"><button type="button" onclick="$('#category-row-{{ category_row }}').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>
+                        </tr>
+                        {% set category_row = category_row + 1 %}
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="input-gift-subscriptions-image" class="col-sm-2 col-form-label">{{ entry_gift_subscriptions_image }}</label>
+              <div class="col-sm-10">
+                <div class="card image">
+                  <img src="{{ gift_subscriptions_image_thumb }}" alt="" title="" id="thumb-gift-subscriptions-image" data-oc-placeholder="{{ placeholder }}" class="card-img-top"/> 
+                  <input type="hidden" name="homepage_gift_subscriptions_image" value="{{ homepage_gift_subscriptions_image }}" id="input-gift-subscriptions-image"/>
+                  <div class="card-body">
+                    <button type="button" data-oc-toggle="image" data-oc-target="#input-gift-subscriptions-image" data-oc-thumb="#thumb-gift-subscriptions-image" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                    <button type="button" data-oc-toggle="clear" data-oc-target="#input-gift-subscriptions-image" data-oc-thumb="#thumb-gift-subscriptions-image" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                  </div>
+                </div>
+                <div class="form-text">{{ help_gift_subscriptions_image }}</div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 3: Static Image -->
+          <fieldset>
+            <legend>Section 3: Static Image</legend>
+            <div class="row mb-3">
+              <label for="input-static-image" class="col-sm-2 col-form-label">{{ entry_static_image }}</label>
+              <div class="col-sm-10">
+                <div class="card image">
+                  <img src="{{ static_image_thumb }}" alt="" title="" id="thumb-image" data-oc-placeholder="{{ placeholder }}" class="card-img-top"/> 
+                  <input type="hidden" name="homepage_static_image" value="{{ homepage_static_image }}" id="input-static-image"/>
+                  <div class="card-body">
+                    <button type="button" data-oc-toggle="image" data-oc-target="#input-static-image" data-oc-thumb="#thumb-image" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                    <button type="button" data-oc-toggle="clear" data-oc-target="#input-static-image" data-oc-thumb="#thumb-image" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                  </div>
+                </div>
+                <div class="form-text">{{ help_static_image }}</div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <label for="input-static-image-header" class="col-sm-2 col-form-label">{{ entry_static_image_header }}</label>
+              <div class="col-sm-10">
+                <input type="text" name="homepage_static_image_header" value="{{ homepage_static_image_header }}" placeholder="{{ entry_static_image_header }}" id="input-static-image-header" class="form-control"/>
+                <div class="form-text">{{ help_static_image_header }}</div>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <label for="input-static-image-text" class="col-sm-2 col-form-label">{{ entry_static_image_text }}</label>
+              <div class="col-sm-10">
+                <textarea name="homepage_static_image_text" rows="5" placeholder="{{ entry_static_image_text }}" id="input-static-image-text" class="form-control">{{ homepage_static_image_text }}</textarea>
+                <div class="form-text">{{ help_static_image_text }}</div>
+              </div>
+            </div>
+          </fieldset>
+
+        
+
+          <!-- Section 6: Featured Topics/Articles -->
+          <fieldset>
+            <legend>Section 4: Featured Topics/Articles</legend>
+            <div class="row mb-3">
+              <label for="input-featured-header" class="col-sm-2 col-form-label">{{ entry_featured_header }}</label>
+              <div class="col-sm-10">
+                <input type="text" name="homepage_featured_header" value="{{ homepage_featured_header }}" placeholder="{{ entry_featured_header }}" id="input-featured-header" class="form-control"/>
+                <div class="form-text">{{ help_featured_header }}</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label class="col-sm-2 col-form-label" for="input-featured-item">{{ entry_featured_item }}</label>
+              <div class="col-sm-10">
+                <input type="text" name="featured_item_autocomplete" value="" placeholder="{{ entry_featured_item }}" id="input-featured-item" data-oc-target="autocomplete-featured-item" class="form-control" autocomplete="off"/>
+                <ul id="autocomplete-featured-item" class="dropdown-menu"></ul>
+                <div class="form-text">{{ help_featured_item }}</div>
+                <div class="table-responsive mt-3">
+                  <table class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <td class="text-center">{{ column_image }}</td>
+                        <td>{{ column_name }}</td>
+                        <td>{{ column_type }}</td>
+                        <td class="text-center">{{ entry_custom_image }}</td>
+                        <td>{{ entry_description }}</td>
+                        <td class="text-end">{{ column_action }}</td>
+                      </tr>
+                    </thead>
+                    <tbody id="featured-item-row">
+                      {% set item_row = 0 %}
+                      {% for item in featured_items %}
+                        <tr id="featured-item-row-{{ item_row }}">
+                          <td class="text-center">
+                            {% if item.image %}
+                              <img src="{{ item.image }}" alt="" class="img-thumbnail"/>
+                            {% endif %}
+                          </td>
+                          <td>{{ item.name }}
+                            <input type="hidden" name="homepage_featured_items[{{ item_row }}][id]" value="{{ item.id }}"/>
+                            <input type="hidden" name="homepage_featured_items[{{ item_row }}][type]" value="{{ item.type }}"/>
+                          </td>
+                          <td><span class="badge bg-{{ item.type == 'topic' ? 'primary' : 'success' }}">{{ item.type|capitalize }}</span></td>
+                          <td class="text-center">
+                            <div class="card image">
+                              <img src="{{ item.thumb|default('https://placehold.co/100x100?text=No+Image') }}" alt="" title="" id="thumb-featured-image-{{ item_row }}" data-oc-placeholder="https://placehold.co/100x100?text=No+Image" class="card-img-top"/> 
+                              <input type="hidden" name="homepage_featured_items[{{ item_row }}][custom_image]" value="{{ item.custom_image }}" id="input-featured-image-{{ item_row }}"/>
+                              <div class="card-body">
+                                <button type="button" data-oc-toggle="image" data-oc-target="#input-featured-image-{{ item_row }}" data-oc-thumb="#thumb-featured-image-{{ item_row }}" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                                <button type="button" data-oc-toggle="clear" data-oc-target="#input-featured-image-{{ item_row }}" data-oc-thumb="#thumb-featured-image-{{ item_row }}" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <textarea name="homepage_featured_items[{{ item_row }}][description]" rows="3" placeholder="{{ entry_description }}" class="form-control">{{ item.description }}</textarea>
+                          </td>
+                          <td class="text-end"><button type="button" onclick="$('#featured-item-row-{{ item_row }}').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>
+                        </tr>
+                        {% set item_row = item_row + 1 %}
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+
+            <!-- Section 6: Meet Section -->
+          <fieldset>
+            <legend>Section 5: Meet</legend>
+            <div class="row mb-3">
+              <label for="input-meet-image" class="col-sm-2 col-form-label">{{ entry_meet_image }}</label>
+              <div class="col-sm-10">
+                <div class="card image">
+                  <img src="{{ meet_image_thumb }}" alt="" title="" id="thumb-meet-image" data-oc-placeholder="{{ placeholder }}" class="card-img-top"/> 
+                  <input type="hidden" name="homepage_meet_image" value="{{ homepage_meet_image }}" id="input-meet-image"/>
+                  <div class="card-body">
+                    <button type="button" data-oc-toggle="image" data-oc-target="#input-meet-image" data-oc-thumb="#thumb-meet-image" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                    <button type="button" data-oc-toggle="clear" data-oc-target="#input-meet-image" data-oc-thumb="#thumb-meet-image" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                  </div>
+                </div>
+                <div class="form-text">{{ help_meet_image }}</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="input-meet-header" class="col-sm-2 col-form-label">{{ entry_meet_header }}</label>
+              <div class="col-sm-10">
+                <input type="text" name="homepage_meet_header" value="{{ homepage_meet_header }}" placeholder="{{ entry_meet_header }}" id="input-meet-header" class="form-control"/>
+                <div class="form-text">{{ help_meet_header }}</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="input-meet-paragraph" class="col-sm-2 col-form-label">{{ entry_meet_paragraph }}</label>
+              <div class="col-sm-10">
+                <textarea name="homepage_meet_paragraph" rows="5" placeholder="{{ entry_meet_paragraph }}" id="input-meet-paragraph" class="form-control">{{ homepage_meet_paragraph }}</textarea>
+                <div class="form-text">{{ help_meet_paragraph }}</div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 7: Full Width Banner -->
+          <fieldset>
+            <legend>Section 6: Full Width Banner</legend>
+            <div class="row mb-3">
+              <label for="input-banner-image" class="col-sm-2 col-form-label">{{ entry_banner_image }}</label>
+              <div class="col-sm-10">
+                <div class="card image">
+                  <img src="{{ banner_image_thumb }}" alt="" title="" id="thumb-banner-image" data-oc-placeholder="{{ placeholder }}" class="card-img-top"/> 
+                  <input type="hidden" name="homepage_banner_image" value="{{ homepage_banner_image }}" id="input-banner-image"/>
+                  <div class="card-body">
+                    <button type="button" data-oc-toggle="image" data-oc-target="#input-banner-image" data-oc-thumb="#thumb-banner-image" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                    <button type="button" data-oc-toggle="clear" data-oc-target="#input-banner-image" data-oc-thumb="#thumb-banner-image" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                  </div>
+                </div>
+                <div class="form-text">{{ help_banner_image }}</div>
+              </div>
+            </div>
+          </fieldset>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript"><!--
+var featured_item_row = {{ featured_items|length }};
+var category_row = {{ categories|length }};
+
+// Category Autocomplete
+$('#input-category').autocomplete({
+    'source': function(searchTerm, response) {
+        $.ajax({
+            url: 'index.php?route=design/homepage.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(searchTerm),
+            dataType: 'json',
+            success: function(json) {
+                var results = $.map(json, function(item) {
+                    return {
+                        label: item['name'],
+                        value: item['category_id'],
+                        image: item['image']
+                    }
+                });
+                
+                response(results);
+            },
+            error: function() {
+                response([]);
+            }
+        });
+    },
+    'select': function(item) {
+        $('#input-category').val('');
+        
+        var html = '';
+        
+        html += '<tr id="category-row-' + category_row + '">';
+        html += '  <td class="text-center">';
+        if (item.image) {
+            html += '<img src="' + item.image + '" alt="" class="img-thumbnail"/>';
+        }
+        html += '  </td>';
+        html += '  <td>' + item.label;
+        html += '    <input type="hidden" name="homepage_featured_categories[' + category_row + '][category_id]" value="' + item.value + '"/>';
+        html += '  </td>';
+        html += '  <td class="text-center">';
+        html += '    <div class="card image">';
+        html += '      <img src="' + (item.image ? item.image : 'https://placehold.co/100x100?text=No+Image') + '" alt="" title="" id="thumb-category-image-' + category_row + '" data-oc-placeholder="https://placehold.co/100x100?text=No+Image" class="card-img-top"/>';
+        html += '      <input type="hidden" name="homepage_featured_categories[' + category_row + '][custom_image]" value="" id="input-category-image-' + category_row + '"/>';
+        html += '      <div class="card-body">';
+        html += '        <button type="button" data-oc-toggle="image" data-oc-target="#input-category-image-' + category_row + '" data-oc-thumb="#thumb-category-image-' + category_row + '" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>';
+        html += '        <button type="button" data-oc-toggle="clear" data-oc-target="#input-category-image-' + category_row + '" data-oc-thumb="#thumb-category-image-' + category_row + '" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>';
+        html += '      </div>';
+        html += '    </div>';
+        html += '  </td>';
+        html += '  <td class="text-end"><button type="button" onclick="$(\'#category-row-' + category_row + '\').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+        html += '</tr>';
+        
+        $('#category-row').append(html);
+        
+        category_row++;
+    }
+});
+
+// Featured Topics/Articles Autocomplete
+$('#input-featured-item').autocomplete({
+    'source': function(searchTerm, response) {
+        $.ajax({
+            url: 'index.php?route=design/homepage.autocompleteTopics&user_token={{ user_token }}&filter_name=' + encodeURIComponent(searchTerm),
+            dataType: 'json',
+            success: function(json) {
+                response($.map(json, function(item) {
+                    return {
+                        label: item['name'] + ' (' + item['type'].charAt(0).toUpperCase() + item['type'].slice(1) + ')',
+                        value: item['type'].charAt(0).toUpperCase() + '-' + item['id'],
+                        type: item['type'],
+                        name: item['name'],
+                        image: item['image']
+                    }
+                }));
+            },
+            error: function() {
+                response([]);
+            }
+        });
+    },
+    'select': function(item) {
+        $('#input-featured-item').val('');
+        
+        var html = '';
+        
+        html += '<tr id="featured-item-row-' + featured_item_row + '">';
+        html += '  <td class="text-center">';
+        if (item.image) {
+            html += '<img src="' + item.image + '" alt="" class="img-thumbnail"/>';
+        }
+        html += '  </td>';
+        html += '  <td>' + item.name;
+        html += '    <input type="hidden" name="homepage_featured_items[' + featured_item_row + '][id]" value="' + item.value + '"/>';
+        html += '    <input type="hidden" name="homepage_featured_items[' + featured_item_row + '][type]" value="' + item.type + '"/>';
+        html += '  </td>';
+        html += '  <td><span class="badge bg-' + (item.type == 'topic' ? 'primary' : 'success') + '">' + item.type.charAt(0).toUpperCase() + item.type.slice(1) + '</span></td>';
+        html += '  <td class="text-center">';
+        html += '    <div class="card image">';
+        html += '      <img src="' + (item.image ? item.image : 'https://placehold.co/100x100?text=No+Image') + '" alt="" title="" id="thumb-featured-image-' + featured_item_row + '" data-oc-placeholder="https://placehold.co/100x100?text=No+Image" class="card-img-top"/>';
+        html += '      <input type="hidden" name="homepage_featured_items[' + featured_item_row + '][custom_image]" value="" id="input-featured-image-' + featured_item_row + '"/>';
+        html += '      <div class="card-body">';
+        html += '        <button type="button" data-oc-toggle="image" data-oc-target="#input-featured-image-' + featured_item_row + '" data-oc-thumb="#thumb-featured-image-' + featured_item_row + '" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>';
+        html += '        <button type="button" data-oc-toggle="clear" data-oc-target="#input-featured-image-' + featured_item_row + '" data-oc-thumb="#thumb-featured-image-' + featured_item_row + '" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>';
+        html += '      </div>';
+        html += '    </div>';
+        html += '  </td>';
+        html += '  <td>';
+        html += '    <textarea name="homepage_featured_items[' + featured_item_row + '][description]" rows="3" placeholder="{{ entry_description }}" class="form-control"></textarea>';
+        html += '  </td>';
+        html += '  <td class="text-end"><button type="button" onclick="$(\'#featured-item-row-' + featured_item_row + '\').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+        html += '</tr>';
+        
+        $('#featured-item-row').append(html);
+        
+        featured_item_row++;
+    }
+});
+//--></script>
+
+{{ footer }}

@@ -1,0 +1,249 @@
+<div class="homepage-sections">
+
+  <!-- Section 1: Text Block -->
+    <div style="background-color: #f5f5f5;" class="text-center pt-3 pb-5 mb-5">
+        <h4 class="py-3" style="font-weight: bold;letter-spacing: .05em;" >{{ text_block_heading }}</h4>
+        <p style="font-size:15px;font-weight: 300">
+          {{ text_block     }}
+        </p>
+      </div>
+
+
+  <!-- Section 2: Featured Categories -->
+  {% if featured_categories or gift_subscriptions_image %}
+  <section class="featured-categories-section text-center">
+    <div class="container-fluid px-5">
+      <div class="row">
+         {% if gift_subscriptions_image %}
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="category-card border-0">
+            <a href="{{ subscription_list_link }}">
+            <img src="{{ gift_subscriptions_image }}" alt="Gift Subscriptions" class="img-fluid">
+            </a>
+            <div class="category-info">
+              <h3><a href="{{ subscription_list_link }}">GIFT A SUBSCRIPTION</a></h3>
+                            <h6><a href="{{ subscription_list_link }}">SHOP NOW</a></h6>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {% for category in featured_categories %}
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="category-card border-0">
+            {% if category.image %}
+            <a href="{{ category.href }}">
+              <img src="{{ category.image }}" alt="{{ category.name }}" class="img-fluid">
+            </a>
+            {% endif %}
+            <div class="category-info">
+              <h3><a href="{{ category.href }}">{{ category.name }}</a></h3>
+                            <h6><a href="{{ category.href }}">SHOP NOW</a></h6>
+              
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+       
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Section 3: Static Image -->
+  {% if static_image %}
+  <section class="static-image-section text-center">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12 p-0">
+          <img src="{{ static_image }}" alt="Static Image" class="img-fluid w-100">
+        </div>
+      </div>
+    </div>
+<h4 class="py-4">{{ static_image_header }}</h4>
+    
+            <p>{{ static_image_text }}</p>
+         <a class="readmore mx-5" href="{{ subscription_list_link }}">SUBSCRIBE NOW</a>
+  </section>
+  {% endif %}
+
+  <!-- Section 5: Featured Topics/Articles -->
+  {% if featured_items %}
+  <section class="featured-items-section">
+    <div class="container">
+      {% if featured_header %}
+      <div class="row">
+        <div class="col-12">
+          <h2>{{ featured_header }}</h2>
+        </div>
+      </div>
+      {% endif %}
+      <div class="row">
+        {% for item in featured_items %}
+        <div class="col-md-4 col-sm-6 mb-4">
+          <div class="featured-item-card">
+            {% if item.image %}
+            <a href="{{ item.href }}">
+              <img src="{{ item.image }}" alt="{{ item.name }}" class="img-fluid">
+            </a>
+            {% endif %}
+            <div class="featured-item-info">
+              <span class="badge badge-{{ item.type == 'topic' ? 'primary' : 'success' }}">{{ item.type|capitalize }}</span>
+              <h3><a href="{{ item.href }}">{{ item.name }}</a></h3>
+              {% if item.description %}
+              <p>{{ item.description }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Section 6: Meet Section -->
+  {% if meet_image or meet_header or meet_paragraph %}
+  <section class="meet-section">
+    <div class="container">
+      <div class="row align-items-center">
+        {% if meet_image %}
+        <div class="col-md-6 mb-4 mb-md-0">
+          <img src="{{ meet_image }}" alt="{{ meet_header }}" class="img-fluid">
+        </div>
+        {% endif %}
+        <div class="col-md-6">
+          {% if meet_header %}
+          <h2>{{ meet_header }}</h2>
+          {% endif %}
+          {% if meet_paragraph %}
+          <p>{{ meet_paragraph }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Section 7: Full Width Banner -->
+  {% if banner_image %}
+  <section class="full-width-banner-section">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12 p-0">
+          <img src="{{ banner_image }}" alt="Banner" class="img-fluid w-100">
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+
+<style>
+
+
+.text-block-section .text-block {
+  background: #f8f9fa;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.category-card, .featured-item-card {
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+}
+.category-card h6 {
+    text-decoration: underline;
+    font-weight: 300;
+}
+
+.category-card:hover, .featured-item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.category-card img, .featured-item-card img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.category-info, .featured-item-info {
+  padding: 20px;
+}
+
+.category-info h3, .featured-item-info h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  letter-spacing: .05em;
+}
+
+.category-info h3 a, .featured-item-info h3 a {
+  color: #333;
+  text-decoration: none;
+}
+
+.category-info h3 a:hover, .featured-item-info h3 a:hover {
+  color: #007bff;
+}
+
+.static-image-section, .full-width-banner-section {
+  padding: 0;
+}
+
+.static-image-text-section .static-text {
+  background: #fff;
+  padding: 30px;
+  text-align: center;
+}
+
+    .static-image-section h4 {
+        font-weight: bold;
+        letter-spacing: .05em;
+    }
+    .static-image-section p {
+        font-size: 15px;
+        font-weight: 300;
+    }
+    .static-image-section .readmore {
+        font-weight: 300;
+        text-decoration: underline;
+    }
+
+.meet-section {
+  background: #f8f9fa;
+}
+
+.meet-section h2 {
+  margin-bottom: 20px;
+}
+
+.meet-section p {
+  line-height: 1.8;
+}
+
+.featured-item-info .badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+.badge-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.badge-success {
+  background-color: #28a745;
+  color: white;
+}
+
+section h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2rem;
+  font-weight: bold;
+}
+</style>
