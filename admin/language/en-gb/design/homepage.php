@@ -7,6 +7,10 @@ $_['text_success']     = 'Success: You have modified homepage configuration!';
 $_['text_edit']        = 'Edit HomePage';
 
 // Entry
+$_['entry_slideshow']           = 'Slideshow Images';
+$_['entry_link']                = 'Link';
+$_['entry_featured_products_header'] = 'Featured Products Header';
+$_['entry_featured_products']   = 'Featured Products';
 $_['entry_text_block_heading']  = 'Text Block Heading';
 $_['entry_text_block']          = 'Text Block';
 $_['entry_featured_categories'] = 'Featured Categories';
@@ -30,6 +34,9 @@ $_['column_type']               = 'Type';
 $_['column_action']             = 'Action';
 
 // Help
+$_['help_slideshow']           = 'Add slideshow images with optional links. Click the + button to add new slides.';
+$_['help_featured_products_header'] = 'Enter a header text for the featured products section.';
+$_['help_featured_products']   = 'Start typing to search and select products to feature on the homepage.';
 $_['help_text_block_heading']  = 'Enter a heading for the text block section.';
 $_['help_text_block']          = 'Enter text content for the homepage text block section.';
 $_['help_featured_categories'] = 'Start typing to search and select categories to feature on the homepage.';

@@ -20,6 +20,59 @@
       <div class="card-body">
         <form id="form-homepage" action="{{ save }}" method="post" data-oc-toggle="ajax">
           
+          <!-- Section 0: Slideshow -->
+          <fieldset>
+            <legend>Slideshow</legend>
+            <div class="row mb-3">
+              <label class="col-sm-2 col-form-label">{{ entry_slideshow }}</label>
+              <div class="col-sm-10">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover" id="slideshow-table">
+                    <thead>
+                      <tr>
+                        <td class="text-center">{{ column_image }}</td>
+                        <td>{{ entry_link }}</td>
+                        <td class="text-end">{{ column_action }}</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% set slide_row = 0 %}
+                      {% for slide in slideshow_items %}
+                        <tr id="slideshow-row-{{ slide_row }}">
+                          <td class="text-center">
+                            <div class="card image">
+                              <img src="{{ slide.thumb }}" alt="" title="" id="thumb-slideshow-{{ slide_row }}" data-oc-placeholder="{{ placeholder }}" class="card-img-top"/> 
+                              <input type="hidden" name="homepage_slideshow[{{ slide_row }}][image]" value="{{ slide.image }}" id="input-slideshow-image-{{ slide_row }}"/>
+                              <div class="card-body">
+                                <button type="button" data-oc-toggle="image" data-oc-target="#input-slideshow-image-{{ slide_row }}" data-oc-thumb="#thumb-slideshow-{{ slide_row }}" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                                <button type="button" data-oc-toggle="clear" data-oc-target="#input-slideshow-image-{{ slide_row }}" data-oc-thumb="#thumb-slideshow-{{ slide_row }}" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <input type="text" name="homepage_slideshow[{{ slide_row }}][link]" value="{{ slide.link }}" placeholder="{{ entry_link }}" class="form-control"/>
+                          </td>
+                          <td class="text-end">
+                            <button type="button" onclick="$('#slideshow-row-{{ slide_row }}').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button>
+                          </td>
+                        </tr>
+                        {% set slide_row = slide_row + 1 %}
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colspan="2"></td>
+                        <td class="text-end">
+                          <button type="button" id="button-slideshow-add" data-bs-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa-solid fa-plus-circle"></i></button>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
           <!-- Section 1: Text Block -->
           <fieldset>
             <legend>Section 1: Text Block</legend>
@@ -35,6 +88,56 @@
               <div class="col-sm-10">
                 <textarea name="homepage_text_block" rows="5" placeholder="{{ entry_text_block }}" id="input-text-block" class="form-control">{{ homepage_text_block }}</textarea>
                 <div class="form-text">{{ help_text_block }}</div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 1.5: Featured Products -->
+          <fieldset>
+            <legend>Featured Products</legend>
+            <div class="row mb-3">
+              <label for="input-featured-products-header" class="col-sm-2 col-form-label">{{ entry_featured_products_header }}</label>
+              <div class="col-sm-10">
+                <input type="text" name="homepage_featured_products_header" value="{{ homepage_featured_products_header }}" placeholder="{{ entry_featured_products_header }}" id="input-featured-products-header" class="form-control"/>
+                <div class="form-text">{{ help_featured_products_header }}</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label class="col-sm-2 col-form-label" for="input-product">{{ entry_featured_products }}</label>
+              <div class="col-sm-10">
+                <input type="text" name="product_autocomplete" value="" placeholder="{{ entry_featured_products }}" id="input-product" data-oc-target="autocomplete-product" class="form-control" autocomplete="off"/>
+                <ul id="autocomplete-product" class="dropdown-menu"></ul>
+                <div class="form-text">{{ help_featured_products }}</div>
+                <div class="table-responsive mt-3">
+                  <table class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <td class="text-center">{{ column_image }}</td>
+                        <td>{{ column_name }}</td>
+                        <td class="text-end">{{ column_action }}</td>
+                      </tr>
+                    </thead>
+                    <tbody id="product-row">
+                      {% set product_row = 0 %}
+                      {% for product in products %}
+                        <tr id="product-row-{{ product_row }}">
+                          <td class="text-center">
+                            {% if product.image %}
+                              <img src="{{ product.image }}" alt="" class="img-thumbnail"/>
+                            {% endif %}
+                          </td>
+                          <td>{{ product.name }}
+                            <input type="hidden" name="homepage_featured_products[]" value="{{ product.product_id }}"/>
+                          </td>
+                          <td class="text-end">
+                            <button type="button" onclick="$('#product-row-{{ product_row }}').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button>
+                          </td>
+                        </tr>
+                        {% set product_row = product_row + 1 %}
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </fieldset>
@@ -270,6 +373,81 @@
 <script type="text/javascript"><!--
 var featured_item_row = {{ featured_items|length }};
 var category_row = {{ categories|length }};
+var product_row = {{ products|length }};
+var slide_row = {{ slideshow_items|length }};
+
+// Slideshow Add Button
+$('#button-slideshow-add').on('click', function() {
+    var html = '';
+    
+    html += '<tr id="slideshow-row-' + slide_row + '">';
+    html += '  <td class="text-center">';
+    html += '    <div class="card image">';
+    html += '      <img src="{{ placeholder }}" alt="" title="" id="thumb-slideshow-' + slide_row + '" data-oc-placeholder="{{ placeholder }}" class="card-img-top"/>';
+    html += '      <input type="hidden" name="homepage_slideshow[' + slide_row + '][image]" value="" id="input-slideshow-image-' + slide_row + '"/>';
+    html += '      <div class="card-body">';
+    html += '        <button type="button" data-oc-toggle="image" data-oc-target="#input-slideshow-image-' + slide_row + '" data-oc-thumb="#thumb-slideshow-' + slide_row + '" class="btn btn-primary btn-sm btn-block"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>';
+    html += '        <button type="button" data-oc-toggle="clear" data-oc-target="#input-slideshow-image-' + slide_row + '" data-oc-thumb="#thumb-slideshow-' + slide_row + '" class="btn btn-warning btn-sm btn-block"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>';
+    html += '      </div>';
+    html += '    </div>';
+    html += '  </td>';
+    html += '  <td>';
+    html += '    <input type="text" name="homepage_slideshow[' + slide_row + '][link]" value="" placeholder="{{ entry_link }}" class="form-control"/>';
+    html += '  </td>';
+    html += '  <td class="text-end">';
+    html += '    <button type="button" onclick="$(\'#slideshow-row-' + slide_row + '\').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button>';
+    html += '  </td>';
+    html += '</tr>';
+    
+    $('#slideshow-table tbody').append(html);
+    
+    slide_row++;
+});
+
+// Product Autocomplete
+$('#input-product').autocomplete({
+    'source': function(searchTerm, response) {
+        $.ajax({
+            url: 'index.php?route=design/homepage.autocompleteProducts&user_token={{ user_token }}&filter_name=' + encodeURIComponent(searchTerm),
+            dataType: 'json',
+            success: function(json) {
+                var results = $.map(json, function(item) {
+                    return {
+                        label: item['name'],
+                        value: item['product_id'],
+                        image: item['image']
+                    }
+                });
+                
+                response(results);
+            },
+            error: function() {
+                response([]);
+            }
+        });
+    },
+    'select': function(item) {
+        $('#input-product').val('');
+        
+        var html = '';
+        
+        html += '<tr id="product-row-' + product_row + '">';
+        html += '  <td class="text-center">';
+        if (item.image) {
+            html += '<img src="' + item.image + '" alt="" class="img-thumbnail"/>';
+        }
+        html += '  </td>';
+        html += '  <td>' + item.label;
+        html += '    <input type="hidden" name="homepage_featured_products[]" value="' + item.value + '"/>';
+        html += '  </td>';
+        html += '  <td class="text-end"><button type="button" onclick="$(\'#product-row-' + product_row + '\').remove();" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
+        html += '</tr>';
+        
+        $('#product-row').append(html);
+        
+        product_row++;
+    }
+});
 
 // Category Autocomplete
 $('#input-category').autocomplete({

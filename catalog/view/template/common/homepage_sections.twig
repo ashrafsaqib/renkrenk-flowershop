@@ -1,5 +1,46 @@
 <div class="homepage-sections">
 
+  <!-- Section 0: Slideshow -->
+  {% if slideshow %}
+  <section class="slideshow-section mb-5">
+    {{ slideshow }}
+  </section>
+  {% endif %}
+
+
+  <!-- Section 1.5: Featured Products -->
+  {% if featured_products %}
+  <section class="featured-products-section mb-5">
+    <div class="container">
+      {% if featured_products_header %}
+      <h5 class="text-left py-4" style="font-weight: bold; letter-spacing: .05em;">{{ featured_products_header }}</h5>
+      {% endif %}
+      <div class="row">
+        {% for product in featured_products %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+          <div class="product-card h-100">
+            <div class="product-image">
+              <a href="{{ product.href }}">
+                <img src="{{ product.thumb }}" alt="{{ product.name }}" class="img-fluid"/>
+              </a>
+            </div>
+            <div class="product-info">
+                <a href="{{ product.href }}">{{ product.name }}</a>
+              {% if product.price %}
+              <div class="product-price"> From  {{ product.price }} 
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+
+
   <!-- Section 1: Text Block -->
     <div style="background-color: #f5f5f5;" class="text-center pt-3 pb-5 mb-5">
         <h4 class="py-3" style="font-weight: bold;letter-spacing: .05em;" >{{ text_block_heading }}</h4>
@@ -7,7 +48,6 @@
           {{ text_block     }}
         </p>
       </div>
-
 
   <!-- Section 2: Featured Categories -->
   {% if featured_categories or gift_subscriptions_image %}
@@ -140,6 +180,71 @@
 
 <style>
 
+.slideshow-section {
+  padding: 0;
+  margin-bottom: 2rem !important;
+}
+
+.slideshow-section .carousel-item img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.featured-products-section .product-card {
+  border: 1px solid #eee;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.featured-products-section .product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.featured-products-section .product-image {
+  overflow: hidden;
+}
+
+.featured-products-section .product-image img {
+  width: 100%;
+  transition: transform 0.3s ease;
+}
+
+.featured-products-section .product-card:hover .product-image img {
+  transform: scale(1.05);
+}
+
+.featured-products-section .product-name {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  letter-spacing: .05em;
+  min-height: 2.5em;
+}
+
+.featured-products-section .product-name a {
+  color: #333;
+  text-decoration: none;
+}
+
+.featured-products-section .product-name a:hover {
+  color: #007bff;
+}
+
+.featured-products-section .product-price {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.featured-products-section .price-old {
+  text-decoration: line-through;
+  color: #999;
+  margin-right: 10px;
+}
+
+.featured-products-section .price-new {
+  color: #333;
+  font-size: 1.1rem;
+}
 
 .text-block-section .text-block {
   background: #f8f9fa;

@@ -38,6 +38,64 @@ class HomePage extends \Opencart\System\Engine\Controller {
 
 		$setting_info = $this->model_setting_setting->getSetting('homepage');
 
+		// Slideshow
+		if (isset($setting_info['homepage_slideshow'])) {
+			$data['homepage_slideshow'] = $setting_info['homepage_slideshow'];
+		} else {
+			$data['homepage_slideshow'] = [];
+		}
+
+		// Process slideshow images for display
+		$data['slideshow_items'] = [];
+		if (!empty($data['homepage_slideshow'])) {
+			foreach ($data['homepage_slideshow'] as $slide) {
+				$image_thumb = '';
+				if (!empty($slide['image']) && is_file(DIR_IMAGE . html_entity_decode($slide['image'], ENT_QUOTES, 'UTF-8'))) {
+					$image_thumb = $this->model_tool_image->resize(html_entity_decode($slide['image'], ENT_QUOTES, 'UTF-8'), 100, 100);
+				} else {
+					$image_thumb = $this->model_tool_image->resize('no_image.png', 100, 100);
+				}
+				
+				$data['slideshow_items'][] = [
+					'image'      => $slide['image'] ?? '',
+					'link'       => $slide['link'] ?? '',
+					'thumb'      => $image_thumb
+				];
+			}
+		}
+
+		// Featured Products
+		if (isset($setting_info['homepage_featured_products_header'])) {
+			$data['homepage_featured_products_header'] = $setting_info['homepage_featured_products_header'];
+		} else {
+			$data['homepage_featured_products_header'] = '';
+		}
+
+		if (isset($setting_info['homepage_featured_products'])) {
+			$data['homepage_featured_products'] = $setting_info['homepage_featured_products'];
+		} else {
+			$data['homepage_featured_products'] = [];
+		}
+
+		// Load products for display
+		$data['products'] = [];
+		if (!empty($data['homepage_featured_products'])) {
+			$this->load->model('catalog/product');
+
+			foreach ($data['homepage_featured_products'] as $product_id) {
+				$product_info = $this->model_catalog_product->getProduct($product_id);
+
+				if ($product_info) {
+					$data['products'][] = [
+						'product_id' => $product_info['product_id'],
+						'name'       => $product_info['name'],
+						'image'      => $product_info['image'] ? $this->model_tool_image->resize($product_info['image'], 40, 40) : '',
+						'thumb'      => $product_info['image'] ? $this->model_tool_image->resize($product_info['image'], 100, 100) : ''
+					];
+				}
+			}
+		}
+
 		// Text Block
 		if (isset($setting_info['homepage_text_block_heading'])) {
 			$data['homepage_text_block_heading'] = $setting_info['homepage_text_block_heading'];
@@ -341,6 +399,39 @@ class HomePage extends \Opencart\System\Engine\Controller {
 					'type'  => 'article',
 					'name'  => strip_tags(html_entity_decode($article['name'], ENT_QUOTES, 'UTF-8')),
 					'image' => $article['image'] ? $this->model_tool_image->resize($article['image'], 40, 40) : ''
+				];
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Autocomplete Products
+	 *
+	 * @return void
+	 */
+	public function autocompleteProducts(): void {
+		$json = [];
+
+		if (isset($this->request->get['filter_name'])) {
+			$this->load->model('catalog/product');
+			$this->load->model('tool/image');
+
+			$filter_data = [
+				'filter_name' => $this->request->get['filter_name'],
+				'start'       => 0,
+				'limit'       => 5
+			];
+
+			$results = $this->model_catalog_product->getProducts($filter_data);
+
+			foreach ($results as $result) {
+				$json[] = [
+					'product_id' => $result['product_id'],
+					'name'       => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
+					'image'      => $result['image'] ? $this->model_tool_image->resize($result['image'], 40, 40) : ''
 				];
 			}
 		}
