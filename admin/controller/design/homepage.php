@@ -250,7 +250,7 @@ class HomePage extends \Opencart\System\Engine\Controller {
 
 		// Full Width Banner
 		if (isset($setting_info['homepage_banner_image'])) {
-			$data['homepage_banner_image'] = 'image/'.$setting_info['homepage_banner_image'];
+			$data['homepage_banner_image'] = $setting_info['homepage_banner_image'];
 		} else {
 			$data['homepage_banner_image'] = '';
 		}
