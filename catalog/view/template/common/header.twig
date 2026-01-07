@@ -15,7 +15,9 @@
   {% endif %}
   <script src="{{ jquery }}" type="text/javascript"></script>
   <link href="{{ icons }}" rel="stylesheet" type="text/css" />
-  <link href="{{ stylesheet }}?v=4.2" type="text/css" rel="stylesheet" />
+  <link href="{{ bootstrap }}" type="text/css" rel="stylesheet" />
+
+  <link href="{{ stylesheet }}" type="text/css" rel="stylesheet" />
   <script src="catalog/view/javascript/common.js?v=1.1" type="text/javascript"></script>
   <script src="catalog/view/javascript/location.js?v=2" type="text/javascript"></script>
 
@@ -133,23 +135,23 @@
     <nav id="top">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-4 pt-1 pl-2 px-5" id="top-left">
+          <div class="col-12 col-lg-4 pt-1 pl-2 px-lg-5 px-2" id="top-left">
                  <a id="openLocationModalBtn" {% if user_city and user_district %} data-location-set="true" {% endif %} href="#" class="dropdown-toggle" data-bs-toggle="offcanvas" data-bs-target="#locationModal" aria-label="Select location">
                     <i class="fa-solid fa-location-dot"></i>
                   {% if user_city and user_district %}
-                    <span class="d-none d-lg-inline">
+                    <span>
                     {{ user_district }}
                     </span>
                   {% else %}
-                    <span class="d-none d-lg-inline">Your Location</span>
+                    <span>Your Location</span>
                   {% endif %}
                   </a>
-                  <br/>
-                <div class="dropdown">
+                  <br class="d-none d-lg-block"/>
+                <div class="dropdown d-none d-lg-inline-block">
                   
-                  <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-label="Select shipping city">
-                     <span class="d-none d-lg-inline">Ships to {% if user_city %}{{ user_city }}{% else %}Select City{% endif %}</span><i class="fa-solid fa-caret-down"></i>
-                  </a>
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-label="Select shipping city">
+                     <span>Ships to {% if user_city %}{{ user_city }}{% else %}Select City{% endif %}</span><i class="fa-solid fa-caret-down"></i>
+                    </a>
                   <ul class="dropdown-menu">
                     {% for city in turkish_cities %}
                     <li><a href="#" class="dropdown-item ship-to-city" data-city="{{ city.name }}" onclick="event.preventDefault(); setShipToCity('{{ city.name }}');">{{ city.name }}</a></li>
@@ -159,15 +161,20 @@
                 </div>
 
           </div>
-          <div class="col-12 col-md-4 d-flex justify-content-center align-items-center">
+          <div class="col-4 d-lg-none" id="logo-left-mobile">
+                <a href="#" id="toggle-search" aria-label="Toggle search" class="px-3"><i class="fa-solid fa-search"></i></a>
+
+            <button type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenuModal" class="navbar-toggler"><i class="fa-solid fa-bars"></i></button>
+          </div>
+          <div class="col-4 col-lg-4 d-flex justify-content-center align-items-center">
             <a href="{{ home }}" class="d-inline-block text-center">
               <img src="{{ logo }}" title="{{ name }}" alt="{{ name }}" class="img-fluid" />
             </a>
           </div>
 
-          <div class="col-3 text-end">
+          <div class="col-4 col-lg-3 text-end" id="logo-right-mobile">
             <ul class="list-inline">
-              <li class="list-inline-item">
+              <li class="list-inline-item d-none d-lg-inline-block">
                 <a href="#" id="toggle-search" aria-label="Toggle search"><i class="fa-solid fa-search"></i></a>
               </li>
 
