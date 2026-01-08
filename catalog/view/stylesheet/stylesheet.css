@@ -1035,6 +1035,9 @@ header{
   .upsell-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .gift-info-section {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1149,4 +1152,10 @@ header{
   font-size: .93rem;
         line-height: 1.2rem;
         font-weight: 700;
+}
+@media (max-width: 576px) {
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
 }
