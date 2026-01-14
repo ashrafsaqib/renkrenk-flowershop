@@ -280,6 +280,10 @@ class Product extends \Opencart\System\Engine\Controller {
 			$data['reward'] = $product_info['reward'];
 			$data['points'] = $product_info['points'];
 			$data['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8');
+			$data['short_description'] = $product_info['short_description'] ?? '';
+			$data['size'] = html_entity_decode($product_info['size'] ?? '', ENT_QUOTES, 'UTF-8');
+			$data['care'] = html_entity_decode($product_info['care'] ?? '', ENT_QUOTES, 'UTF-8');
+			$data['delivery'] = html_entity_decode($product_info['delivery'] ?? '', ENT_QUOTES, 'UTF-8');
 
 			// Stock Status
 			if ($product_info['quantity'] <= 0) {

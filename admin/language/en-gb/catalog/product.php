@@ -63,6 +63,10 @@ $_['column_action']              = 'Action';
 // Entry
 $_['entry_name']                 = 'Product Name';
 $_['entry_description']          = 'Description';
+$_['entry_short_description']    = 'Short Description';
+$_['entry_size']                 = 'Size';
+$_['entry_care']                 = 'Care Instructions';
+$_['entry_delivery']             = 'Delivery';
 $_['entry_meta_title']           = 'Meta Tag Title';
 $_['entry_meta_keyword']         = 'Meta Tag Keywords';
 $_['entry_meta_description']     = 'Meta Tag Description';
@@ -120,6 +124,7 @@ $_['entry_zone']                 = 'District';
 
 // Help
 $_['help_tag']                   = 'Comma separated';
+$_['help_short_description']     = 'Add one feature per line. Each line will be displayed as a bullet point.';
 $_['help_minimum']               = 'Force a minimum ordered amount';
 $_['help_stock_status']          = 'Status shown when a product is out of stock';
 $_['help_manufacturer']          = '(Autocomplete)';
