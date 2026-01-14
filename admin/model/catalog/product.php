@@ -120,6 +120,13 @@ class Product extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		// Addon
+		if (isset($data['product_addon'])) {
+			foreach ($data['product_addon'] as $addon_id) {
+				$this->model_catalog_product->addAddon($product_id, $addon_id);
+			}
+		}
+
 		// Color
 		if (isset($data['product_color'])) {
 			foreach ($data['product_color'] as $color_id) {
@@ -344,6 +351,15 @@ class Product extends \Opencart\System\Engine\Model {
 		if (isset($data['product_vase'])) {
 			foreach ($data['product_vase'] as $vase_id) {
 				$this->model_catalog_product->addVase($product_id, $vase_id);
+			}
+		}
+
+		// Addon
+		$this->model_catalog_product->deleteAddons($product_id);
+
+		if (isset($data['product_addon'])) {
+			foreach ($data['product_addon'] as $addon_id) {
+				$this->model_catalog_product->addAddon($product_id, $addon_id);
 			}
 		}
 
@@ -2903,6 +2919,71 @@ class Product extends \Opencart\System\Engine\Model {
 		}
 
 		return $product_vase_data;
+	}
+
+	/**
+	 * Add Addon
+	 *
+	 * @param int $product_id primary key of the product record
+	 * @param int $addon_id   primary key of the addon product record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $this->model_catalog_product->addAddon($product_id, $addon_id);
+	 */
+	public function addAddon(int $product_id, int $addon_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "product_to_addon` WHERE `product_id` = '" . (int)$product_id . "' AND `addon_id` = '" . (int)$addon_id . "'");
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "product_to_addon` SET `product_id` = '" . (int)$product_id . "', `addon_id` = '" . (int)$addon_id . "'");
+	}
+
+	/**
+	 * Delete Addons
+	 *
+	 * Delete addon records in the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $this->model_catalog_product->deleteAddons($product_id);
+	 */
+	public function deleteAddons(int $product_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "product_to_addon` WHERE `product_id` = '" . (int)$product_id . "'");
+	}
+
+	/**
+	 * Get Addons
+	 *
+	 * Get the record of the addon records in the database.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return array<int, int> addon records that have product ID
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $product_addons = $this->model_catalog_product->getAddons($product_id);
+	 */
+	public function getAddons(int $product_id): array {
+		$product_addon_data = [];
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_to_addon` WHERE `product_id` = '" . (int)$product_id . "'");
+
+		foreach ($query->rows as $result) {
+			$product_addon_data[] = $result['addon_id'];
+		}
+
+		return $product_addon_data;
 	}
 
 	/**

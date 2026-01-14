@@ -236,6 +236,7 @@ class Product extends \Opencart\System\Engine\Controller {
 		$this->document->addLink($this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_id), 'canonical');
 
 		$this->document->addScript('catalog/view/javascript/calendar.js');
+		$this->document->addStyle('catalog/view/stylesheet/product.css');
 		$this->document->addScript('catalog/view/javascript/jquery/magnific/jquery.magnific-popup.min.js');
 		$this->document->addStyle('catalog/view/javascript/jquery/magnific/magnific-popup.css');			$data['heading_title'] = $product_info['name'];
 
@@ -468,6 +469,39 @@ class Product extends \Opencart\System\Engine\Controller {
 			$data['vases'][] = [
 				'product_id' => $vase['product_id'],
 				'name'       => $vase['name'],
+				'price'      => $price,
+				'special'    => $special,
+				'thumb'      => $this->model_tool_image->resize($image, 100, 100)
+			];
+		}
+
+		// Addons
+		$data['addons'] = [];
+
+		$addon_results = $this->model_catalog_product->getAddons($product_id);
+
+		foreach ($addon_results as $addon) {
+			if ($addon['image'] && is_file(DIR_IMAGE . html_entity_decode($addon['image'], ENT_QUOTES, 'UTF-8'))) {
+				$image = $addon['image'];
+			} else {
+				$image = 'placeholder.png';
+			}
+
+			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+				$price = $this->currency->format($this->tax->calculate($addon['price'], $addon['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			} else {
+				$price = false;
+			}
+
+			if ((float)$addon['special']) {
+				$special = $this->currency->format($this->tax->calculate($addon['special'], $addon['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			} else {
+				$special = false;
+			}
+
+			$data['addons'][] = [
+				'product_id' => $addon['product_id'],
+				'name'       => $addon['name'],
 				'price'      => $price,
 				'special'    => $special,
 				'thumb'      => $this->model_tool_image->resize($image, 100, 100)

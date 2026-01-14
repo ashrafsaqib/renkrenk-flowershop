@@ -367,10 +367,6 @@ class Cart extends \Opencart\System\Engine\Controller {
 					$cart_override['gift_id'] = (int)$this->request->post['gift_id'];
 				}
 
-				if (isset($this->request->post['vase_id'])) {
-					$cart_override['vase_id'] = (int)$this->request->post['vase_id'];
-				}
-
 				// Map duration if provided
 				if (isset($this->request->post['duration_id'])) {
 					$cart_override['duration'] = (int)$this->request->post['duration_id'];
@@ -379,31 +375,36 @@ class Cart extends \Opencart\System\Engine\Controller {
 
 			$this->cart->add($product_id, $quantity, $option, $subscription_plan_id, $cart_override);
 
-			// Add vase and gift card as separate products if selected
-			$vase_product_info = null;
-			$gift_product_info = null;
+			// Add additional products (vases, addons, gift cards) as separate products if selected
+			$additional_products = [];
 			
-			if ($subscription_plan_id) {
-				// Add vase as a separate product if selected
-				if (isset($cart_override['vase_id']) && $cart_override['vase_id'] > 0) {
-					$vase_product_info = $this->model_catalog_product->getProduct($cart_override['vase_id']);
-					if ($vase_product_info) {
-						$this->cart->add($cart_override['vase_id'], 1, [], 0, [
-							'linked_to_subscription' => $subscription_plan_id,
-							'is_vase_addon' => 1
-						]);
+			// Collect product IDs from vase selection (radio button)
+			if (isset($this->request->post['product_ids_vase']) && (int)$this->request->post['product_ids_vase'] > 0) {
+				$additional_products[] = (int)$this->request->post['product_ids_vase'];
+			}
+			
+			// Collect product IDs from addon checkboxes
+			if (isset($this->request->post['product_ids']) && is_array($this->request->post['product_ids'])) {
+				$additional_products = array_merge($additional_products, array_map('intval', $this->request->post['product_ids']));
+			}
+			
+			// Add gift card if selected (for subscriptions)
+			if ($subscription_plan_id && isset($cart_override['gift_id']) && $cart_override['gift_id'] > 0) {
+				$additional_products[] = $cart_override['gift_id'];
+			}
+			
+			// Add all additional products to cart
+			foreach ($additional_products as $additional_product_id) {
+				$additional_product_info = $this->model_catalog_product->getProduct($additional_product_id);
+				if ($additional_product_info) {
+					$addon_override = ['is_additional_product' => 1];
+					
+					// Link to subscription if this is a subscription product
+					if ($subscription_plan_id) {
+						$addon_override['linked_to_subscription'] = $subscription_plan_id;
 					}
-				}
-				
-				// Add gift card as a separate product if selected
-				if (isset($cart_override['gift_id']) && $cart_override['gift_id'] > 0) {
-					$gift_product_info = $this->model_catalog_product->getProduct($cart_override['gift_id']);
-					if ($gift_product_info) {
-						$this->cart->add($cart_override['gift_id'], 1, [], 0, [
-							'linked_to_subscription' => $subscription_plan_id,
-							'is_gift_addon' => 1
-						]);
-					}
+					
+					$this->cart->add($additional_product_id, 1, [], 0, $addon_override);
 				}
 			}
 
@@ -609,25 +610,22 @@ class Cart extends \Opencart\System\Engine\Controller {
 					}
 				}
 				
-				// Add addon products (vase and gift) to popup data
+				// Add addon products to popup data
 				$popup_data['addons'] = [];
 				
-				if ($vase_product_info) {
-					$popup_data['addons'][] = [
-						'type' => 'vase',
-						'name' => $vase_product_info['name'],
-						'image' => $this->model_tool_image->resize($vase_product_info['image'], 100, 100),
-						'price' => $this->currency->format($this->tax->calculate($vase_product_info['price'], $vase_product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])
-					];
-				}
-				
-				if ($gift_product_info) {
-					$popup_data['addons'][] = [
-						'type' => 'gift',
-						'name' => $gift_product_info['name'],
-						'image' => $this->model_tool_image->resize($gift_product_info['image'], 100, 100),
-						'price' => $this->currency->format($this->tax->calculate($gift_product_info['price'], $gift_product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])
-					];
+				// Loop through additional products that were added
+				if (!empty($additional_products)) {
+					foreach ($additional_products as $additional_product_id) {
+						$addon_info = $this->model_catalog_product->getProduct($additional_product_id);
+						if ($addon_info) {
+							$popup_data['addons'][] = [
+								'type' => 'addon',
+								'name' => $addon_info['name'],
+								'image' => $this->model_tool_image->resize($addon_info['image'], 100, 100),
+								'price' => $this->currency->format($this->tax->calculate($addon_info['price'], $addon_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])
+							];
+						}
+					}
 				}
 				
 				// Add subscription options to popup data if present

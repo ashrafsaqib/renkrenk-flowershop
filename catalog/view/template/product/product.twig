@@ -1,4 +1,5 @@
 {{ header }}
+<link href="catalog/view/stylesheet/product.css" rel="stylesheet">
 <div id="product-info" class="container">
 
   <div class="row">{{ column_left }}
@@ -191,7 +192,7 @@
                       title="None"
                     >
                       <input type="radio"
-                             name="vase_id"
+                             name="product_ids_vase"
                              class="d-none"
                              value="0"
                              checked/>
@@ -206,10 +207,38 @@
                       title="{{ vase.name }}"
                     >
                       <input type="radio"
-                             name="vase_id"
+                             name="product_ids_vase"
                              class="d-none"
                              value="{{ vase.product_id }}"/>
                       <img src="{{ vase.thumb }}" alt="{{ vase.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                    </label>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+
+              {% if addons %}
+                <hr>
+                <div class="mb-3">
+                  <div class="mb-2">
+                    <label class="form-label">Select Add ons:</label>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Addons">
+                    {% for addon in addons %}
+                    <label
+                      class="btn-addon-img btn"
+                      data-id="{{ addon.product_id }}"
+                      data-name="{{ addon.name }}"
+                      aria-pressed="false"
+                      title="{{ addon.name }}"
+                    >
+                      <input type="checkbox"
+                             name="product_ids[]"
+                             class="d-none"
+                             value="{{ addon.product_id }}"/>
+                      <img src="{{ addon.thumb }}" alt="{{ addon.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                      <div class="text-center small mt-1">{{ addon.name }}</div>
                     </label>
                     {% endfor %}
                   </div>
@@ -437,6 +466,25 @@ $(document).ready(function() {
         });
     })();
 
+    // Addon selection
+    (function(){
+        document.querySelectorAll('.btn-addon-img').forEach(function(btn){
+            btn.addEventListener('click', function(e){
+                e.preventDefault();
+                var checkbox = this.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+                
+                if (checkbox.checked) {
+                    this.classList.add('active');
+                    this.setAttribute('aria-pressed', 'true');
+                } else {
+                    this.classList.remove('active');
+                    this.setAttribute('aria-pressed', 'false');
+                }
+            });
+        });
+    })();
+
     // Stepped checkout logic
     var hasStep1 = $('.step1').length > 0;
     var hasStep2 = $('.step2').length > 0;
@@ -473,70 +521,4 @@ $(document).ready(function() {
     }
 });
 //--></script>
-<style>
-  .btn-size {
-    width: 70px;
-    line-height: 17px;
-    text-transform: uppercase;
-    font-size: 12px;
-    font-weight: 300;
-  }
-
-  /* Vase selection styles */
-  .btn-vase-img {
-    padding: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .btn-vase-img .img-thumbnail {
-    border: 2px solid #dee2e6;
-    transition: all 0.2s ease;
-    border-radius: 8px;
-  }
-
-  .btn-vase-img:hover .img-thumbnail {
-    border-color: #0d6efd;
-    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
-  }
-
-  .btn-vase-img.active .img-thumbnail {
-    border-color: #0d6efd;
-    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25);
-  }
-
-  .image-btns {
-    gap: 0.5rem;
-  }
-
-  /* Color selection styles */
-  .btn-color-link {
-    display: inline-block;
-    padding: 0;
-    border: none;
-    background: transparent;
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .btn-color-link .img-thumbnail {
-    border: 2px solid #dee2e6;
-    transition: all 0.2s ease;
-    border-radius: 8px;
-  }
-
-  .btn-color-link:hover .img-thumbnail {
-    border-color: #0d6efd;
-    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
-    transform: translateY(-2px);
-  }
-
-  .btn-color-link.active .img-thumbnail {
-    border-color: #0d6efd;
-    border-width: 3px;
-    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.35);
-  }
-</style>
 {{ footer }}

@@ -87,6 +87,16 @@
                       <small><em>🏺 Vase Addon</em></small>
                     </li>
                   {% endif %}
+                  {% if product.override.is_addon %}
+                    <li>
+                      <small><em>➕ Product Addon</em></small>
+                    </li>
+                  {% endif %}
+                  {% if product.override.is_additional_product %}
+                    <li>
+                      <small><em>➕ Additional Product</em></small>
+                    </li>
+                  {% endif %}
                   {% if product.override.is_gift_addon %}
                     <li>
                       <small><em>🎁 Gift Card Addon</em></small>

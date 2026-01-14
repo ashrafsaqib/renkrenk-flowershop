@@ -952,6 +952,23 @@ class Product extends \Opencart\System\Engine\Controller {
 			}
 		}
 
+		// Addon
+		if ($product_id) {
+			$product_addons = $this->model_catalog_product->getAddons($product_id);
+		} else {
+			$product_addons = [];
+		}
+
+		$data['product_addons'] = [];
+
+		foreach ($product_addons as $addon_id) {
+			$addon_info = $this->model_catalog_product->getProduct($addon_id);
+
+			if ($addon_info) {
+				$data['product_addons'][] = $addon_info;
+			}
+		}
+
 		// Color
 		if ($product_id) {
 			$product_colors = $this->model_catalog_product->getColors($product_id);
