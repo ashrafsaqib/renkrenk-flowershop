@@ -105,15 +105,15 @@ header {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+.nav-item.dropdown {
+  position: static;
+}
 #menu .dropdown-menu-fullwidth {
-  position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
-  transform: none !important;
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 100%;
+    margin-top: 0;
 }
 #menu .dropdown-inner {
   display: flex;
