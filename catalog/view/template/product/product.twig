@@ -558,8 +558,14 @@ $(document).ready(function() {
     (function(){
         var label = document.getElementById('selectedVase');
 
-        if (label && !label.textContent.trim()) {
-            label.textContent = 'None';
+        // Set initial label based on checked radio button
+        if (label) {
+            var checkedVase = document.querySelector('.btn-vase-img.active');
+            if (checkedVase) {
+                label.textContent = checkedVase.getAttribute('data-name') || checkedVase.getAttribute('title') || 'None';
+            } else {
+                label.textContent = 'None';
+            }
         }
 
         document.querySelectorAll('.btn-vase-img').forEach(function(btn){
