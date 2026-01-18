@@ -107,7 +107,7 @@
                         {% for option_value in option.product_option_value %}
                         <div>
                             <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" id="input-option-value-{{ option_value.product_option_value_id }}" class="btn-check"{% if loop.first %} checked{% endif %}/>
-                          <label for="input-option-value-{{ option_value.product_option_value_id }}" class="btn-size btn btn-outline-dark btn-lg">
+                          <label for="input-option-value-{{ option_value.product_option_value_id }}" class="btn-size {% if option_value.name|split(' ')|length == 2 %} btn-size-square{% endif %} btn btn-outline-dark btn-lg">
                           {% if option_value.image %}
                             <img src="{{ option_value.image }}" alt="{{ option_value.name }}" class="img-thumbnail d-block mb-2" style="max-width: 60px;"/>
                           {% endif %}
