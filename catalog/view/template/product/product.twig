@@ -86,10 +86,10 @@
                     {% if option.type == 'select' %}
                       <div class="mb-3{% if option.required %} required{% endif %}">
                         <label for="input-option-{{ option.product_option_id }}" class="form-label">{{ option.name }}</label>
-                        <select name="option[{{ option.product_option_id }}]" id="input-option-{{ option.product_option_id }}" class="form-select">
-                          <option value="">{{ text_select }}</option>
+                        <select name="option[{{ option.product_option_id }}]" id="input-option-{{ option.product_option_id }}" class="form-select option-select" data-option-type="select">
+                          <option value="" data-price="0" data-price-prefix="">{{ text_select }}</option>
                           {% for option_value in option.product_option_value %}
-                            <option value="{{ option_value.product_option_value_id }}">{{ option_value.name }}
+                            <option value="{{ option_value.product_option_value_id }}" data-price="{{ option_value.price_value|default(0) }}" data-price-prefix="{{ option_value.price_prefix|default('') }}">{{ option_value.name }}
                               {% if option_value.price %}
                                 ({{ option_value.price_prefix }}{{ option_value.price }})
                               {% endif %}</option>
@@ -105,7 +105,7 @@
                       <div id="input-option-{{ option.product_option_id }}" class="d-flex flex-wrap gap-2">
                         {% for option_value in option.product_option_value %}
                         <div>
-                            <input type="radio" data-price="{{ option_value.price }}" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" id="input-option-value-{{ option_value.product_option_value_id }}" class="btn-check"{% if loop.first %} checked{% endif %}/>
+                            <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" id="input-option-value-{{ option_value.product_option_value_id }}" class="btn-check option-radio" data-option-type="radio" data-price="{{ option_value.price_value|default(0) }}" data-price-prefix="{{ option_value.price_prefix|default('') }}"{% if loop.first %} checked{% endif %}/>
                           <label for="input-option-value-{{ option_value.product_option_value_id }}" class="btn-size {% if option_value.name|split(' ')|length == 2 %} btn-size-square{% endif %} btn btn-outline-dark btn-lg">
                           {% if option_value.image %}
                             <img src="{{ option_value.image }}" alt="{{ option_value.name }}" class="img-thumbnail d-block mb-2" style="max-width: 60px;"/>
@@ -125,7 +125,7 @@
                         <div id="input-option-{{ option.product_option_id }}">
                           {% for option_value in option.product_option_value %}
                             <div class="form-check">
-                              <input type="checkbox" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" id="input-option-value-{{ option_value.product_option_value_id }}" class="form-check-input"/> 
+                              <input type="checkbox" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" id="input-option-value-{{ option_value.product_option_value_id }}" class="form-check-input option-checkbox" data-option-type="checkbox" data-price="{{ option_value.price_value|default(0) }}" data-price-prefix="{{ option_value.price_prefix|default('') }}"/> 
 							                <label for="input-option-value-{{ option_value.product_option_value_id }}" class="form-check-label">
                                 {% if option_value.image %}
                                   <img src="{{ option_value.image }}" alt="{{ option_value.name }} {% if option_value.price %}{{ option_value.price_prefix }} {{ option_value.price }}{% endif %}" class="img-thumbnail"/>{% endif %}
@@ -184,13 +184,15 @@
                       class="btn-vase-img btn active"
                       data-id="0"
                       data-name="None"
+                      data-price="0"
                       aria-pressed="true"
                       title="None"
                     >
                       <input type="radio"
                              name="product_ids_vase"
-                             class="d-none"
+                             class="d-none vase-option"
                              value="0"
+                             data-price="0"
                              checked/>
                       <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 12px; font-weight: bold;">None</div>
                     </label>
@@ -199,13 +201,15 @@
                       class="btn-vase-img btn"
                       data-id="{{ vase.product_id }}"
                       data-name="{{ vase.name }}"
+                      data-price="{{ vase.price_value|default(vase.price)|default(0) }}"
                       aria-pressed="false"
                       title="{{ vase.name }}"
                     >
                       <input type="radio"
                              name="product_ids_vase"
-                             class="d-none"
-                             value="{{ vase.product_id }}"/>
+                             class="d-none vase-option"
+                             value="{{ vase.product_id }}"
+                             data-price="{{ vase.price_value|default(vase.price)|default(0) }}"/>
                       <img src="{{ vase.thumb }}" alt="{{ vase.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
                     </label>
                     {% endfor %}
@@ -226,13 +230,15 @@
                       class="btn-addon-img btn"
                       data-id="{{ addon.product_id }}"
                       data-name="{{ addon.name }}"
+                      data-price="{{ addon.price_value|default(addon.price)|default(0) }}"
                       aria-pressed="false"
                       title="{{ addon.name }}"
                     >
                       <input type="checkbox"
                              name="product_ids[]"
-                             class="d-none"
-                             value="{{ addon.product_id }}"/>
+                             class="d-none addon-option"
+                             value="{{ addon.product_id }}"
+                             data-price="{{ addon.price_value|default(addon.price)|default(0) }}"/>
                       <img src="{{ addon.thumb }}" alt="{{ addon.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
                       <div class="text-center small mt-1">{{ addon.name }}</div>
                     </label>
@@ -287,13 +293,13 @@
                 <div class="mb-3">
                 <div class="input-group">
                   <input type="hidden" name="quantity" value="{{ minimum }}" id="input-quantity"/>
-                  <button type="button" id="button-step1" class="btn btn-primary btn-lg w-100" style="display: none;">
-                    <span class="priceFinal" >{{ price }} </span> GO TO GIFT WRAPPING & MESSAGE
+                  <button type="button" id="button-step1" class="btn btn-primary btn-lg w-100" style="display: none;" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left }}" data-currency-right="{{ currency_right }}">
+                    <span class="priceFinal">{{ price }}</span> GO TO GIFT WRAPPING & MESSAGE
                   </button>
-                  <button type="button" id="button-step2" class="btn btn-primary btn-lg w-100" style="display: none;">
-                    <span class="priceFinal" >{{ price }} </span> CONTINUE TO DELIVERY
+                  <button type="button" id="button-step2" class="btn btn-primary btn-lg w-100" style="display: none;" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left }}" data-currency-right="{{ currency_right }}">
+                    <span class="priceFinal">{{ price }}</span> CONTINUE TO DELIVERY
                   </button>
-                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg w-100">{{ button_cart }}</button>
+                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg w-100" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left }}" data-currency-right="{{ currency_right }}"><span class="price-display">{{ button_cart }}</span></button>
                 </div>
                 <input type="hidden" name="product_id" value="{{ product_id }}" id="input-product-id"/>
                 <div id="error-quantity" class="form-text"></div>
@@ -445,7 +451,85 @@ $('#form-product').on('submit', function(e) {
     });
 });
 
+// Function to calculate and update price based on selected options
+function updateProductPrice() {
+    var basePrice = parseFloat($('#button-cart').data('base-price')) || 0;
+    var totalOptionPrice = 0;
+    
+    // Calculate price from select options
+    $('.option-select').each(function() {
+        var selectedOption = $(this).find('option:selected');
+        var price = parseFloat(selectedOption.data('price')) || 0;
+        var prefix = selectedOption.data('price-prefix') || '+';
+        
+        if (prefix === '+') {
+            totalOptionPrice += price;
+        } else if (prefix === '-') {
+            totalOptionPrice -= price;
+        }
+    });
+    
+    // Calculate price from radio options
+    $('.option-radio:checked').each(function() {
+        var price = parseFloat($(this).data('price')) || 0;
+        var prefix = $(this).data('price-prefix') || '+';
+        
+        if (prefix === '+') {
+            totalOptionPrice += price;
+        } else if (prefix === '-') {
+            totalOptionPrice -= price;
+        }
+    });
+    
+    // Calculate price from checkbox options
+    $('.option-checkbox:checked').each(function() {
+        var price = parseFloat($(this).data('price')) || 0;
+        var prefix = $(this).data('price-prefix') || '+';
+        
+        if (prefix === '+') {
+            totalOptionPrice += price;
+        } else if (prefix === '-') {
+            totalOptionPrice -= price;
+        }
+    });
+    
+    // Calculate price from selected vase
+    var selectedVase = $('.vase-option:checked');
+    if (selectedVase.length > 0) {
+        var vasePrice = parseFloat(selectedVase.data('price')) || 0;
+        totalOptionPrice += vasePrice;
+    }
+    
+    // Calculate price from selected addons
+    $('.addon-option:checked').each(function() {
+        var addonPrice = parseFloat($(this).data('price')) || 0;
+        totalOptionPrice += addonPrice;
+    });
+    
+    // Calculate final price
+    var finalPrice = basePrice + totalOptionPrice;
+    
+    // Format price with currency
+    var currencyLeft = $('#button-cart').data('currency-left') || '';
+    var currencyRight = $('#button-cart').data('currency-right') || '';
+    var formattedPrice = currencyLeft + finalPrice.toFixed(2) + currencyRight;
+    
+    // Update all button prices
+    $('#button-cart .price-display').html(formattedPrice + ' - {{ button_cart }}');
+    $('#button-step1 .priceFinal, #button-step2 .priceFinal').html(formattedPrice);
+}
+
 $(document).ready(function() {
+    // Attach event listeners to option changes
+    $('.option-select').on('change', updateProductPrice);
+    $('.option-radio').on('change', updateProductPrice);
+    $('.option-checkbox').on('change', updateProductPrice);
+    $('.vase-option').on('change', updateProductPrice);
+    $('.addon-option').on('change', updateProductPrice);
+    
+    // Initial price calculation on page load
+    updateProductPrice();
+    
     $('.magnific-popup').magnificPopup({
         type: 'image',
         delegate: 'a',
@@ -489,6 +573,9 @@ $(document).ready(function() {
 
                 if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
                 this.querySelector('input[type="radio"]').checked = true;
+                
+                // Trigger price update
+                updateProductPrice();
             });
         });
     })();
@@ -508,6 +595,9 @@ $(document).ready(function() {
                     this.classList.remove('active');
                     this.setAttribute('aria-pressed', 'false');
                 }
+                
+                // Trigger price update
+                updateProductPrice();
             });
         });
     })();
