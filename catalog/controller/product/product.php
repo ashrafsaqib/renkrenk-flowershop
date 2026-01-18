@@ -338,8 +338,10 @@ class Product extends \Opencart\System\Engine\Controller {
 
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$data['price_value'] = $this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax'));
 			} else {
 				$data['price'] = false;
+				$data['price_value'] = 0;
 			}
 
 			if ((float)$product_info['special']) {
@@ -347,6 +349,16 @@ class Product extends \Opencart\System\Engine\Controller {
 			} else {
 				$data['special'] = false;
 			}
+
+			// Add currency formatting info
+			$currency = $this->session->data['currency'];
+			$data['currency_left'] = $this->currency->getSymbolLeft($currency);
+			$data['currency_right'] = $this->currency->getSymbolRight($currency);
+
+			// Add currency formatting info
+			$currency = $this->session->data['currency'];
+			$data['currency_left'] = $this->currency->getSymbolLeft($currency);
+			$data['currency_right'] = $this->currency->getSymbolRight($currency);
 
 			if ($this->config->get('config_tax')) {
 				$data['tax'] = $this->currency->format((float)$product_info['special'] ? $product_info['special'] : $product_info['price'], $this->session->data['currency']);

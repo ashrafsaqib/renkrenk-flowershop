@@ -293,13 +293,13 @@
                 <div class="mb-3">
                 <div class="input-group">
                   <input type="hidden" name="quantity" value="{{ minimum }}" id="input-quantity"/>
-                  <button type="button" id="button-step1" class="btn btn-primary btn-lg w-100" style="display: none;" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left }}" data-currency-right="{{ currency_right }}">
+                  <button type="button" id="button-step1" class="btn btn-primary btn-lg w-50" style="display: none;" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left|default('') }}" data-currency-right="{{ currency_right|default('') }}">
                     <span class="priceFinal">{{ price }}</span> GO TO GIFT WRAPPING & MESSAGE
                   </button>
-                  <button type="button" id="button-step2" class="btn btn-primary btn-lg w-100" style="display: none;" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left }}" data-currency-right="{{ currency_right }}">
+                  <button type="button" id="button-step2" class="btn btn-primary btn-lg w-50" style="display: none;" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left|default('') }}" data-currency-right="{{ currency_right|default('') }}">
                     <span class="priceFinal">{{ price }}</span> CONTINUE TO DELIVERY
                   </button>
-                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg w-100" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left }}" data-currency-right="{{ currency_right }}"><span class="price-display">{{ button_cart }}</span></button>
+                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg w-50" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left|default('') }}" data-currency-right="{{ currency_right|default('') }}" data-button-text="{{ button_cart }}"><span class="price-display">{{ price }} {{ button_cart }}</span></button>
                 </div>
                 <input type="hidden" name="product_id" value="{{ product_id }}" id="input-product-id"/>
                 <div id="error-quantity" class="form-text"></div>
@@ -512,10 +512,11 @@ function updateProductPrice() {
     // Format price with currency
     var currencyLeft = $('#button-cart').data('currency-left') || '';
     var currencyRight = $('#button-cart').data('currency-right') || '';
+    var buttonText = $('#button-cart').data('button-text') || 'Add to Cart';
     var formattedPrice = currencyLeft + finalPrice.toFixed(2) + currencyRight;
     
     // Update all button prices
-    $('#button-cart .price-display').html(formattedPrice + ' - {{ button_cart }}');
+    $('#button-cart .price-display').html(formattedPrice + ' ' + buttonText);
     $('#button-step1 .priceFinal, #button-step2 .priceFinal').html(formattedPrice);
 }
 
