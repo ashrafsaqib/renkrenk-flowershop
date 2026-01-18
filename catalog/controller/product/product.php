@@ -395,22 +395,25 @@ class Product extends \Opencart\System\Engine\Controller {
 						if (!$option_value['subtract'] || ($option_value['quantity'] > 0)) {
 							if ((($this->config->get('config_customer_price') && $this->customer->isLogged()) || !$this->config->get('config_customer_price')) && (float)$option_value['price']) {
 								$price = $this->currency->format($this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-							$price_value = $this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax'));
-						} else {
-							$price = false;
-							$price_value = 0;
-						}
+							} else {
+								$price = false;
+							}
 
-						if ($option_value['image'] && is_file(DIR_IMAGE . html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8'))) {
-							$image = $option_value['image'];
-						} else {
-							$image = '';
-						}
+							if ($option_value['image'] && is_file(DIR_IMAGE . html_entity_decode($option_value['image'], ENT_QUOTES, 'UTF-8'))) {
+								$image = $option_value['image'];
+							} else {
+								$image = '';
+							}
 
-						$product_option_value_data[] = [
-							'image' => $this->model_tool_image->resize($image, 50, 50),
-							'price' => $price,
-							'price_value' => $price_value
+							$product_option_value_data[] = [
+								'image' => $this->model_tool_image->resize($image, 50, 50),
+								'price' => $price,
+								'price_value' => $option_value['price'],
+								'price_prefix' => $option_value['price_prefix']
+							] + $option_value;
+						}
+					}
+
 					$data['options'][] = ['product_option_value' => $product_option_value_data] + $option;
 				}
 			}
