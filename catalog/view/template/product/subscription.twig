@@ -604,8 +604,14 @@ $(document).ready(function() {
     var labelPrice = document.getElementById('selectedVasePrice');
     var hidden = document.getElementById('vase_id');
 
-    if (labelName && !labelName.textContent.trim()) {
-      labelName.textContent = 'None';
+    // Set initial label based on checked radio button
+    if (labelName) {
+      var checkedVase = document.querySelector('.btn-vase.active');
+      if (checkedVase) {
+        labelName.textContent = checkedVase.getAttribute('data-name') || checkedVase.getAttribute('title') || 'None';
+      } else {
+        labelName.textContent = 'None';
+      }
     }
     if (hidden) hidden.value = '0';
 
