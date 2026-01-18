@@ -30,7 +30,6 @@
             <li class="nav-item"><a href="#tab-color" data-bs-toggle="tab" class="nav-link">{{ tab_color }}</a></li>
             <li class="nav-item"><a href="#tab-attribute" data-bs-toggle="tab" class="nav-link">{{ tab_attribute }}</a></li>
             <li class="nav-item"><a href="#tab-option" data-bs-toggle="tab" class="nav-link">{{ tab_option }}</a></li>
-            <li class="nav-item"><a href="#tab-subscription" data-bs-toggle="tab" class="nav-link">{{ tab_subscription }}</a></li>
             <li class="nav-item"><a href="#tab-discount" data-bs-toggle="tab" class="nav-link">{{ tab_discount }}</a></li>
             <li class="nav-item"><a href="#tab-image" data-bs-toggle="tab" class="nav-link">{{ tab_image }}</a></li>
             <li class="nav-item"><a href="#tab-reward" data-bs-toggle="tab" class="nav-link">{{ tab_reward }}</a></li>
@@ -2186,29 +2185,6 @@ $('#button-image').on('click', function() {
     image_row++;
 });
 
-var subscription_row = {{ subscription_row }};
-
-$('#button-subscription').on('click', function() {
-    html = '<tr id="subscription-row-' + subscription_row + '">';
-    html += '  <td><select name="product_subscription[' + subscription_row + '][subscription_plan_id]" class="form-select">';
-  {% for subscription_plan in subscription_plans %}
-    html += '      <option value="{{ subscription_plan.subscription_plan_id }}">{{ subscription_plan.name|escape('js') }}</option>';
-  {% endfor %}
-    html += '  </select></td>';
-    html += '  <td><select name="product_subscription[' + subscription_row + '][customer_group_id]" class="form-select">';
-  {% for customer_group in customer_groups %}
-    html += '      <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name|escape('js') }}</option>';
-  {% endfor %}
-    html += '  <select></td>';
-    html += '  <td class="text-end"><input type="text" name="product_subscription[' + subscription_row + '][trial_price]" value="" placeholder="{{ entry_trial_price|escape('js') }}" class="form-control"/></td>';
-    html += '  <td class="text-end"><input type="text" name="product_subscription[' + subscription_row + '][price]" value="" placeholder="{{ entry_price|escape('js') }}" class="form-control"/></td>';
-    html += '  <td class="text-end"><button type="button" onclick="$(\'#subscription-row-' + subscription_row + '\').remove()" data-bs-toggle="tooltip" title="{{ button_remove|escape('js') }}" class="btn btn-danger"><i class="fa-solid fa-minus-circle"></i></button></td>';
-    html += '</tr>';
-
-    $('#product-subscription tbody').append(html);
-
-    subscription_row++;
-});
 
 {% if master_id %}
 // Variable products
