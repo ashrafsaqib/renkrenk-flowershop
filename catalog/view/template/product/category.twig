@@ -8,10 +8,17 @@
   <div class="row">{{ column_left }}
     <div id="content" class="col">{{ content_top }}
       <h1>{{ heading_title }}</h1>
-      {% if image or description %}
+      {% if description %}
         <div class="row">
           {% if description %}
-            <div class="col-9">{{ description }}</div>
+            <div class="col-9">
+              <div id="category-description" class="description-collapsed">
+                {{ description }}
+              </div>
+              <a href="javascript:void(0);" id="read-more-btn" class="text-primary" style="display: none;">
+                <small>Read More <i class="fa fa-chevron-down"></i></small>
+              </a>
+            </div>
           {% endif %}
         </div>
         <hr/>
@@ -72,4 +79,59 @@
       {{ content_bottom }}</div>
     {{ column_right }}</div>
 </div>
+
+<style>
+#category-description.description-collapsed {
+  max-height: 4.5em;
+  overflow: hidden;
+  line-height: 1.5em;
+  position: relative;
+}
+
+#category-description.description-collapsed::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 1.5em;
+  background: linear-gradient(to bottom, transparent, white);
+}
+
+#category-description.description-expanded {
+  max-height: none;
+}
+
+#category-description.description-expanded::after {
+  display: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const description = document.getElementById('category-description');
+  const readMoreBtn = document.getElementById('read-more-btn');
+  
+  if (description && readMoreBtn) {
+    // Check if content is actually overflowing
+    if (description.scrollHeight > description.clientHeight) {
+      readMoreBtn.style.display = 'inline-block';
+    }
+    
+    readMoreBtn.addEventListener('click', function() {
+      if (description.classList.contains('description-collapsed')) {
+        description.classList.remove('description-collapsed');
+        description.classList.add('description-expanded');
+        this.innerHTML = '<small>Read More <i class="fa fa-chevron-down"></i></small>';
+      } else {
+        description.classList.remove('description-expanded');
+        description.classList.add('description-collapsed');
+        this.innerHTML = '<small>Read Less <i class="fa fa-chevron-up"></i></small>';
+        description.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+  }
+});
+</script>
+
 {{ footer }}
