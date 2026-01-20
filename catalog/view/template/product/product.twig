@@ -245,7 +245,7 @@
                              class="d-none addon-option"
                              value="{{ addon.product_id }}"
                              data-price="{{ addon.price_value|default(addon.price)|default(0) }}"/>
-                      <img src="{{ addon.thumb }}" alt="{{ addon.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover; border: none; display: block;" />
+                      <img src="{{ addon.thumb }}" alt="{{ addon.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none; display: block;" />
                       <div class="text-center small mt-1">{{ addon.name }}</div>
                     </label>
                     {% endfor %}
