@@ -218,12 +218,13 @@ class Category extends \Opencart\System\Engine\Controller {
 			// Product
 			$data['products'] = [];
 
-			$filter_data = [
-				'filter_category_id'  => $category_id,
-				'filter_sub_category' => false,
-				'filter_filter'       => $filter,
-				'sort'                => $sort,
-				'order'               => $order,
+		// Check if category has subcategories to include their products
+		$subcategories = $this->model_catalog_category->getCategories($category_id);
+		$include_subcategory_products = !empty($subcategories);
+
+		$filter_data = [
+			'filter_category_id'  => $category_id,
+			'filter_sub_category' => $include_subcategory_products,
 				'start'               => ($page - 1) * $limit,
 				'limit'               => $limit
 			];
