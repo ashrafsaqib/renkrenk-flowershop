@@ -56,33 +56,14 @@ class ColumnLeft extends \Opencart\System\Engine\Controller {
 				];
 			}
 
-			$filter = [];
+		if ($this->user->hasPermission('access', 'catalog/color_swatch')) {
+			$catalog[] = [
+				'name'     => $this->language->get('text_color_swatch'),
+				'href'     => $this->url->link('catalog/color_swatch', 'user_token=' . $this->session->data['user_token']),
+				'children' => []
+			];
+		}
 
-			if ($this->user->hasPermission('access', 'catalog/filter')) {
-				$filter[] = [
-					'name'     => $this->language->get('text_filter'),
-					'href'     => $this->url->link('catalog/filter', 'user_token=' . $this->session->data['user_token']),
-					'children' => []
-				];
-			}
-
-			if ($this->user->hasPermission('access', 'catalog/filter_group')) {
-				$filter[] = [
-					'name'     => $this->language->get('text_filter_group'),
-					'href'     => $this->url->link('catalog/filter_group', 'user_token=' . $this->session->data['user_token']),
-					'children' => []
-				];
-			}
-
-			if ($filter) {
-				$catalog[] = [
-					'name'     => $this->language->get('text_filter'),
-					'href'     => '',
-					'children' => $filter
-				];
-			}
-
-			// Attributes
 			$attribute = [];
 
 			if ($this->user->hasPermission('access', 'catalog/attribute')) {

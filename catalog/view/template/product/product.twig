@@ -68,9 +68,15 @@
                     <a
                       href="{{ color.href }}"
                       class="btn-color-link{% if color.selected %} active{% endif %}"
-                      title="{{ color.name }}"
+                      title="{{ color.color_swatch_title|default(color.name) }}"
                     >
-                      <img src="{{ color.thumb }}" alt="{{ color.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                      {% if color.color_swatch_image %}
+                        <img src="{{ color.color_swatch_image }}" alt="{{ color.color_swatch_title|default(color.name) }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                      {% elseif color.color_code %}
+                        <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: {{ color.color_code }};"></div>
+                      {% else %}
+                        <img src="{{ color.thumb }}" alt="{{ color.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                      {% endif %}
                     </a>
                     {% endfor %}
                   </div>

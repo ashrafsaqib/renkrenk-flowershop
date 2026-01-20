@@ -14,6 +14,7 @@ $_['text_backup']              = 'Backup / Restore';
 $_['text_banner']              = 'Banners';
 $_['text_catalog']             = 'Catalog';
 $_['text_category']            = 'Categories';
+$_['text_color_swatch']        = 'Color Swatches';
 $_['text_cms']                 = 'CMS';
 $_['text_contact']             = 'Mail';
 $_['text_country']             = 'Cities';

@@ -531,6 +531,13 @@ class Product extends \Opencart\System\Engine\Controller {
 
 		$color_results = $this->model_catalog_product->getColors($product_id);
 
+		// Get color swatch info for current product
+		$current_color_swatch = null;
+		if (!empty($product_info['color_swatch_id'])) {
+			$this->load->model('catalog/color_swatch');
+			$current_color_swatch = $this->model_catalog_color_swatch->getColorSwatch($product_info['color_swatch_id']);
+		}
+
 		// Add current product to colors list
 		if ($product_info['image'] && is_file(DIR_IMAGE . html_entity_decode($product_info['image'], ENT_QUOTES, 'UTF-8'))) {
 			$current_image = $product_info['image'];
@@ -539,13 +546,17 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 
 		$data['colors'][] = [
-			'product_id' => $product_id,
-			'name'       => $product_info['name'],
-			'price'      => $data['price'],
-			'special'    => $data['special'],
-			'thumb'      => $this->model_tool_image->resize($current_image, 100, 100),
-			'href'       => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_id),
-			'selected'   => true
+			'product_id'         => $product_id,
+			'name'               => $product_info['name'],
+			'price'              => $data['price'],
+			'special'            => $data['special'],
+			'thumb'              => $this->model_tool_image->resize($current_image, 100, 100),
+			'href'               => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_id),
+			'selected'           => true,
+			'color_swatch_id'    => !empty($current_color_swatch) ? $current_color_swatch['color_swatch_id'] : null,
+			'color_code'         => !empty($current_color_swatch) ? $current_color_swatch['color_code'] : null,
+			'color_swatch_image' => !empty($current_color_swatch) && $current_color_swatch['image'] ? $this->model_tool_image->resize($current_color_swatch['image'], 100, 100) : null,
+			'color_swatch_title' => !empty($current_color_swatch) ? $current_color_swatch['title'] : null
 		];
 
 		foreach ($color_results as $color) {
@@ -567,14 +578,24 @@ class Product extends \Opencart\System\Engine\Controller {
 				$special = false;
 			}
 
+			// Get color swatch image if available
+			$color_swatch_image = null;
+			if (!empty($color['color_swatch_image']) && is_file(DIR_IMAGE . html_entity_decode($color['color_swatch_image'], ENT_QUOTES, 'UTF-8'))) {
+				$color_swatch_image = $this->model_tool_image->resize($color['color_swatch_image'], 100, 100);
+			}
+
 			$data['colors'][] = [
-				'product_id' => $color['product_id'],
-				'name'       => $color['name'],
-				'price'      => $price,
-				'special'    => $special,
-				'thumb'      => $this->model_tool_image->resize($image, 100, 100),
-				'href'       => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $color['product_id']),
-				'selected'   => false
+				'product_id'         => $color['product_id'],
+				'name'               => $color['name'],
+				'price'              => $price,
+				'special'            => $special,
+				'thumb'              => $this->model_tool_image->resize($image, 100, 100),
+				'href'               => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $color['product_id']),
+				'selected'           => false,
+				'color_swatch_id'    => !empty($color['color_swatch_id']) ? $color['color_swatch_id'] : null,
+				'color_code'         => !empty($color['color_code']) ? $color['color_code'] : null,
+				'color_swatch_image' => $color_swatch_image,
+				'color_swatch_title' => !empty($color['color_swatch_title']) ? $color['color_swatch_title'] : null
 			];
 		}
 

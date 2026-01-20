@@ -839,6 +839,17 @@ class Product extends \Opencart\System\Engine\Controller {
 			$data['manufacturer'] = '';
 		}
 
+		// Color Swatch
+		$this->load->model('catalog/color_swatch');
+
+		$data['color_swatches'] = $this->model_catalog_color_swatch->getColorSwatches();
+
+		if (!empty($product_info) && isset($product_info['color_swatch_id'])) {
+			$data['color_swatch_id'] = $product_info['color_swatch_id'];
+		} else {
+			$data['color_swatch_id'] = 0;
+		}
+
 		// Category
 		$this->load->model('catalog/category');
 
@@ -1263,6 +1274,7 @@ class Product extends \Opencart\System\Engine\Controller {
 			'stock_status_id'     => 0,
 			'date_available'      => '',
 			'manufacturer_id'     => 0,
+			'color_swatch_id'     => 0,
 			'shipping'            => 0,
 			'price'               => 0.0,
 			'points'              => 0,
