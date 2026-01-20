@@ -71,11 +71,11 @@
                       title="{{ color.color_swatch_title|default(color.name) }}"
                     >
                       {% if color.color_swatch_image %}
-                        <img src="{{ color.color_swatch_image }}" alt="{{ color.color_swatch_title|default(color.name) }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                        <img src="{{ color.color_swatch_image }}" alt="{{ color.color_swatch_title|default(color.name) }}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: none;" />
                       {% elseif color.color_code %}
-                        <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: {{ color.color_code }};"></div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: {{ color.color_code }}; border: none;"></div>
                       {% else %}
-                        <img src="{{ color.thumb }}" alt="{{ color.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                        <img src="{{ color.thumb }}" alt="{{ color.name }}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: none;" />
                       {% endif %}
                     </a>
                     {% endfor %}
