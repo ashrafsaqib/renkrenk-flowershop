@@ -521,9 +521,12 @@ function updateProductPrice() {
     var buttonText = $('#button-cart').data('button-text') || 'Add to Cart';
     var formattedPrice = currencyLeft + finalPrice.toFixed(2) + currencyRight;
     
-    // Update all button prices
+    // Update button-cart with price + button text
     $('#button-cart .price-display').html(formattedPrice + ' ' + buttonText);
-    $('#button-step1 .priceFinal, #button-step2 .priceFinal').html(formattedPrice);
+    
+    // Update step buttons with just the price (they have their own text)
+    $('#button-step1 .priceFinal').html(formattedPrice);
+    $('#button-step2 .priceFinal').html(formattedPrice);
 }
 
 $(document).ready(function() {
