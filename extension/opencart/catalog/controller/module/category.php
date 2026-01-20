@@ -101,6 +101,8 @@ class Category extends \Opencart\System\Engine\Controller {
 			}
 		}
 
+		$data['heading_title'] = $this->language->get('heading_title');
+
 		return $this->load->view('extension/opencart/module/category', $data);
 	}
 }
