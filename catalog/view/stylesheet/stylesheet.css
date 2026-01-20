@@ -1174,5 +1174,11 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
         font-size: 2rem;
         line-height: 2.13rem;
         letter-spacing: 0.1em;
+        padding-bottom: 3px;
     }
+}
+#product-info h1 {
+  display: inline-block;
+  border-bottom: 3px solid;
+  font-weight: 600;
 }
