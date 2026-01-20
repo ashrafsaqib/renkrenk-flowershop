@@ -349,7 +349,11 @@ footer h5, footer .h5 {
   margin-bottom: 45px;
 }
 .product-thumb .description h4, .product-thumb .description .h4 {
-  /* font-weight: bold; */
+  font-weight: 300;
+  text-transform: uppercase;
+  font-size: .93rem;
+  line-height: 1.2rem;
+  margin-bottom: 0px;
 }
 .product-thumb .button {
   display: flex;
@@ -1160,3 +1164,6 @@ header{
   }
 }
 
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
+  text-transform: uppercase;
+}
