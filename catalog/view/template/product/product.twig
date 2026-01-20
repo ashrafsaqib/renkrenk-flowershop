@@ -579,7 +579,8 @@ $(document).ready(function() {
         }
 
         document.querySelectorAll('.btn-vase-img').forEach(function(btn){
-            btn.addEventListener('click', function(){
+            btn.addEventListener('click', function(e){
+                e.preventDefault();
                 document.querySelectorAll('.btn-vase-img').forEach(function(b){
                     b.classList.remove('active');
                     b.setAttribute('aria-pressed','false');
@@ -588,10 +589,11 @@ $(document).ready(function() {
                 this.setAttribute('aria-pressed','true');
 
                 if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
-                this.querySelector('input[type="radio"]').checked = true;
+                var radioInput = this.querySelector('input[type="radio"]');
+                radioInput.checked = true;
                 
-                // Trigger price update
-                updateProductPrice();
+                // Trigger change event to update price
+                $(radioInput).trigger('change');
             });
         });
     })();
@@ -612,8 +614,8 @@ $(document).ready(function() {
                     this.setAttribute('aria-pressed', 'false');
                 }
                 
-                // Trigger price update
-                updateProductPrice();
+                // Trigger change event to update price
+                $(checkbox).trigger('change');
             });
         });
     })();
