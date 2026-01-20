@@ -187,7 +187,7 @@
 
                   <div class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Vases">
                     <label
-                      class="btn-vase-img btn active"
+                      class="btn-vase-img active"
                       data-id="0"
                       data-name="None"
                       data-price="0"
@@ -204,7 +204,7 @@
                     </label>
                     {% for vase in vases %}
                     <label
-                      class="btn-vase-img btn"
+                      class="btn-vase-img"
                       data-id="{{ vase.product_id }}"
                       data-name="{{ vase.name }}"
                       data-price="{{ vase.price_value|default(vase.price)|default(0) }}"
