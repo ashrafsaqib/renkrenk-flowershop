@@ -474,24 +474,28 @@ class Product extends \Opencart\System\Engine\Controller {
 
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 					$price = $this->currency->format($this->tax->calculate($vase['price'], $vase['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-				} else {
-					$price = false;
-				}
+				$price_value = $this->tax->calculate($vase['price'], $vase['tax_class_id'], $this->config->get('config_tax'));
+			} else {
+				$price = false;
+				$price_value = 0;
+			}
 
-				if ((float)$vase['special']) {
-					$special = $this->currency->format($this->tax->calculate($vase['special'], $vase['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-				} else {
-					$special = false;
-				}
+			if ((float)$vase['special']) {
+				$special = $this->currency->format($this->tax->calculate($vase['special'], $vase['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$special_value = $this->tax->calculate($vase['special'], $vase['tax_class_id'], $this->config->get('config_tax'));
+			} else {
+				$special = false;
+				$special_value = 0;
+			}
 
-			$data['vases'][] = [
-				'product_id' => $vase['product_id'],
-				'name'       => $vase['name'],
-				'price'      => $price,
-				'special'    => $special,
-				'thumb'      => $this->model_tool_image->resize($image, 100, 100)
-			];
-		}
+		$data['vases'][] = [
+			'product_id'    => $vase['product_id'],
+			'name'          => $vase['name'],
+			'price'         => $price,
+			'price_value'   => $price_value,
+			'special'       => $special,
+			'special_value' => $special_value,
+			'thumb'         => $this->model_tool_image->resize($image, 100, 100)
 
 		// Addons
 		$data['addons'] = [];
@@ -507,22 +511,28 @@ class Product extends \Opencart\System\Engine\Controller {
 
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$price = $this->currency->format($this->tax->calculate($addon['price'], $addon['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price_value = $this->tax->calculate($addon['price'], $addon['tax_class_id'], $this->config->get('config_tax'));
 			} else {
 				$price = false;
+				$price_value = 0;
 			}
 
 			if ((float)$addon['special']) {
 				$special = $this->currency->format($this->tax->calculate($addon['special'], $addon['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$special_value = $this->tax->calculate($addon['special'], $addon['tax_class_id'], $this->config->get('config_tax'));
 			} else {
 				$special = false;
+				$special_value = 0;
 			}
 
 			$data['addons'][] = [
-				'product_id' => $addon['product_id'],
-				'name'       => $addon['name'],
-				'price'      => $price,
-				'special'    => $special,
-				'thumb'      => $this->model_tool_image->resize($image, 100, 100)
+				'product_id'    => $addon['product_id'],
+				'name'          => $addon['name'],
+				'price'         => $price,
+				'price_value'   => $price_value,
+				'special'       => $special,
+				'special_value' => $special_value,
+				'thumb'         => $this->model_tool_image->resize($image, 100, 100)
 			];
 		}
 
