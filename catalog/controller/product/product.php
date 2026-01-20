@@ -496,7 +496,8 @@ class Product extends \Opencart\System\Engine\Controller {
 			'special'       => $special,
 			'special_value' => $special_value,
 			'thumb'         => $this->model_tool_image->resize($image, 100, 100)
-
+];
+		}
 		// Addons
 		$data['addons'] = [];
 
