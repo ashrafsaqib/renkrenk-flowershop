@@ -71,11 +71,11 @@
                       title="{{ color.color_swatch_title|default(color.name) }}"
                     >
                       {% if color.color_swatch_image %}
-                        <img src="{{ color.color_swatch_image }}" alt="{{ color.color_swatch_title|default(color.name) }}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: none;" />
+                        <img src="{{ color.color_swatch_image }}" alt="{{ color.color_swatch_title|default(color.name) }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover; border: none;" />
                       {% elseif color.color_code %}
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: {{ color.color_code }}; border: none;"></div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: {{ color.color_code }}; border: none;"></div>
                       {% else %}
-                        <img src="{{ color.thumb }}" alt="{{ color.name }}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: none;" />
+                        <img src="{{ color.thumb }}" alt="{{ color.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover; border: none;" />
                       {% endif %}
                     </a>
                     {% endfor %}
@@ -200,7 +200,7 @@
                              value="0"
                              data-price="0"
                              checked/>
-                      <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 12px; font-weight: bold;">None</div>
+                      <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 12px; font-weight: bold; border: none;">None</div>
                     </label>
                     {% for vase in vases %}
                     <label
@@ -216,7 +216,7 @@
                              class="d-none vase-option"
                              value="{{ vase.product_id }}"
                              data-price="{{ vase.price_value|default(vase.price)|default(0) }}"/>
-                      <img src="{{ vase.thumb }}" alt="{{ vase.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                      <img src="{{ vase.thumb }}" alt="{{ vase.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover; border: none;" />
                     </label>
                     {% endfor %}
                   </div>
@@ -245,7 +245,7 @@
                              class="d-none addon-option"
                              value="{{ addon.product_id }}"
                              data-price="{{ addon.price_value|default(addon.price)|default(0) }}"/>
-                      <img src="{{ addon.thumb }}" alt="{{ addon.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" />
+                      <img src="{{ addon.thumb }}" alt="{{ addon.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover; border: none;" />
                       <div class="text-center small mt-1">{{ addon.name }}</div>
                     </label>
                     {% endfor %}
