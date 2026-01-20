@@ -71,11 +71,11 @@
                       title="{{ color.color_swatch_title|default(color.name) }}"
                     >
                       {% if color.color_swatch_image %}
-                        <img src="{{ color.color_swatch_image }}" alt="{{ color.color_swatch_title|default(color.name) }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover; border: none;" />
+                        <img src="{{ color.color_swatch_image }}" alt="{{ color.color_swatch_title|default(color.name) }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none;" />
                       {% elseif color.color_code %}
                         <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: {{ color.color_code }}; border: none;"></div>
                       {% else %}
-                        <img src="{{ color.thumb }}" alt="{{ color.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover; border: none;" />
+                        <img src="{{ color.thumb }}" alt="{{ color.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none;" />
                       {% endif %}
                     </a>
                     {% endfor %}
@@ -216,7 +216,7 @@
                              class="d-none vase-option"
                              value="{{ vase.product_id }}"
                              data-price="{{ vase.price_value|default(vase.price)|default(0) }}"/>
-                      <img src="{{ vase.thumb }}" alt="{{ vase.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover; border: none; display: block;" />
+                      <img src="{{ vase.thumb }}" alt="{{ vase.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none; display: block;" />
                     </label>
                     {% endfor %}
                   </div>
