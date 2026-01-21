@@ -6,7 +6,7 @@
       {{ content_top }}
       <div class="row mb-3 align-items-start">
         {% if thumb or images %}
-          <div class="col-sm-6 col-lg-5 sticky-image-column">
+          <div class="col-sm-6 col-lg-6 sticky-image-column">
             <div class="image magnific-popup">
               {% if thumb %}
                 <a href="{{ popup }}" title="{{ heading_title }}"><img src="{{ thumb }}" title="{{ heading_title }}" alt="{{ heading_title }}" class="img-thumbnail mb-3"/></a>
@@ -21,7 +21,7 @@
             </div>
           </div>
         {% endif %}
-        <div class="col-sm-6 col-lg-7">
+        <div class="col-sm-6 col-lg-6">
             <ul class="breadcrumb">
     {% for breadcrumb in breadcrumbs %}
       <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
