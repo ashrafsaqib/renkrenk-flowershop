@@ -67,7 +67,7 @@
                     {% for color in colors %}
                     <a
                       href="{{ color.href }}"
-                      class="btn-color-link{% if color.selected %} active{% endif %}"
+                      class="btn-color-link{% if color.selected %} active{% endif %} mr-1"
                       title="{{ color.color_swatch_title|default(color.name) }}"
                     >
                       {% if color.color_swatch_image %}
@@ -85,7 +85,10 @@
 
               {% if options %}
                 <hr>
-                <h3>{{ text_option }}</h3>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h3 class="mb-0">{{ text_option }}</h3>
+                  <span id="option-price-display" class="badge bg-secondary" style="display: none;"></span>
+                </div>
                 <div>
                   {% for option in options %}
 
@@ -181,8 +184,9 @@
               {% if vases %}
                 <hr>
                 <div class="mb-3">
-                  <div class="mb-2">
-                    <label class="form-label">Select Vase: <small id="selectedVase" class="text-muted">None</small></label>
+                  <div class="mb-2 d-flex justify-content-between align-items-center">
+                    <label class="form-label mb-0">Select Vase: <small id="selectedVase" class="text-muted">None</small></label>
+                    <span id="vase-price-display" class="badge bg-secondary" style="display: none;"></span>
                   </div>
 
                   <div class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Vases">
@@ -226,8 +230,9 @@
               {% if addons %}
                 <hr>
                 <div class="mb-3">
-                  <div class="mb-2">
-                    <label class="form-label">Select Add ons:</label>
+                  <div class="mb-2 d-flex justify-content-between align-items-center">
+                    <label class="form-label mb-0">Select Add ons:</label>
+                    <span id="addon-price-display" class="badge bg-secondary" style="display: none;"></span>
                   </div>
 
                   <div class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Addons">
@@ -461,6 +466,7 @@ $('#form-product').on('submit', function(e) {
 function updateProductPrice() {
     var basePrice = parseFloat($('#button-cart').data('base-price')) || 0;
     var totalOptionPrice = 0;
+    var optionPriceTotal = 0;
     
     // Calculate price from select options
     $('.option-select').each(function() {
@@ -470,8 +476,10 @@ function updateProductPrice() {
         
         if (prefix === '+') {
             totalOptionPrice += price;
+            optionPriceTotal += price;
         } else if (prefix === '-') {
             totalOptionPrice -= price;
+            optionPriceTotal -= price;
         }
     });
     
@@ -482,8 +490,10 @@ function updateProductPrice() {
         
         if (prefix === '+') {
             totalOptionPrice += price;
+            optionPriceTotal += price;
         } else if (prefix === '-') {
             totalOptionPrice -= price;
+            optionPriceTotal -= price;
         }
     });
     
@@ -494,22 +504,27 @@ function updateProductPrice() {
         
         if (prefix === '+') {
             totalOptionPrice += price;
+            optionPriceTotal += price;
         } else if (prefix === '-') {
             totalOptionPrice -= price;
+            optionPriceTotal -= price;
         }
     });
     
     // Calculate price from selected vase
+    var vasePrice = 0;
     var selectedVase = $('.vase-option:checked');
     if (selectedVase.length > 0) {
-        var vasePrice = parseFloat(selectedVase.data('price')) || 0;
+        vasePrice = parseFloat(selectedVase.data('price')) || 0;
         totalOptionPrice += vasePrice;
     }
     
     // Calculate price from selected addons
+    var addonPriceTotal = 0;
     $('.addon-option:checked').each(function() {
         var addonPrice = parseFloat($(this).data('price')) || 0;
         totalOptionPrice += addonPrice;
+        addonPriceTotal += addonPrice;
     });
     
     // Calculate final price
@@ -527,6 +542,35 @@ function updateProductPrice() {
     // Update step buttons with just the price (they have their own text)
     $('#button-step1 .priceFinal').html(formattedPrice);
     $('#button-step2 .priceFinal').html(formattedPrice);
+    
+    // Update section price displays
+    updateSectionPriceDisplays(optionPriceTotal, vasePrice, addonPriceTotal, currencyLeft, currencyRight);
+}
+
+// Function to update individual section price displays
+function updateSectionPriceDisplays(optionPrice, vasePrice, addonPrice, currencyLeft, currencyRight) {
+    // Update options price display
+    if (optionPrice > 0) {
+        $('#option-price-display').text('+' + currencyLeft + optionPrice.toFixed(2) + currencyRight).show();
+    } else if (optionPrice < 0) {
+        $('#option-price-display').text(currencyLeft + optionPrice.toFixed(2) + currencyRight).show();
+    } else {
+        $('#option-price-display').hide();
+    }
+    
+    // Update vase price display
+    if (vasePrice > 0) {
+        $('#vase-price-display').text('+' + currencyLeft + vasePrice.toFixed(2) + currencyRight).show();
+    } else {
+        $('#vase-price-display').hide();
+    }
+    
+    // Update addon price display
+    if (addonPrice > 0) {
+        $('#addon-price-display').text('+' + currencyLeft + addonPrice.toFixed(2) + currencyRight).show();
+    } else {
+        $('#addon-price-display').hide();
+    }
 }
 
 $(document).ready(function() {
