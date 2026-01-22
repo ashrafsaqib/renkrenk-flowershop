@@ -246,6 +246,22 @@
                   </div>
 
                   <div id="regular-addons" class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Regular Addons">
+                    <label
+                      class="btn-addon-img btn btn-addon-none active"
+                      data-id="0"
+                      data-name="None"
+                      data-price="0"
+                      aria-pressed="true"
+                      title="None"
+                    >
+                      <input type="checkbox"
+                             name="addon_none"
+                             class="d-none addon-option-none"
+                             value="0"
+                             data-price="0"
+                             checked/>
+                      <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: white; border: 2px solid #ddd;"></div>
+                    </label>
                     {% for addon in addons %}
                     <label
                       class="btn-addon-img btn"
@@ -655,7 +671,7 @@ $(document).ready(function() {
     (function(){
         var updateAddonLabel = function() {
             var selectedAddons = [];
-            document.querySelectorAll('.btn-addon-img.active').forEach(function(btn){
+            document.querySelectorAll('.btn-addon-img.active:not(.btn-addon-none)').forEach(function(btn){
                 var name = btn.getAttribute('data-name') || btn.getAttribute('title');
                 if (name) selectedAddons.push(name);
             });
@@ -665,9 +681,44 @@ $(document).ready(function() {
             }
         };
 
-        document.querySelectorAll('.btn-addon-img').forEach(function(btn){
+        // Handle "None" button
+        var noneBtn = document.querySelector('.btn-addon-none');
+        if (noneBtn) {
+            noneBtn.addEventListener('click', function(e){
+                e.preventDefault();
+                
+                // Uncheck and deactivate all other addons
+                document.querySelectorAll('.btn-addon-img:not(.btn-addon-none)').forEach(function(btn){
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-pressed', 'false');
+                    var checkbox = btn.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = false;
+                });
+                
+                // Activate None
+                this.classList.add('active');
+                this.setAttribute('aria-pressed', 'true');
+                var checkbox = this.querySelector('input[type="checkbox"]');
+                if (checkbox) checkbox.checked = true;
+                
+                updateAddonLabel();
+                updateProductPrice();
+            });
+        }
+
+        // Handle regular addon buttons
+        document.querySelectorAll('.btn-addon-img:not(.btn-addon-none)').forEach(function(btn){
             btn.addEventListener('click', function(e){
                 e.preventDefault();
+                
+                // Deactivate "None" when selecting any addon
+                if (noneBtn) {
+                    noneBtn.classList.remove('active');
+                    noneBtn.setAttribute('aria-pressed', 'false');
+                    var noneCheckbox = noneBtn.querySelector('input[type="checkbox"]');
+                    if (noneCheckbox) noneCheckbox.checked = false;
+                }
+                
                 var checkbox = this.querySelector('input[type="checkbox"]');
                 checkbox.checked = !checkbox.checked;
                 
@@ -677,6 +728,15 @@ $(document).ready(function() {
                 } else {
                     this.classList.remove('active');
                     this.setAttribute('aria-pressed', 'false');
+                }
+                
+                // If no addons are selected, activate "None"
+                var anySelected = document.querySelector('.btn-addon-img:not(.btn-addon-none).active');
+                if (!anySelected && noneBtn) {
+                    noneBtn.classList.add('active');
+                    noneBtn.setAttribute('aria-pressed', 'true');
+                    var noneCheckbox = noneBtn.querySelector('input[type="checkbox"]');
+                    if (noneCheckbox) noneCheckbox.checked = true;
                 }
                 
                 updateAddonLabel();
