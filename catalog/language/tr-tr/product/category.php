@@ -18,3 +18,7 @@ $_['text_rating_desc'] = 'Puan (En Yüksek)';
 $_['text_model_asc']   = 'Model (A - Z)';
 $_['text_model_desc']  = 'Model (Z - A)';
 $_['text_limit']       = 'Göster';
+
+// UI Labels
+$_['button_read_more'] = 'Daha Fazla Oku';
+$_['button_read_less'] = 'Daha Az Oku';

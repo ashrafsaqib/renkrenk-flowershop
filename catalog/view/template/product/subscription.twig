@@ -125,8 +125,8 @@
                          class="d-none"
                          value="0"
                          checked
-                         data-label="On Going" />
-                  On Going
+                         data-label="{{ text_on_going }}" />
+                  {{ text_on_going }}
                 </label>
               {% for duration in durations %}
                 <label class="btn-duration btn btn-outline-dark btn-lg gift-duration">
@@ -152,24 +152,24 @@
                   {% set current_gift_name = gift.name %}
                 {% endif %}
               {% endfor %}
-              <label class="form-label d-flex align-items-center">Select gift: <small id="selectedGiftName" class="fw-bold fw-bold ms-1">{{ current_gift_name|default('None') }}</small><small id="selectedGiftPrice" class="fw-bold fw-bold ms-auto"></small></label>
+              <label class="form-label d-flex align-items-center">{{ text_select_gift }}: <small id="selectedGiftName" class="fw-bold fw-bold ms-1">{{ current_gift_name|default(text_none) }}</small><small id="selectedGiftPrice" class="fw-bold fw-bold ms-auto"></small></label>
             </div>
 
             <div class="d-flex flex-wrap image-btns" role="group" aria-label="Gifts">
               <label
                 class="btn-gift btn active"
                 data-id="0"
-                data-name="None"
+                data-name="{{ text_none }}"
                 data-price=""
                 aria-pressed="true"
-                title="None"
+                title="{{ text_none }}"
               >
                 <input type="radio"
                        name="gift_option"
                        class="d-none"
                        value="0"
                        checked/>
-                <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 12px; font-weight: bold;">None</div>
+                <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 12px; font-weight: bold;">{{ text_none }}</div>
               </label>
               {% for gift in gifts %}
                 <label
@@ -203,23 +203,23 @@
                   {% set current_vase_name = vase.name %}
                 {% endif %}
               {% endfor %}
-              <label class="form-label d-flex align-items-center">Select vase: <small id="selectedVaseName" class="fw-bold fw-bold ms-1">{{ current_vase_name|default('None') }}</small><small id="selectedVasePrice" class="fw-bold fw-bold ms-auto"></small></label>
+              <label class="form-label d-flex align-items-center">{{ text_select_vase }}: <small id="selectedVaseName" class="fw-bold fw-bold ms-1">{{ current_vase_name|default(text_none) }}</small><small id="selectedVasePrice" class="fw-bold fw-bold ms-auto"></small></label>
             </div>
 
             <div class="d-flex flex-wrap image-btns" role="group" aria-label="Vases">
               <label
                 class="btn-vase btn active"
                 data-id="0"
-                data-name="None"
+                data-name="{{ text_none }}"
                 aria-pressed="true"
-                title="None"
+                title="{{ text_none }}"
               >
                 <input type="radio"
                        name="vase_option"
                        class="d-none"
                        value="0"
                        checked/>
-                <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 12px; font-weight: bold;">None</div>
+                <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 12px; font-weight: bold;">{{ text_none }}</div>
               </label>
               {% for vase in vases %}
                 <label
@@ -374,8 +374,8 @@
       {% if description %}
         <ul class="nav nav-tabs">
           <li class="nav-item"><a href="#tab-description" data-bs-toggle="tab" class="nav-link active">{{ tab_description }}</a></li>
-          <li class="nav-item"><a href="#tab-delivery" data-bs-toggle="tab" class="nav-link">Delivery</a></li>
-          <li class="nav-item"><a href="#tab-care" data-bs-toggle="tab" class="nav-link">Care</a></li>
+          <li class="nav-item"><a href="#tab-delivery" data-bs-toggle="tab" class="nav-link">{{ tab_delivery }}</a></li>
+          <li class="nav-item"><a href="#tab-care" data-bs-toggle="tab" class="nav-link">{{ tab_care }}</a></li>
         </ul>
         <div class="tab-content">
           <div id="tab-description" class="tab-pane active">{{ description }}</div>
@@ -690,7 +690,7 @@ $(document).ready(function() {
     addToCartBtn.addEventListener('click', function(){
       var deliveryDate = deliveryDateInput.value;
       if (!deliveryDate) {
-        alert('Please select a delivery date');
+        alert('{{ error_select_delivery_date }}');
         return;
       }
 
@@ -716,7 +716,7 @@ $(document).ready(function() {
 
       addToCartBtn.disabled = true;
       var originalText = addToCartBtn.innerHTML;
-      addToCartBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Adding to Cart...';
+      addToCartBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ text_adding_to_cart }}';
 
       $.ajax({
         url: 'index.php?route=checkout/cart.add&language={{ config_language }}',
@@ -753,7 +753,7 @@ $(document).ready(function() {
           addToCartBtn.disabled = false;
           addToCartBtn.innerHTML = originalText;
           console.error('AJAX Error:', thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-          alert('An error occurred while adding to cart. Please try again.');
+          alert('{{ error_add_to_cart_failed }}');
         }
       });
     });

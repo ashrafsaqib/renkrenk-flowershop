@@ -14,6 +14,9 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 	 * @return string
 	 */
 	public function index(): string {
+		// Load language file
+		$this->load->language('common/header');
+		
 		// Load models
 		$this->load->model('catalog/category');
 		$this->load->model('cms/topic');
@@ -21,6 +24,9 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 		$this->load->model('tool/image');
 
 		$data['sections'] = [];
+		
+		// Add language variables
+		$data['text_from'] = $this->language->get('text_from');
 
 		// Section 0: Slideshow (using banner module)
 		$slideshow_data = $this->config->get('homepage_slideshow');

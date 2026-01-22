@@ -28,3 +28,6 @@ $_['text_set_address'] = 'SET MY ADDRESS';
 $_['text_your_location'] = 'Your Location';
 $_['text_ships_to'] = 'Ships to';
 $_['text_select_city_short'] = 'Select City';
+
+// Product Price Label
+$_['text_from'] = 'From';

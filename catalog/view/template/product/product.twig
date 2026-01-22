@@ -60,7 +60,7 @@
                 <hr>
                 <div class="mb-3">
                   <div class="mb-2">
-                    <label class="form-label">Select Color: <small id="selectedColor" class="text-muted">{% for color in colors %}{% if color.selected %}{{ color.name }}{% endif %}{% endfor %}</small></label>
+                    <label class="form-label">{{ text_select_color }}: <small id="selectedColor" class="text-muted">{% for color in colors %}{% if color.selected %}{{ color.name }}{% endif %}{% endfor %}</small></label>
                   </div>
 
                   <div class="d-flex flex-wrap gap-3 image-btns" role="group" aria-label="Colors">
@@ -110,7 +110,7 @@
 
                     {% if option.type == 'radio' %}
                       <div class="mb-3{% if option.required %} required{% endif %}">
-                      <label class="form-label">Select {{ option.name }}</label>
+                      <label class="form-label">{{ text_select }} {{ option.name }}</label>
                       <div id="input-option-{{ option.product_option_id }}" class="d-flex flex-wrap gap-2">
                         {% for option_value in option.product_option_value %}
                         <div>
@@ -185,7 +185,7 @@
                 <hr>
                 <div class="mb-3">
                   <div class="mb-2 d-flex justify-content-between align-items-center">
-                    <label class="form-label mb-0">Select Vase: <small id="selectedVase" class="text-muted">None</small></label>
+                    <label class="form-label mb-0">{{ text_select_vase }}: <small id="selectedVase" class="text-muted">{{ text_none }}</small></label>
                     <span id="vase-price-display">0</span>
                   </div>
 
@@ -195,10 +195,10 @@
                     <label
                       class="btn-vase-img active"
                       data-id="0"
-                      data-name="None"
+                      data-name="{{ text_none }}"
                       data-price="0"
                       aria-pressed="true"
-                      title="None"
+                      title="{{ text_none }}"
                     >
                       <input type="radio"
                              name="product_ids_vase"
@@ -206,7 +206,7 @@
                              value="0"
                              data-price="0"
                              checked/>
-                      <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 12px; font-weight: bold; border: none;">None</div>
+                      <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 12px; font-weight: bold; border: none;">{{ text_none }}</div>
                     </label>
                     {% for vase in vases %}
                     <label
@@ -330,10 +330,10 @@
                 <div class="input-group">
                   <input type="hidden" name="quantity" value="{{ minimum }}" id="input-quantity"/>
                   <button type="button" id="button-step1" class="btn btn-primary btn-lg w-75" style="display: none;" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left|default('') }}" data-currency-right="{{ currency_right|default('') }}">
-                    <span class="priceFinal">{{ price }}</span> GO TO GIFT WRAPPING & MESSAGE
+                    <span class="priceFinal">{{ price }}</span> {{ button_step1 }}
                   </button>
                   <button type="button" id="button-step2" class="btn btn-primary btn-lg w-75" style="display: none;" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left|default('') }}" data-currency-right="{{ currency_right|default('') }}">
-                    <span class="priceFinal">{{ price }}</span> CONTINUE TO DELIVERY
+                    <span class="priceFinal">{{ price }}</span> {{ button_step2 }}
                   </button>
                   <button type="submit" id="button-cart" class="btn btn-primary btn-lg w-75" data-base-price="{{ price_value|default(0) }}" data-currency-left="{{ currency_left|default('') }}" data-currency-right="{{ currency_right|default('') }}" data-button-text="{{ button_cart }}"><span class="price-display">{{ price }} {{ button_cart }}</span></button>
                 </div>
@@ -558,7 +558,7 @@ function updateProductPrice() {
     // Format price with currency
     var currencyLeft = $('#button-cart').data('currency-left') || '';
     var currencyRight = $('#button-cart').data('currency-right') || '';
-    var buttonText = $('#button-cart').data('button-text') || 'Add to Cart';
+    var buttonText = $('#button-cart').data('button-text') || '{{ button_add_to_cart }}';
     var formattedPrice = currencyLeft + finalPrice.toFixed(2) + currencyRight;
     
     // Update button-cart with price + button text

@@ -15,3 +15,7 @@ $_['text_rating_desc'] = 'Rating (Highest)';
 $_['text_model_asc']   = 'Model (A - Z)';
 $_['text_model_desc']  = 'Model (Z - A)';
 $_['text_limit']       = 'Show';
+
+// UI Labels
+$_['button_read_more'] = 'Read More';
+$_['button_read_less'] = 'Read Less';

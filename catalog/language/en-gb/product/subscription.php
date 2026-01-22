@@ -20,6 +20,27 @@ $_['button_subscribe']           = 'Subscribe Now';
 
 // Tab
 $_['tab_description']            = 'Description';
+$_['tab_delivery']               = 'Delivery';
+$_['tab_care']                   = 'Care';
+
+// UI Labels
+$_['text_on_going']              = 'On Going';
+$_['text_none']                  = 'None';
+$_['text_select_gift']           = 'Select gift';
+$_['text_select_vase']           = 'Select Vase';
+$_['text_loading']               = 'Loading...';
+$_['button_add_to_cart']         = 'Add to Cart';
+
+// Validation Messages
+$_['error_select_delivery_date'] = 'Please select a delivery date';
+$_['text_adding_to_cart']        = 'Adding to Cart...';
+$_['error_add_to_cart_failed']   = 'An error occurred while adding to cart. Please try again.';
+
+// Placeholder Texts
+$_['text_placeholder_vacation']  = 'e.g., Going on vacation';
+$_['text_placeholder_vacation_duration'] = 'e.g., Going on vacation for a month';
+$_['text_placeholder_delivery_instructions'] = 'Any special delivery instructions...';
+$_['text_placeholder_feedback']  = 'Additional feedback (optional)';
 
 // Error
 $_['error_not_found']            = 'Subscription plan not found!';

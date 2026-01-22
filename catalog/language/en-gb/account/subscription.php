@@ -46,6 +46,13 @@ $_['column_date_added']          = 'Date Added';
 // Button
 $_['button_cancel']              = 'Cancel Subscription';
 
+// UI Labels & Placeholders
+$_['text_loading']               = 'Loading...';
+$_['text_placeholder_vacation']  = 'e.g., Going on vacation';
+$_['text_placeholder_vacation_duration'] = 'e.g., Going on vacation for a month';
+$_['text_placeholder_delivery_instructions'] = 'Any special delivery instructions...';
+$_['text_placeholder_feedback']  = 'Additional feedback (optional)';
+
 // Success messages for subscription management
 $_['text_pause_success']         = 'Success: Your subscription has been paused!';
 $_['text_resume_success']        = 'Success: Your subscription has been resumed!';

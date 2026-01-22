@@ -89,11 +89,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if (description.classList.contains('description-collapsed')) {
         description.classList.remove('description-collapsed');
         description.classList.add('description-expanded');
-        this.innerHTML = '<small>Read More <i class="fa fa-chevron-down"></i></small>';
+        this.innerHTML = '<small>{{ button_read_more }} <i class="fa fa-chevron-down"></i></small>';
       } else {
         description.classList.remove('description-expanded');
         description.classList.add('description-collapsed');
-        this.innerHTML = '<small>Read Less <i class="fa fa-chevron-up"></i></small>';
+        this.innerHTML = '<small>{{ button_read_less }} <i class="fa fa-chevron-up"></i></small>';
         description.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     });

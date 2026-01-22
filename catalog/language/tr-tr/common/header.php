@@ -50,3 +50,6 @@ $_['text_set_address'] = 'ADRESİMİ AYARLA';
 $_['text_your_location'] = 'Konumunuz';
 $_['text_ships_to'] = 'Teslimat Yeri';
 $_['text_select_city_short'] = 'Şehir Seçin';
+
+// Product Price Label
+$_['text_from'] = 'Başlangıçtan';

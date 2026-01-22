@@ -37,5 +37,16 @@ $_['tab_description']            = 'Açıklama';
 $_['tab_attribute']              = 'Özellikler';
 $_['tab_review']                 = 'Yorumlar (%s)';
 
+// UI Labels
+$_['text_none']                  = 'Hiçbiri';
+$_['text_select_color']          = 'Renk Seç';
+$_['button_add_to_cart']         = 'Sepete Ekle';
+$_['text_select_vase']           = 'Vazo Seç';
+$_['text_select_addons']         = 'Eklentileri Seç';
+$_['text_loading']               = 'Yükleniyor...';
+$_['button_close']               = 'Kapat';
+$_['button_step1']               = 'HEDİYE PAKETLEME & MESAJ İÇİN DEVAM ET';
+$_['button_step2']               = 'TESLİMATA DEVAM ET';
+
 // Error
 $_['error_subscription_plan']    = 'Lütfen bir abonelik planı seçin!';

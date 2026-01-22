@@ -32,3 +32,14 @@ $_['entry_rating']               = 'Rating';
 $_['tab_description']            = 'Description';
 $_['tab_attribute']              = 'Specification';
 $_['tab_review']                 = 'Reviews (%s)';
+
+// UI Labels
+$_['text_none']                  = 'None';
+$_['text_select_color']          = 'Select Color';
+$_['button_add_to_cart']         = 'Add to Cart';
+$_['text_select_vase']           = 'Select Vase';
+$_['text_select_addons']         = 'Select Add ons';
+$_['text_loading']               = 'Loading...';
+$_['button_close']               = 'Close';
+$_['button_step1']               = 'GO TO GIFT WRAPPING & MESSAGE';
+$_['button_step2']               = 'CONTINUE TO DELIVERY';

@@ -470,7 +470,7 @@ $(document).ready(function() {
             type: 'get',
             dataType: 'json',
             beforeSend: function() {
-                $('#input-zone').html('<option value="">Loading...</option>');
+                $('#input-zone').html('<option value="">{{ text_loading }}</option>');
             },
             success: function(json) {
                 console.log('Zones loaded:', json);
@@ -640,7 +640,7 @@ $(document).ready(function() {
         </div>
         <div class="mb-3">
           <label for="input-pause-comment" class="form-label">Reason (Optional)</label>
-          <textarea id="input-pause-comment" class="form-control" rows="3" placeholder="e.g., Going on vacation"></textarea>
+          <textarea id="input-pause-comment" class="form-control" rows="3" placeholder="{{ text_placeholder_vacation }}"></textarea>
         </div>
       </div>
       <div class="modal-footer">
@@ -696,7 +696,7 @@ $(document).ready(function() {
         </div>
         <div class="mb-3">
           <label for="input-skip-comment" class="form-label">Reason (Optional)</label>
-          <textarea id="input-skip-comment" class="form-control" rows="3" placeholder="e.g., Going on vacation for a month"></textarea>
+          <textarea id="input-skip-comment" class="form-control" rows="3" placeholder="{{ text_placeholder_vacation_duration }}"></textarea>
         </div>
       </div>
       <div class="modal-footer">
@@ -871,7 +871,7 @@ $(document).ready(function() {
             </div>
             <div class="mb-3">
               <label for="input-edit-comment" class="form-label">Comment (Optional)</label>
-              <textarea id="input-edit-comment" class="form-control" rows="2" placeholder="Any special delivery instructions..."></textarea>
+              <textarea id="input-edit-comment" class="form-control" rows="2" placeholder="{{ text_placeholder_delivery_instructions }}"></textarea>
             </div>
           </div>
 
@@ -892,7 +892,7 @@ $(document).ready(function() {
             </div>
             <div class="mb-3">
               <label for="input-select-comment" class="form-label">Comment (Optional)</label>
-              <textarea id="input-select-comment" class="form-control" rows="2" placeholder="Any special delivery instructions..."></textarea>
+              <textarea id="input-select-comment" class="form-control" rows="2" placeholder="{{ text_placeholder_delivery_instructions }}"></textarea>
             </div>
           </div>
         </div>
@@ -929,7 +929,7 @@ $(document).ready(function() {
             <option value="Found alternative">Found alternative</option>
             <option value="Other">Other</option>
           </select>
-          <textarea id="input-cancel-additional" class="form-control" rows="3" placeholder="Additional feedback (optional)"></textarea>
+          <textarea id="input-cancel-additional" class="form-control" rows="3" placeholder="{{ text_placeholder_feedback }}"></textarea>
         </div>
       </div>
       <div class="modal-footer">
