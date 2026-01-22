@@ -186,7 +186,7 @@
                 <div class="mb-3">
                   <div class="mb-2 d-flex justify-content-between align-items-center">
                     <label class="form-label mb-0">Select Vase: <small id="selectedVase" class="text-muted">None</small></label>
-                    <span id="vase-price-display" style="display: none;"></span>
+                    <span id="vase-price-display">0</span>
                   </div>
 
                   {# Regular vases - show by default if no option value vases #}
@@ -241,8 +241,8 @@
                 <hr>
                 <div class="mb-3" id="addon-section">
                   <div class="mb-2 d-flex justify-content-between align-items-center">
-                    <label class="form-label mb-0">Select Add ons:</label>
-                    <span id="addon-price-display" style="display: none;"></span>
+                    <label class="form-label mb-0">Select Add ons: <small id="selectedAddons" class="text-muted">None</small></label>
+                    <span id="addon-price-display">0</span>
                   </div>
 
                   <div id="regular-addons" class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Regular Addons">
@@ -261,7 +261,6 @@
                              value="{{ addon.product_id }}"
                              data-price="{{ addon.price_value|default(addon.price)|default(0) }}"/>
                       <img src="{{ addon.thumb }}" alt="{{ addon.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none; display: block;" />
-                      <div class="text-center small mt-1">{{ addon.name }}</div>
                     </label>
                     {% endfor %}
                   </div>
@@ -654,6 +653,18 @@ $(document).ready(function() {
 
     // Addon selection
     (function(){
+        var updateAddonLabel = function() {
+            var selectedAddons = [];
+            document.querySelectorAll('.btn-addon-img.active').forEach(function(btn){
+                var name = btn.getAttribute('data-name') || btn.getAttribute('title');
+                if (name) selectedAddons.push(name);
+            });
+            var label = document.getElementById('selectedAddons');
+            if (label) {
+                label.textContent = selectedAddons.length > 0 ? selectedAddons.join(', ') : 'None';
+            }
+        };
+
         document.querySelectorAll('.btn-addon-img').forEach(function(btn){
             btn.addEventListener('click', function(e){
                 e.preventDefault();
@@ -668,10 +679,15 @@ $(document).ready(function() {
                     this.setAttribute('aria-pressed', 'false');
                 }
                 
+                updateAddonLabel();
+                
                 // Trigger change event to update price
                 $(checkbox).trigger('change');
             });
         });
+        
+        // Initialize label on page load
+        updateAddonLabel();
     })();
 
     {% if has_option_value_vases %}
@@ -700,7 +716,6 @@ $(document).ready(function() {
                 html += 'data-price="' + (vase.price_value || 0) + '"/>';
                 html += '<img src="' + vase.thumb + '" alt="' + vase.name + '" ';
                 html += 'class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none; display: block;" />';
-                html += '<div class="text-center small mt-1">' + vase.name + '</div>';
                 html += '</label>';
             });
             
@@ -721,6 +736,10 @@ $(document).ready(function() {
                     radio.prop('checked', true);
                     $(this).addClass('active');
                     $(this).attr('aria-pressed', 'true');
+                    
+                    // Update the selected vase name in the label
+                    var vaseName = $(this).data('name');
+                    $('#selectedVase').text(vaseName);
                     
                     // Trigger price update
                     updateProductPrice();
