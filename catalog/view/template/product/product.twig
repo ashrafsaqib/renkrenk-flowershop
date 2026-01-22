@@ -569,16 +569,16 @@ function updateSectionPriceDisplays(optionPrice, vasePrice, addonPrice, currency
     
     // Update vase price display
     if (vasePrice > 0) {
-        $('#vase-price-display').text('+' + currencyLeft + vasePrice.toFixed(2) + currencyRight).show();
+        $('#vase-price-display').text('+' + currencyLeft + vasePrice.toFixed(2) + currencyRight);
     } else {
-        $('#vase-price-display').hide();
+        $('#vase-price-display').text(currencyLeft + '0.00' + currencyRight);
     }
     
     // Update addon price display
     if (addonPrice > 0) {
-        $('#addon-price-display').text('+' + currencyLeft + addonPrice.toFixed(2) + currencyRight).show();
+        $('#addon-price-display').text('+' + currencyLeft + addonPrice.toFixed(2) + currencyRight);
     } else {
-        $('#addon-price-display').hide();
+        $('#addon-price-display').text(currencyLeft + '0.00' + currencyRight);
     }
 }
 
