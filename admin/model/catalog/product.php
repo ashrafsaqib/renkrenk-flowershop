@@ -227,6 +227,21 @@ class Product extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		// Option Value Addons
+		if (isset($data['product_option_addon'])) {
+			foreach ($data['product_option_addon'] as $product_option_id => $option_values) {
+				foreach ($option_values as $product_option_value_id => $addon_products) {
+					if (is_array($addon_products)) {
+						foreach ($addon_products as $addon_product_id) {
+							if ((int)$addon_product_id > 0) {
+								$this->model_catalog_product->addOptionValueAddon($product_id, (int)$product_option_id, (int)$product_option_value_id, (int)$addon_product_id);
+							}
+						}
+					}
+				}
+			}
+		}
+
 		$this->cache->delete('product');
 
 		return $product_id;
@@ -476,6 +491,23 @@ class Product extends \Opencart\System\Engine\Model {
 						$zone_data = $data['product_zone_data'][$country_id][$zone_id];
 						if (isset($zone_data['country_id']) && isset($zone_data['zone_id'])) {
 							$this->model_catalog_product->addZone($product_id, (int)$zone_data['country_id'], (int)$zone_data['zone_id']);
+						}
+					}
+				}
+			}
+		}
+
+		// Option Value Addons
+		$this->model_catalog_product->deleteOptionValueAddons($product_id);
+
+		if (isset($data['product_option_addon'])) {
+			foreach ($data['product_option_addon'] as $product_option_id => $option_values) {
+				foreach ($option_values as $product_option_value_id => $addon_products) {
+					if (is_array($addon_products)) {
+						foreach ($addon_products as $addon_product_id) {
+							if ((int)$addon_product_id > 0) {
+								$this->model_catalog_product->addOptionValueAddon($product_id, (int)$product_option_id, (int)$product_option_value_id, (int)$addon_product_id);
+							}
 						}
 					}
 				}
@@ -3367,5 +3399,103 @@ class Product extends \Opencart\System\Engine\Model {
 		}
 
 		return $product_zone_data;
+	}
+
+	/**
+	 * Add Option Value Addon
+	 *
+	 * @param int $product_id              primary key of the product record
+	 * @param int $product_option_id       primary key of the product option record
+	 * @param int $product_option_value_id primary key of the product option value record
+	 * @param int $addon_product_id        primary key of the addon product record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $this->model_catalog_product->addOptionValueAddon($product_id, $product_option_id, $product_option_value_id, $addon_product_id);
+	 */
+	public function addOptionValueAddon(int $product_id, int $product_option_id, int $product_option_value_id, int $addon_product_id): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "product_option_value_addon` SET `product_id` = '" . (int)$product_id . "', `product_option_id` = '" . (int)$product_option_id . "', `product_option_value_id` = '" . (int)$product_option_value_id . "', `addon_product_id` = '" . (int)$addon_product_id . "'");
+	}
+
+	/**
+	 * Delete Option Value Addons
+	 *
+	 * Delete all option value addon records for a product.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return void
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $this->model_catalog_product->deleteOptionValueAddons($product_id);
+	 */
+	public function deleteOptionValueAddons(int $product_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "product_option_value_addon` WHERE `product_id` = '" . (int)$product_id . "'");
+	}
+
+	/**
+	 * Get Option Value Addons
+	 *
+	 * Get all option value addon records for a product.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return array<int, array<string, mixed>> option value addon records
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $product_option_value_addons = $this->model_catalog_product->getOptionValueAddons($product_id);
+	 */
+	public function getOptionValueAddons(int $product_id): array {
+		$product_option_value_addon_data = [];
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_option_value_addon` WHERE `product_id` = '" . (int)$product_id . "' ORDER BY `product_option_id`, `product_option_value_id`");
+
+		foreach ($query->rows as $result) {
+			$product_option_value_addon_data[] = [
+				'product_option_id'       => $result['product_option_id'],
+				'product_option_value_id' => $result['product_option_value_id'],
+				'addon_product_id'        => $result['addon_product_id']
+			];
+		}
+
+		return $product_option_value_addon_data;
+	}
+
+	/**
+	 * Get Option Value Addons by Option Value
+	 *
+	 * Get addon products for a specific option value.
+	 *
+	 * @param int $product_id              primary key of the product record
+	 * @param int $product_option_value_id primary key of the product option value record
+	 *
+	 * @return array<int, int> array of addon product IDs
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $addons = $this->model_catalog_product->getOptionValueAddonsByOptionValue($product_id, $product_option_value_id);
+	 */
+	public function getOptionValueAddonsByOptionValue(int $product_id, int $product_option_value_id): array {
+		$addon_product_ids = [];
+
+		$query = $this->db->query("SELECT `addon_product_id` FROM `" . DB_PREFIX . "product_option_value_addon` WHERE `product_id` = '" . (int)$product_id . "' AND `product_option_value_id` = '" . (int)$product_option_value_id . "'");
+
+		foreach ($query->rows as $result) {
+			$addon_product_ids[] = $result['addon_product_id'];
+		}
+
+		return $addon_product_ids;
 	}
 }

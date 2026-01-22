@@ -964,4 +964,25 @@ class Product extends \Opencart\System\Engine\Model {
 
 		return (array)$product_data;
 	}
+
+	/**
+	 * Get Option Value Addons
+	 *
+	 * Get addon products linked to specific product option values.
+	 *
+	 * @param int $product_id primary key of the product record
+	 *
+	 * @return array<int, array<string, mixed>> option value addon records
+	 *
+	 * @example
+	 *
+	 * $this->load->model('catalog/product');
+	 *
+	 * $results = $this->model_catalog_product->getOptionValueAddons($product_id);
+	 */
+	public function getOptionValueAddons(int $product_id): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_option_value_addon` WHERE `product_id` = '" . (int)$product_id . "' ORDER BY `product_option_id`, `product_option_value_id`");
+
+		return $query->rows;
+	}
 }

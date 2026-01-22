@@ -788,6 +788,21 @@
                   <div class="form-text">{{ help_addon }}</div>
                 </div>
               </div>
+              <hr/>
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">Product Option Related Values</label>
+                <div class="col-sm-10">
+                  <div id="product-option-addon-container">
+                    {% if product_id %}
+                      <!-- Options will be loaded dynamically -->
+                    {% else %}
+                      <div class="alert alert-info">
+                        <i class="fa-solid fa-circle-info"></i> Save product once to start adding option based addons.
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
             </div>
             <div id="tab-color" class="tab-pane">
               <div class="row mb-3">
@@ -1823,6 +1838,133 @@ $('#input-color').autocomplete({
 $('#product-color').on('click', '.btn', function() {
     $(this).parent().parent().remove();
 });
+
+// Product Option Based Addons
+{% if product_id %}
+var optionAddonRowIndex = 0;
+
+function loadProductOptionAddons() {
+    $.ajax({
+        url: 'index.php?route=catalog/product.getProductOptionsForAddons&user_token={{ user_token }}&product_id={{ product_id }}',
+        dataType: 'json',
+        success: function(json) {
+            if (json && json.length > 0) {
+                var html = '';
+                
+                json.forEach(function(option) {
+                    if (option.type === 'radio' && option.product_option_value && option.product_option_value.length > 0) {
+                        html += '<fieldset class="mb-4">';
+                        html += '  <legend>' + option.name + '</legend>';
+                        
+                        option.product_option_value.forEach(function(optionValue) {
+                            var optionAddonId = 'option-addon-' + option.option_id + '-' + optionValue.option_value_id;
+                            
+                            html += '  <div class="row mb-3">';
+                            html += '    <label class="col-sm-3 col-form-label">' + optionValue.name + '</label>';
+                            html += '    <div class="col-sm-9">';
+                            html += '      <input type="text" id="input-' + optionAddonId + '" data-oc-target="autocomplete-' + optionAddonId + '" placeholder="Search for product addon" class="form-control option-addon-autocomplete" data-option-id="' + option.option_id + '" data-option-value-id="' + optionValue.option_value_id + '" data-product-option-id="' + option.product_option_id + '" data-product-option-value-id="' + optionValue.product_option_value_id + '" autocomplete="off"/>';
+                            html += '      <ul id="autocomplete-' + optionAddonId + '" class="dropdown-menu"></ul>';
+                            html += '      <div class="form-control p-0 mt-2" style="height: 150px; overflow: auto;">';
+                            html += '        <table id="' + optionAddonId + '-table" class="table m-0">';
+                            html += '          <tbody>';
+                            
+                            // Load existing addons for this option value
+                            if (optionValue.addons && optionValue.addons.length > 0) {
+                                optionValue.addons.forEach(function(addon) {
+                                    html += '            <tr id="' + optionAddonId + '-product-' + addon.product_id + '">';
+                                    html += '              <td>' + addon.name + '<input type="hidden" name="product_option_addon[' + option.product_option_id + '][' + optionValue.product_option_value_id + '][]" value="' + addon.product_id + '"/></td>';
+                                    html += '              <td class="text-end"><button type="button" class="btn btn-danger btn-sm btn-remove-option-addon"><i class="fa-solid fa-minus-circle"></i></button></td>';
+                                    html += '            </tr>';
+                                });
+                            }
+                            
+                            html += '          </tbody>';
+                            html += '        </table>';
+                            html += '      </div>';
+                            html += '    </div>';
+                            html += '  </div>';
+                        });
+                        
+                        html += '</fieldset>';
+                    }
+                });
+                
+                if (html) {
+                    $('#product-option-addon-container').html(html);
+                    
+                    // Initialize autocomplete for each input after HTML is rendered
+                    $('.option-addon-autocomplete').each(function() {
+                        var $input = $(this);
+                        var optionId = $input.data('option-id');
+                        var optionValueId = $input.data('option-value-id');
+                        var productOptionId = $input.data('product-option-id');
+                        var productOptionValueId = $input.data('product-option-value-id');
+                        var optionAddonId = 'option-addon-' + optionId + '-' + optionValueId;
+                        
+                        $input.autocomplete({
+                            'source': function(request, response) {
+                                $.ajax({
+                                    url: 'index.php?route=catalog/product.autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+                                    dataType: 'json',
+                                    success: function(json) {
+                                        response($.map(json, function(item) {
+                                            return {
+                                                label: item['name'],
+                                                value: item['product_id']
+                                            }
+                                        }));
+                                    }
+                                });
+                            },
+                            'select': function(item) {
+                                $input.val('');
+                                
+                                // Remove if already exists
+                                $('#' + optionAddonId + '-product-' + item['value']).remove();
+                                
+                                var html = '<tr id="' + optionAddonId + '-product-' + item['value'] + '">';
+                                html += '  <td>' + item['label'] + '<input type="hidden" name="product_option_addon[' + productOptionId + '][' + productOptionValueId + '][]" value="' + item['value'] + '"/></td>';
+                                html += '  <td class="text-end"><button type="button" class="btn btn-danger btn-sm btn-remove-option-addon"><i class="fa-solid fa-minus-circle"></i></button></td>';
+                                html += '</tr>';
+                                
+                                $('#' + optionAddonId + '-table tbody').append(html);
+                            }
+                        });
+                    });
+                } else {
+                    $('#product-option-addon-container').html('<div class="alert alert-warning"><i class="fa-solid fa-circle-exclamation"></i> No radio options with values found. Please add radio options to this product first.</div>');
+                }
+            } else {
+                $('#product-option-addon-container').html('<div class="alert alert-warning"><i class="fa-solid fa-circle-exclamation"></i> No radio options with values found. Please add radio options to this product first.</div>');
+            }
+        },
+        error: function() {
+            $('#product-option-addon-container').html('<div class="alert alert-danger"><i class="fa-solid fa-circle-exclamation"></i> Error loading product options.</div>');
+        }
+    });
+}
+
+function initializeOptionAddonAutocomplete() {
+    // This function is no longer needed as initialization happens in loadProductOptionAddons
+}
+
+// Remove option addon
+$(document).on('click', '.btn-remove-option-addon', function() {
+    $(this).closest('tr').remove();
+});
+
+// Load option addons when tab is activated
+$('a[href="#tab-addon"]').on('shown.bs.tab', function() {
+    if ($('#product-option-addon-container').children().length === 0 || $('#product-option-addon-container').find('.alert-info').length > 0) {
+        loadProductOptionAddons();
+    }
+});
+
+// Also load on page load if on addon tab
+if ($('#tab-addon').hasClass('active')) {
+    loadProductOptionAddons();
+}
+{% endif %}
 
 var attributeautocomplete = function(attribute_row) {
     $('#input-attribute-' + attribute_row).autocomplete({

@@ -60,7 +60,7 @@
                 <hr>
                 <div class="mb-3">
                   <div class="mb-2">
-                    <label class="form-label">Select Color</label>
+                    <label class="form-label">Select Color: <small id="selectedColor" class="text-muted">{% for color in colors %}{% if color.selected %}{{ color.name }}{% endif %}{% endfor %}</small></label>
                   </div>
 
                   <div class="d-flex flex-wrap gap-3 image-btns" role="group" aria-label="Colors">
@@ -110,7 +110,7 @@
 
                     {% if option.type == 'radio' %}
                       <div class="mb-3{% if option.required %} required{% endif %}">
-                      <label class="form-label">{{ option.name }}</label>
+                      <label class="form-label">Select {{ option.name }}</label>
                       <div id="input-option-{{ option.product_option_id }}" class="d-flex flex-wrap gap-2">
                         {% for option_value in option.product_option_value %}
                         <div>
@@ -227,15 +227,17 @@
                 </div>
               {% endif %}
 
-              {% if addons %}
+              {% if addons or has_option_value_addons %}
                 <hr>
-                <div class="mb-3">
+                <div class="mb-3" id="addon-section">
                   <div class="mb-2 d-flex justify-content-between align-items-center">
                     <label class="form-label mb-0">Select Add ons:</label>
                     <span id="addon-price-display" style="display: none;"></span>
                   </div>
 
-                  <div class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Addons">
+                  {# Regular addons - show by default if no option value addons #}
+                  {% if addons %}
+                  <div id="regular-addons" class="d-flex flex-wrap gap-2 image-btns{% if has_option_value_addons %} d-none{% endif %}" role="group" aria-label="Regular Addons">
                     {% for addon in addons %}
                     <label
                       class="btn-addon-img btn"
@@ -247,7 +249,7 @@
                     >
                       <input type="checkbox"
                              name="product_ids[]"
-                             class="d-none addon-option"
+                             class="d-none addon-option regular-addon"
                              value="{{ addon.product_id }}"
                              data-price="{{ addon.price_value|default(addon.price)|default(0) }}"/>
                       <img src="{{ addon.thumb }}" alt="{{ addon.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none; display: block;" />
@@ -255,6 +257,14 @@
                     </label>
                     {% endfor %}
                   </div>
+                  {% endif %}
+                  
+                  {# Option value based addons - shown dynamically #}
+                  {% if has_option_value_addons %}
+                  <div id="option-value-addons" class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Option Addons">
+                    {# Will be populated dynamically via JavaScript #}
+                  </div>
+                  {% endif %}
                 </div>
               {% endif %}
 
@@ -663,6 +673,86 @@ $(document).ready(function() {
             });
         });
     })();
+
+    {% if has_option_value_addons %}
+    // Option Value Addons Data
+    var optionValueAddons = {{ option_value_addons|json_encode|raw }};
+    
+    // Function to load addons for a specific option value
+    function loadOptionValueAddons(optionValueId) {
+        var $container = $('#option-value-addons');
+        var addons = optionValueAddons[optionValueId] || [];
+        
+        if (addons.length > 0) {
+            // Hide regular addons if we have option-specific ones
+            $('#regular-addons').addClass('d-none');
+            
+            var html = '';
+            addons.forEach(function(addon) {
+                html += '<label class="btn-addon-img btn" ';
+                html += 'data-id="' + addon.product_id + '" ';
+                html += 'data-name="' + addon.name + '" ';
+                html += 'data-price="' + (addon.price_value || 0) + '" ';
+                html += 'aria-pressed="false" ';
+                html += 'title="' + addon.name + '">';
+                html += '<input type="checkbox" name="product_ids[]" class="d-none addon-option option-addon" ';
+                html += 'value="' + addon.product_id + '" ';
+                html += 'data-price="' + (addon.price_value || 0) + '"/>';
+                html += '<img src="' + addon.thumb + '" alt="' + addon.name + '" ';
+                html += 'class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none; display: block;" />';
+                html += '<div class="text-center small mt-1">' + addon.name + '</div>';
+                html += '</label>';
+            });
+            
+            $container.html(html);
+            $container.removeClass('d-none');
+            
+            // Reinitialize click handlers for new addon buttons
+            $container.find('.btn-addon-img').each(function() {
+                $(this).off('click').on('click', function(e) {
+                    e.preventDefault();
+                    var checkbox = $(this).find('input[type="checkbox"]');
+                    checkbox.prop('checked', !checkbox.prop('checked'));
+                    
+                    if (checkbox.prop('checked')) {
+                        $(this).addClass('active');
+                        $(this).attr('aria-pressed', 'true');
+                    } else {
+                        $(this).removeClass('active');
+                        $(this).attr('aria-pressed', 'false');
+                    }
+                    
+                    // Trigger price update
+                    updateProductPrice();
+                });
+            });
+            
+            // Update price after loading addons
+            updateProductPrice();
+        } else {
+            // No option-specific addons, show regular addons
+            $container.html('').addClass('d-none');
+            $('#regular-addons').removeClass('d-none');
+        }
+    }
+    
+    // Listen for radio option changes
+    $('.option-radio').on('change', function() {
+        if ($(this).is(':checked')) {
+            var optionValueId = $(this).val();
+            loadOptionValueAddons(optionValueId);
+        }
+    });
+    
+    // Load addons for initially selected radio option
+    $(document).ready(function() {
+        var $checkedRadio = $('.option-radio:checked').first();
+        if ($checkedRadio.length > 0) {
+            var optionValueId = $checkedRadio.val();
+            loadOptionValueAddons(optionValueId);
+        }
+    });
+    {% endif %}
 
     // Stepped checkout logic
     var hasStep1 = $('.step1').length > 0;

@@ -1674,4 +1674,83 @@ class Product extends \Opencart\System\Engine\Controller {
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
+
+	/**
+	 * Get product options for addons (radio type only)
+	 *
+	 * @return void
+	 */
+	public function getProductOptionsForAddons(): void {
+		$json = [];
+
+		if (isset($this->request->get['product_id'])) {
+			$this->load->model('catalog/product');
+			$this->load->model('catalog/option');
+
+			$product_id = (int)$this->request->get['product_id'];
+			
+			// Get all options for this product
+			$product_options = $this->model_catalog_product->getOptions($product_id);
+
+			// Get saved option value addons
+			$saved_addons = $this->model_catalog_product->getOptionValueAddons($product_id);
+
+			// Organize saved addons by option value
+			$addons_by_option_value = [];
+			foreach ($saved_addons as $saved_addon) {
+				$key = $saved_addon['product_option_value_id'];
+				if (!isset($addons_by_option_value[$key])) {
+					$addons_by_option_value[$key] = [];
+				}
+				
+				// Get addon product info
+				$addon_product_info = $this->model_catalog_product->getProduct($saved_addon['addon_product_id']);
+				if ($addon_product_info) {
+					$addons_by_option_value[$key][] = [
+						'product_id' => $addon_product_info['product_id'],
+						'name'       => $addon_product_info['name']
+					];
+				}
+			}
+
+			foreach ($product_options as $product_option) {
+				// Only include radio options
+				if ($product_option['type'] === 'radio') {
+					$product_option_value_data = [];
+
+					if (isset($product_option['product_option_value'])) {
+						foreach ($product_option['product_option_value'] as $product_option_value) {
+							$option_value_info = $this->model_catalog_option->getValue($product_option_value['option_value_id']);
+
+							if ($option_value_info) {
+								// Get saved addons for this option value
+								$addons = [];
+								if (isset($addons_by_option_value[$product_option_value['product_option_value_id']])) {
+									$addons = $addons_by_option_value[$product_option_value['product_option_value_id']];
+								}
+								
+								$product_option_value_data[] = [
+									'product_option_value_id' => $product_option_value['product_option_value_id'],
+									'option_value_id'         => $product_option_value['option_value_id'],
+									'name'                    => $option_value_info['name'],
+									'addons'                  => $addons
+								];
+							}
+						}
+					}
+
+					$json[] = [
+						'product_option_id'    => $product_option['product_option_id'],
+						'option_id'            => $product_option['option_id'],
+						'name'                 => $product_option['name'],
+						'type'                 => $product_option['type'],
+						'product_option_value' => $product_option_value_data
+					];
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
 }
