@@ -565,6 +565,9 @@ $(document).ready(function() {
     if (labelName && !labelName.textContent.trim()) {
       labelName.textContent = 'None';
     }
+    if (labelPrice) {
+      labelPrice.textContent = '{{ currency_left }}0.00{{ currency_right }}';
+    }
     if (hidden) hidden.value = '0';
 
     document.querySelectorAll('.btn-gift').forEach(function(btn){
@@ -588,7 +591,7 @@ $(document).ready(function() {
             // Extract numeric value from formatted price
             giftPriceRaw = parseFloat(giftPrice.replace(/[^\d.]/g, '')) || 0;
           } else {
-            labelPrice.textContent = '';
+            labelPrice.textContent = '{{ currency_left }}0.00{{ currency_right }}';
             giftPriceRaw = 0;
           }
         }
@@ -613,6 +616,9 @@ $(document).ready(function() {
         labelName.textContent = 'None';
       }
     }
+    if (labelPrice) {
+      labelPrice.textContent = '{{ currency_left }}0.00{{ currency_right }}';
+    }
     if (hidden) hidden.value = '0';
 
     document.querySelectorAll('.btn-vase').forEach(function(btn){
@@ -636,7 +642,7 @@ $(document).ready(function() {
             // Extract numeric value from formatted price
             vasePriceRaw = parseFloat(vasePrice.replace(/[^\d.]/g, '')) || 0;
           } else {
-            labelPrice.textContent = '';
+            labelPrice.textContent = '{{ currency_left }}0.00{{ currency_right }}';
             vasePriceRaw = 0;
           }
         }
