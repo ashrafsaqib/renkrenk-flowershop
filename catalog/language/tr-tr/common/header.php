@@ -32,3 +32,21 @@ $_['text_express_delivery'] = 'EXPRESS GÖNDERİM';
 $_['text_plants']          = 'BİTKİLER';
 $_['text_home_decor']      = 'EV';
 $_['text_gifts']           = 'HEDİYELİK';
+
+// Location & Cart Modal
+$_['text_city_selection_title'] = 'Konumunuzu Seçin';
+$_['text_city_selection_desc'] = 'Yerel para biriminizi, teslimat sürelerinizi ve maliyetlerinizi görmek için teslimat şehrinizi seçin.';
+$_['text_confirm_selection'] = 'Seçiminizi Onaylayın';
+$_['text_shopping_cart_title'] = 'ALIŞVERİŞ SEPETİ';
+$_['text_location_modal_title'] = 'TESLİMAT ADRESİNİ DEĞİŞTİR';
+$_['text_enter_address'] = 'Teslimat adresinizi girin';
+$_['text_address_placeholder'] = 'Tam adresinizi yazmaya başlayın (örn. Levent, İstanbul)...';
+$_['text_add_address_manually'] = 'ADRESİ MANUEL EKLE';
+$_['text_select_city'] = 'İl (Şehir)';
+$_['text_select_city_option'] = 'Bir Şehir Seçin...';
+$_['text_select_district'] = 'İlçe';
+$_['text_select_district_option'] = 'Bir İlçe Seçin...';
+$_['text_set_address'] = 'ADRESİMİ AYARLA';
+$_['text_your_location'] = 'Konumunuz';
+$_['text_ships_to'] = 'Teslimat Yeri';
+$_['text_select_city_short'] = 'Şehir Seçin';
