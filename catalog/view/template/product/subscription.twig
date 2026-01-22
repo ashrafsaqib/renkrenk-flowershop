@@ -421,11 +421,15 @@ $(document).ready(function() {
   var basePrice = {{ price }};
   var giftPriceRaw = 0;
   var vasePriceRaw = 0;
+  
+  // Extract currency format from price_formatted
+  var priceFormatted = '{{ price_formatted }}';
+  var zeroFormatted = priceFormatted.replace(/[\d,\.]+/, '0.00');
 
   function updateFinalPrice() {
     var total = basePrice + giftPriceRaw + vasePriceRaw;
     // Format using the currency
-    var formattedPrice = '{{ price_formatted }}'.replace(/[\d,\.]+/, total.toFixed(2));
+    var formattedPrice = priceFormatted.replace(/[\d,\.]+/, total.toFixed(2));
     document.querySelectorAll('.priceFinal').forEach(function(el) {
       el.textContent = formattedPrice;
     });
@@ -566,7 +570,7 @@ $(document).ready(function() {
       labelName.textContent = 'None';
     }
     if (labelPrice) {
-      labelPrice.textContent = '{{ currency_left }}0.00{{ currency_right }}';
+      labelPrice.textContent = zeroFormatted;
     }
     if (hidden) hidden.value = '0';
 
@@ -591,7 +595,7 @@ $(document).ready(function() {
             // Extract numeric value from formatted price
             giftPriceRaw = parseFloat(giftPrice.replace(/[^\d.]/g, '')) || 0;
           } else {
-            labelPrice.textContent = '{{ currency_left }}0.00{{ currency_right }}';
+            labelPrice.textContent = zeroFormatted;
             giftPriceRaw = 0;
           }
         }
@@ -617,7 +621,7 @@ $(document).ready(function() {
       }
     }
     if (labelPrice) {
-      labelPrice.textContent = '{{ currency_left }}0.00{{ currency_right }}';
+      labelPrice.textContent = zeroFormatted;
     }
     if (hidden) hidden.value = '0';
 
@@ -642,7 +646,7 @@ $(document).ready(function() {
             // Extract numeric value from formatted price
             vasePriceRaw = parseFloat(vasePrice.replace(/[^\d.]/g, '')) || 0;
           } else {
-            labelPrice.textContent = '{{ currency_left }}0.00{{ currency_right }}';
+            labelPrice.textContent = zeroFormatted;
             vasePriceRaw = 0;
           }
         }
