@@ -537,49 +537,49 @@ class Product extends \Opencart\System\Engine\Controller {
 			];
 		}
 
-		// Option Value Addons
-		$data['option_value_addons'] = [];
-		$data['has_option_value_addons'] = false;
+		// Option Value Vases
+		$data['option_value_vases'] = [];
+		$data['has_option_value_vases'] = false;
 		
 		$option_value_addon_results = $this->model_catalog_product->getOptionValueAddons($product_id);
 		
 		foreach ($option_value_addon_results as $ov_addon) {
-			$data['has_option_value_addons'] = true;
+			$data['has_option_value_vases'] = true;
 			
-			// Get addon product details
-			$addon_product = $this->model_catalog_product->getProduct($ov_addon['addon_product_id']);
+			// Get vase product details
+			$vase_product = $this->model_catalog_product->getProduct($ov_addon['addon_product_id']);
 			
-			if ($addon_product) {
-				if ($addon_product['image'] && is_file(DIR_IMAGE . html_entity_decode($addon_product['image'], ENT_QUOTES, 'UTF-8'))) {
-					$image = $addon_product['image'];
+			if ($vase_product) {
+				if ($vase_product['image'] && is_file(DIR_IMAGE . html_entity_decode($vase_product['image'], ENT_QUOTES, 'UTF-8'))) {
+					$image = $vase_product['image'];
 				} else {
 					$image = 'placeholder.png';
 				}
 
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-					$price = $this->currency->format($this->tax->calculate($addon_product['price'], $addon_product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-					$price_value = $this->tax->calculate($addon_product['price'], $addon_product['tax_class_id'], $this->config->get('config_tax'));
+					$price = $this->currency->format($this->tax->calculate($vase_product['price'], $vase_product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					$price_value = $this->tax->calculate($vase_product['price'], $vase_product['tax_class_id'], $this->config->get('config_tax'));
 				} else {
 					$price = false;
 					$price_value = 0;
 				}
 
-				if ((float)$addon_product['special']) {
-					$special = $this->currency->format($this->tax->calculate($addon_product['special'], $addon_product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-					$special_value = $this->tax->calculate($addon_product['special'], $addon_product['tax_class_id'], $this->config->get('config_tax'));
+				if ((float)$vase_product['special']) {
+					$special = $this->currency->format($this->tax->calculate($vase_product['special'], $vase_product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					$special_value = $this->tax->calculate($vase_product['special'], $vase_product['tax_class_id'], $this->config->get('config_tax'));
 				} else {
 					$special = false;
 					$special_value = 0;
 				}
 				
 				$key = $ov_addon['product_option_value_id'];
-				if (!isset($data['option_value_addons'][$key])) {
-					$data['option_value_addons'][$key] = [];
+				if (!isset($data['option_value_vases'][$key])) {
+					$data['option_value_vases'][$key] = [];
 				}
 				
-				$data['option_value_addons'][$key][] = [
-					'product_id'              => $addon_product['product_id'],
-					'name'                    => $addon_product['name'],
+				$data['option_value_vases'][$key][] = [
+					'product_id'              => $vase_product['product_id'],
+					'name'                    => $vase_product['name'],
 					'price'                   => $price,
 					'price_value'             => $price_value,
 					'special'                 => $special,

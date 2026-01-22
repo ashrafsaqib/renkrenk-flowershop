@@ -757,6 +757,21 @@
                   <div class="form-text">{{ help_vase }}</div>
                 </div>
               </div>
+              <hr/>
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">Product Option Related Values</label>
+                <div class="col-sm-10">
+                  <div id="product-option-addon-container">
+                  {% if product_id %}
+                    <!-- Options will be loaded dynamically -->
+                  {% else %}
+                    <div class="alert alert-info">
+                    <i class="fa-solid fa-circle-info"></i> Save product once to start adding option based vases.
+                    </div>
+                  {% endif %}
+                  </div>
+                </div>
+              </div>
             </div>
             <div id="tab-addon" class="tab-pane">
               <div class="row mb-3">
@@ -786,21 +801,6 @@
                     {% endif %}
                   </div>
                   <div class="form-text">{{ help_addon }}</div>
-                </div>
-              </div>
-              <hr/>
-              <div class="row mb-3">
-                <label class="col-sm-2 col-form-label">Product Option Related Values</label>
-                <div class="col-sm-10">
-                  <div id="product-option-addon-container">
-                    {% if product_id %}
-                      <!-- Options will be loaded dynamically -->
-                    {% else %}
-                      <div class="alert alert-info">
-                        <i class="fa-solid fa-circle-info"></i> Save product once to start adding option based addons.
-                      </div>
-                    {% endif %}
-                  </div>
                 </div>
               </div>
             </div>

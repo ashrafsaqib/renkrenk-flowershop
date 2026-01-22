@@ -181,7 +181,7 @@
                 </div>
               {% endif %}
 
-              {% if vases %}
+              {% if vases or has_option_value_vases %}
                 <hr>
                 <div class="mb-3">
                   <div class="mb-2 d-flex justify-content-between align-items-center">
@@ -189,7 +189,9 @@
                     <span id="vase-price-display" style="display: none;"></span>
                   </div>
 
-                  <div class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Vases">
+                  {# Regular vases - show by default if no option value vases #}
+                  {% if vases %}
+                  <div id="regular-vases" class="d-flex flex-wrap gap-2 image-btns{% if has_option_value_vases %} d-none{% endif %}" role="group" aria-label="Vases">
                     <label
                       class="btn-vase-img active"
                       data-id="0"
@@ -200,7 +202,7 @@
                     >
                       <input type="radio"
                              name="product_ids_vase"
-                             class="d-none vase-option"
+                             class="d-none vase-option regular-vase"
                              value="0"
                              data-price="0"
                              checked/>
@@ -217,17 +219,25 @@
                     >
                       <input type="radio"
                              name="product_ids_vase"
-                             class="d-none vase-option"
+                             class="d-none vase-option regular-vase"
                              value="{{ vase.product_id }}"
                              data-price="{{ vase.price_value|default(vase.price)|default(0) }}"/>
                       <img src="{{ vase.thumb }}" alt="{{ vase.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none; display: block;" />
                     </label>
                     {% endfor %}
                   </div>
+                  {% endif %}
+                  
+                  {# Option value based vases - shown dynamically #}
+                  {% if has_option_value_vases %}
+                  <div id="option-value-vases" class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Option Vases">
+                    {# Will be populated dynamically via JavaScript #}
+                  </div>
+                  {% endif %}
                 </div>
               {% endif %}
 
-              {% if addons or has_option_value_addons %}
+              {% if addons %}
                 <hr>
                 <div class="mb-3" id="addon-section">
                   <div class="mb-2 d-flex justify-content-between align-items-center">
@@ -235,9 +245,7 @@
                     <span id="addon-price-display" style="display: none;"></span>
                   </div>
 
-                  {# Regular addons - show by default if no option value addons #}
-                  {% if addons %}
-                  <div id="regular-addons" class="d-flex flex-wrap gap-2 image-btns{% if has_option_value_addons %} d-none{% endif %}" role="group" aria-label="Regular Addons">
+                  <div id="regular-addons" class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Regular Addons">
                     {% for addon in addons %}
                     <label
                       class="btn-addon-img btn"
@@ -249,7 +257,7 @@
                     >
                       <input type="checkbox"
                              name="product_ids[]"
-                             class="d-none addon-option regular-addon"
+                             class="d-none addon-option"
                              value="{{ addon.product_id }}"
                              data-price="{{ addon.price_value|default(addon.price)|default(0) }}"/>
                       <img src="{{ addon.thumb }}" alt="{{ addon.name }}" class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none; display: block;" />
@@ -257,14 +265,6 @@
                     </label>
                     {% endfor %}
                   </div>
-                  {% endif %}
-                  
-                  {# Option value based addons - shown dynamically #}
-                  {% if has_option_value_addons %}
-                  <div id="option-value-addons" class="d-flex flex-wrap gap-2 image-btns" role="group" aria-label="Option Addons">
-                    {# Will be populated dynamically via JavaScript #}
-                  </div>
-                  {% endif %}
                 </div>
               {% endif %}
 
@@ -674,65 +674,65 @@ $(document).ready(function() {
         });
     })();
 
-    {% if has_option_value_addons %}
-    // Option Value Addons Data
-    var optionValueAddons = {{ option_value_addons|json_encode|raw }};
+    {% if has_option_value_vases %}
+    // Option Value Vases Data
+    var optionValueVases = {{ option_value_vases|json_encode|raw }};
     
-    // Function to load addons for a specific option value
-    function loadOptionValueAddons(optionValueId) {
-        var $container = $('#option-value-addons');
-        var addons = optionValueAddons[optionValueId] || [];
+    // Function to load vases for a specific option value
+    function loadOptionValueVases(optionValueId) {
+        var $container = $('#option-value-vases');
+        var vases = optionValueVases[optionValueId] || [];
         
-        if (addons.length > 0) {
-            // Hide regular addons if we have option-specific ones
-            $('#regular-addons').addClass('d-none');
+        if (vases.length > 0) {
+            // Hide regular vases if we have option-specific ones
+            $('#regular-vases').addClass('d-none');
             
             var html = '';
-            addons.forEach(function(addon) {
-                html += '<label class="btn-addon-img btn" ';
-                html += 'data-id="' + addon.product_id + '" ';
-                html += 'data-name="' + addon.name + '" ';
-                html += 'data-price="' + (addon.price_value || 0) + '" ';
+            vases.forEach(function(vase) {
+                html += '<label class="btn-vase-img btn" ';
+                html += 'data-id="' + vase.product_id + '" ';
+                html += 'data-name="' + vase.name + '" ';
+                html += 'data-price="' + (vase.price_value || 0) + '" ';
                 html += 'aria-pressed="false" ';
-                html += 'title="' + addon.name + '">';
-                html += '<input type="checkbox" name="product_ids[]" class="d-none addon-option option-addon" ';
-                html += 'value="' + addon.product_id + '" ';
-                html += 'data-price="' + (addon.price_value || 0) + '"/>';
-                html += '<img src="' + addon.thumb + '" alt="' + addon.name + '" ';
+                html += 'title="' + vase.name + '">';
+                html += '<input type="radio" name="vase_id" class="d-none vase-option option-vase" ';
+                html += 'value="' + vase.product_id + '" ';
+                html += 'data-price="' + (vase.price_value || 0) + '"/>';
+                html += '<img src="' + vase.thumb + '" alt="' + vase.name + '" ';
                 html += 'class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none; display: block;" />';
-                html += '<div class="text-center small mt-1">' + addon.name + '</div>';
+                html += '<div class="text-center small mt-1">' + vase.name + '</div>';
                 html += '</label>';
             });
             
             $container.html(html);
             $container.removeClass('d-none');
             
-            // Reinitialize click handlers for new addon buttons
-            $container.find('.btn-addon-img').each(function() {
+            // Reinitialize click handlers for new vase buttons
+            $container.find('.btn-vase-img').each(function() {
                 $(this).off('click').on('click', function(e) {
                     e.preventDefault();
-                    var checkbox = $(this).find('input[type="checkbox"]');
-                    checkbox.prop('checked', !checkbox.prop('checked'));
                     
-                    if (checkbox.prop('checked')) {
-                        $(this).addClass('active');
-                        $(this).attr('aria-pressed', 'true');
-                    } else {
-                        $(this).removeClass('active');
-                        $(this).attr('aria-pressed', 'false');
-                    }
+                    // Uncheck all other radio buttons and remove active class
+                    $('#option-value-vases .btn-vase-img').removeClass('active').attr('aria-pressed', 'false');
+                    $('#option-value-vases .vase-option').prop('checked', false);
+                    
+                    // Check this radio button and add active class
+                    var radio = $(this).find('input[type="radio"]');
+                    radio.prop('checked', true);
+                    $(this).addClass('active');
+                    $(this).attr('aria-pressed', 'true');
                     
                     // Trigger price update
                     updateProductPrice();
                 });
             });
             
-            // Update price after loading addons
+            // Update price after loading vases
             updateProductPrice();
         } else {
-            // No option-specific addons, show regular addons
+            // No option-specific vases, show regular vases
             $container.html('').addClass('d-none');
-            $('#regular-addons').removeClass('d-none');
+            $('#regular-vases').removeClass('d-none');
         }
     }
     
@@ -740,16 +740,16 @@ $(document).ready(function() {
     $('.option-radio').on('change', function() {
         if ($(this).is(':checked')) {
             var optionValueId = $(this).val();
-            loadOptionValueAddons(optionValueId);
+            loadOptionValueVases(optionValueId);
         }
     });
     
-    // Load addons for initially selected radio option
+    // Load vases for initially selected radio option
     $(document).ready(function() {
         var $checkedRadio = $('.option-radio:checked').first();
         if ($checkedRadio.length > 0) {
             var optionValueId = $checkedRadio.val();
-            loadOptionValueAddons(optionValueId);
+            loadOptionValueVases(optionValueId);
         }
     });
     {% endif %}
