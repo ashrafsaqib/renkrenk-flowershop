@@ -1954,16 +1954,35 @@ $(document).on('click', '.btn-remove-option-addon', function() {
 });
 
 // Load option addons when tab is activated
-$('a[href="#tab-addon"]').on('shown.bs.tab', function() {
-    if ($('#product-option-addon-container').children().length === 0 || $('#product-option-addon-container').find('.alert-info').length > 0) {
-        loadProductOptionAddons();
-    }
+$('a[href="#tab-vase"]').on('shown.bs.tab', function() {
+    loadProductOptionAddons();
 });
 
-// Also load on page load if on addon tab
-if ($('#tab-addon').hasClass('active')) {
+// Load on page load
+$(document).ready(function() {
     loadProductOptionAddons();
-}
+});
+
+// Reload after form save success
+$('#form-product').on('submit', function(e) {
+    var form = $(this);
+    
+    // Store original success handler if exists
+    var originalHandler = form.data('success-handler');
+    
+    // Add our custom handler to reload option addons after save
+    setTimeout(function() {
+        // Wait a bit for the save to complete, then reload
+        $(document).one('ajaxSuccess', function(event, xhr, settings) {
+            if (settings.url && settings.url.indexOf('catalog/product') !== -1) {
+                // Product was saved, reload option addons
+                setTimeout(function() {
+                    loadProductOptionAddons();
+                }, 500);
+            }
+        });
+    }, 100);
+});
 {% endif %}
 
 var attributeautocomplete = function(attribute_row) {
