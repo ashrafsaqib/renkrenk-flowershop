@@ -1161,7 +1161,7 @@ class Product extends \Opencart\System\Engine\Model {
 		}
 
 		if (!empty($data['filter_name'])) {
-			$sql .= " AND LCASE(`pd`.`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_name']) . '%') . "'";
+			$sql .= " AND LCASE(`pd`.`name`) LIKE '%" . $this->db->escape(oc_strtolower($data['filter_name']) . '%') . "'";
 		}
 
 		if (!empty($data['filter_model'])) {
