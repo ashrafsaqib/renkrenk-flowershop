@@ -704,6 +704,20 @@ $(document).ready(function() {
             $('#regular-vases').addClass('d-none');
             
             var html = '';
+            
+            // Add "None" option first (selected by default)
+            html += '<label class="btn-vase-img btn active" ';
+            html += 'data-id="0" ';
+            html += 'data-name="None" ';
+            html += 'data-price="0" ';
+            html += 'aria-pressed="true" ';
+            html += 'title="None">';
+            html += '<input type="radio" name="vase_id" class="d-none vase-option option-vase" ';
+            html += 'value="0" ';
+            html += 'data-price="0" checked/>';
+            html += '<div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: white; border: 2px solid #ddd;"></div>';
+            html += '</label>';
+            
             vases.forEach(function(vase) {
                 html += '<label class="btn-vase-img btn" ';
                 html += 'data-id="' + vase.product_id + '" ';
