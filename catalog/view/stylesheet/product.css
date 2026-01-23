@@ -107,3 +107,16 @@
       font-weight: 700;
       letter-spacing: .05em;
   }
+  .btn-color-link.active img,
+.btn-color-link.active div {
+    border: 2px solid #000 !important;
+}
+
+.btn-vase-img.active img,
+.btn-vase-img.active div {
+    border: 2px solid #000 !important;
+}
+
+.btn-addon-img.active img {
+    border: 2px solid #000 !important;
+}
