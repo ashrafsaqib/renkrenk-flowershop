@@ -13,6 +13,7 @@ class HomePage extends \Opencart\System\Engine\Controller {
 	 */
 	public function index(): void {
 		$this->load->model('tool/image');
+		$this->load->model('localisation/language');
 
 		$this->load->language('design/homepage');
 
@@ -30,13 +31,34 @@ class HomePage extends \Opencart\System\Engine\Controller {
 			'href' => $this->url->link('design/homepage', 'user_token=' . $this->session->data['user_token'])
 		];
 
-		$data['save'] = $this->url->link('design/homepage.save', 'user_token=' . $this->session->data['user_token']);
+		$language_id = (int)($this->request->get['language_id'] ?? $this->config->get('config_language_id'));
+		$data['language_id'] = $language_id;
+		$data['languages'] = $this->model_localisation_language->getLanguages();
+		$data['language_links'] = [];
+		foreach ($data['languages'] as $language) {
+			$data['language_links'][] = [
+				'language_id' => $language['language_id'],
+				'name'        => $language['name'],
+				'href'        => $this->url->link('design/homepage', 'user_token=' . $this->session->data['user_token'] . '&language_id=' . $language['language_id'])
+			];
+		}
+
+		$data['save'] = $this->url->link('design/homepage.save', 'user_token=' . $this->session->data['user_token'] . '&language_id=' . $language_id);
 		$data['back'] = $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token']);
 
 		// Load settings
 		$this->load->model('setting/setting');
 
-		$setting_info = $this->model_setting_setting->getSetting('homepage');
+		$setting_raw = $this->model_setting_setting->getSetting('homepage_' . $language_id);
+		$setting_info = [];
+		$setting_prefix = 'homepage_' . $language_id . '_';
+
+		foreach ($setting_raw as $key => $value) {
+			if (strpos($key, $setting_prefix) === 0) {
+				$mapped_key = 'homepage_' . substr($key, strlen($setting_prefix));
+				$setting_info[$mapped_key] = $value;
+			}
+		}
 
 		// Slideshow
 		if (isset($setting_info['homepage_slideshow'])) {
@@ -301,6 +323,7 @@ class HomePage extends \Opencart\System\Engine\Controller {
 		$this->load->language('design/homepage');
 
 		$json = [];
+		$language_id = (int)($this->request->get['language_id'] ?? $this->request->post['language_id'] ?? $this->config->get('config_language_id'));
 
 		if (!$this->user->hasPermission('modify', 'design/homepage')) {
 			$json['error'] = $this->language->get('error_permission');
@@ -308,8 +331,19 @@ class HomePage extends \Opencart\System\Engine\Controller {
 
 		if (!$json) {
 			$this->load->model('setting/setting');
+			$post = $this->request->post;
+			unset($post['language_id']);
 
-			$this->model_setting_setting->editSetting('homepage', $this->request->post);
+			$code = 'homepage_' . $language_id;
+			$prefixed = [];
+
+			foreach ($post as $key => $value) {
+				if (strpos($key, 'homepage_') === 0) {
+					$prefixed[$code . '_' . substr($key, strlen('homepage_'))] = $value;
+				}
+			}
+
+			$this->model_setting_setting->editSetting($code, $prefixed);
 
 			$json['success'] = $this->language->get('text_success');
 		}

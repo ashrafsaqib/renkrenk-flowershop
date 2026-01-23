@@ -22,6 +22,23 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 		$this->load->model('cms/topic');
 		$this->load->model('cms/article');
 		$this->load->model('tool/image');
+		$this->load->model('setting/setting');
+
+		$language_id = (int)$this->config->get('config_language_id');
+		$setting_raw = $this->model_setting_setting->getSetting('homepage_' . $language_id);
+		$setting_info = [];
+		$setting_prefix = 'homepage_' . $language_id . '_';
+
+		foreach ($setting_raw as $key => $value) {
+			if (strpos($key, $setting_prefix) === 0) {
+				$mapped_key = 'homepage_' . substr($key, strlen($setting_prefix));
+				$setting_info[$mapped_key] = $value;
+			}
+		}
+
+		$get_setting = function(string $key, $default = '') use ($setting_info) {
+			return $setting_info[$key] ?? $default;
+		};
 
 		$data['sections'] = [];
 		
@@ -29,7 +46,7 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 		$data['text_from'] = $this->language->get('text_from');
 
 		// Section 0: Slideshow (using banner module)
-		$slideshow_data = $this->config->get('homepage_slideshow');
+		$slideshow_data = $get_setting('homepage_slideshow', []);
 		if ($slideshow_data && is_array($slideshow_data)) {
 			// Prepare banners array for the banner module
 			$banners = [];
@@ -65,17 +82,17 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 		}
 
 		// Section 1: Text Block
-		$data['text_block_heading'] = html_entity_decode($this->config->get('homepage_text_block_heading'), ENT_QUOTES, 'UTF-8');
-		$data['text_block'] = html_entity_decode($this->config->get('homepage_text_block'), ENT_QUOTES, 'UTF-8');
+		$data['text_block_heading'] = html_entity_decode($get_setting('homepage_text_block_heading'), ENT_QUOTES, 'UTF-8');
+		$data['text_block'] = html_entity_decode($get_setting('homepage_text_block'), ENT_QUOTES, 'UTF-8');
 
 		// Section 1.5: Featured Products
-		$data['featured_products_header'] = html_entity_decode($this->config->get('homepage_featured_products_header'), ENT_QUOTES, 'UTF-8');
+		$data['featured_products_header'] = html_entity_decode($get_setting('homepage_featured_products_header'), ENT_QUOTES, 'UTF-8');
 		$data['featured_products'] = [];
 
-		if ($this->config->get('homepage_featured_products')) {
+		if ($get_setting('homepage_featured_products')) {
 			$this->load->model('catalog/product');
 			
-			foreach ($this->config->get('homepage_featured_products') as $product_id) {
+			foreach ($get_setting('homepage_featured_products') as $product_id) {
 				$product_info = $this->model_catalog_product->getProduct($product_id);
 
 				if ($product_info) {
@@ -115,8 +132,8 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 		// Section 2: Featured Categories
 		$data['featured_categories'] = [];
 
-		if ($this->config->get('homepage_featured_categories')) {
-			foreach ($this->config->get('homepage_featured_categories') as $item) {
+		if ($get_setting('homepage_featured_categories')) {
+			foreach ($get_setting('homepage_featured_categories') as $item) {
 				$category_id = is_array($item) && isset($item['category_id']) ? $item['category_id'] : $item;
 				$category_info = $this->model_catalog_category->getCategory($category_id);
 
@@ -136,28 +153,28 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 		}
 
 		// Gift Subscriptions Image
-		$gift_subscriptions_image = $this->config->get('homepage_gift_subscriptions_image');
+		$gift_subscriptions_image = $get_setting('homepage_gift_subscriptions_image');
 		$data['gift_subscriptions_image'] = $gift_subscriptions_image ? $this->model_tool_image->resize($gift_subscriptions_image, 400, 400) : '';
 		
 		// Subscription list link
 		$data['subscription_list_link'] = $this->url->link('product/subscription', 'language=' . $this->config->get('config_language'));
 
 		// Section 3: Static Image
-		$static_image = $this->config->get('homepage_static_image');
-		$data['static_image'] = 'image/'.$static_image;
+		$static_image = $get_setting('homepage_static_image');
+		$data['static_image'] = $static_image ? 'image/' . $static_image : '';
 		$data['static_image_original'] = $static_image;
 
 		// Section 4: Static Image Text
-		$data['static_image_text'] = $this->config->get('homepage_static_image_text');
+		$data['static_image_text'] = $get_setting('homepage_static_image_text');
         //homepage_static_image_header
-        $data['static_image_header'] = $this->config->get('homepage_static_image_header');
+		$data['static_image_header'] = $get_setting('homepage_static_image_header');
 
 		// Section 5: Featured Topics/Articles
-		$data['featured_header'] = $this->config->get('homepage_featured_header');
+		$data['featured_header'] = $get_setting('homepage_featured_header');
 		$data['featured_items'] = [];
 
-		if ($this->config->get('homepage_featured_items')) {
-			foreach ($this->config->get('homepage_featured_items') as $item) {
+		if ($get_setting('homepage_featured_items')) {
+			foreach ($get_setting('homepage_featured_items') as $item) {
 				if ($item['type'] == 'topic') {
 					$id = explode('-', $item['id'])[1];
 					$topic_info = $this->model_cms_topic->getTopic((int)$id);
@@ -193,14 +210,14 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 		}
 
 		// Section 6: Meet Section
-		$meet_image = $this->config->get('homepage_meet_image');
+		$meet_image = $get_setting('homepage_meet_image');
 		$data['meet_image'] = $meet_image ? $this->model_tool_image->resize($meet_image, 600, 600) : '';
-		$data['meet_header'] = $this->config->get('homepage_meet_header');
+		$data['meet_header'] = $get_setting('homepage_meet_header');
         //nl2br
-		$data['meet_paragraph'] =  nl2br($this->config->get('homepage_meet_paragraph'));
+		$data['meet_paragraph'] =  nl2br($get_setting('homepage_meet_paragraph'));
 
 		// Section 7: Full Width Banner
-		$banner_image = $this->config->get('homepage_banner_image');
+		$banner_image = $get_setting('homepage_banner_image');
 		$data['banner_image'] = $banner_image ? $this->model_tool_image->resize($banner_image, 1920, 600) : '';
 		$data['banner_image_original'] = $banner_image;
 

@@ -18,7 +18,19 @@
     <div class="card">
       <div class="card-header"><i class="fa-solid fa-pencil"></i> {{ text_edit }}</div>
       <div class="card-body">
+        {% if language_links|length > 1 %}
+        <ul class="nav nav-tabs mb-3">
+          {% for language in language_links %}
+            <li class="nav-item">
+              <a class="nav-link{% if language.language_id == language_id %} active{% endif %}" href="{{ language.href }}">
+                {{ language.name }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
         <form id="form-homepage" action="{{ save }}" method="post" data-oc-toggle="ajax">
+          <input type="hidden" name="language_id" value="{{ language_id }}"/>
           
           <!-- Section 0: Slideshow -->
           <fieldset>
