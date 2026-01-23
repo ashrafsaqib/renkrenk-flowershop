@@ -16,6 +16,7 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 	public function index(): string {
 		// Load language file
 		$this->load->language('common/header');
+		$this->load->language('common/homepage_sections');
 		
 		// Load models
 		$this->load->model('catalog/category');
@@ -44,6 +45,12 @@ class HomepageSections extends \Opencart\System\Engine\Controller {
 		
 		// Add language variables
 		$data['text_from'] = $this->language->get('text_from');
+		$data['text_gift_subscription'] = $this->language->get('text_gift_subscription');
+		$data['text_shop_now'] = $this->language->get('text_shop_now');
+		$data['text_subscribe_now'] = $this->language->get('text_subscribe_now');
+		$data['text_discover_world'] = $this->language->get('text_discover_world');
+		$data['text_read_more'] = $this->language->get('text_read_more');
+		$data['text_discover_flowers'] = $this->language->get('text_discover_flowers');
 
 		// Section 0: Slideshow (using banner module)
 		$slideshow_data = $get_setting('homepage_slideshow', []);
