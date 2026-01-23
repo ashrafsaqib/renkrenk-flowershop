@@ -36,10 +36,14 @@ $_['entry_rating']               = 'Puan';
 $_['tab_description']            = 'Açıklama';
 $_['tab_attribute']              = 'Özellikler';
 $_['tab_review']                 = 'Yorumlar (%s)';
+$_['tab_size']                   = 'Boyut';
+$_['tab_care']                   = 'Bakım';
+$_['tab_delivery']               = 'Teslimat';
 
 // UI Labels
 $_['text_none']                  = 'Hiçbiri';
 $_['text_select_color']          = 'Renk Seç';
+$_['text_from']                  = 'İTİBAREN';
 $_['button_add_to_cart']         = 'Sepete Ekle';
 $_['text_select_vase']           = 'Vazo Seç';
 $_['text_select_addons']         = 'Eklentileri Seç';

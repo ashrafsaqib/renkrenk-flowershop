@@ -33,10 +33,10 @@
           {% if price %}
             <ul class="list-unstyled">
               {% if not special %}
-                <li><h2>{% if options or (colors|length > 1) %}FROM {% endif %}<span class="price-new">{{ price }}</span></h2></li>
+                <li><h2>{% if options or (colors|length > 1) %}{{ text_from }} {% endif %}<span class="price-new" id="price-main-display">{{ price }}</span></h2></li>
               {% else %}
                 <li><span class="price-old">{{ price }}</span></li>
-                <li><h2><span class="price-new">{{ special }}</span></h2></li>
+                <li><h2><span class="price-new" id="price-main-display">{{ special }}</span></h2></li>
               {% endif %}
               {% if tax %}
                 <li>{{ text_tax }} {{ tax }}</li>
@@ -241,7 +241,7 @@
                 <hr>
                 <div class="mb-3" id="addon-section">
                   <div class="mb-2 d-flex justify-content-between align-items-center">
-                    <label class="form-label mb-0">Select Add ons: <small id="selectedAddons" class="text-muted">None</small></label>
+                    <label class="form-label mb-0">{{ text_select_addons }}: <small id="selectedAddons" class="text-muted">{{ text_none }}</small></label>
                     <span id="addon-price-display">0</span>
                   </div>
 
@@ -249,10 +249,10 @@
                     <label
                       class="btn-addon-img btn btn-addon-none active"
                       data-id="0"
-                      data-name="None"
+                      data-name="{{ text_none }}"
                       data-price="0"
                       aria-pressed="true"
-                      title="None"
+                      title="{{ text_none }}"
                     >
                       <input type="checkbox"
                              name="addon_none"
@@ -360,13 +360,13 @@
             <ul class="nav nav-tabs mt-4">
               <li class="nav-item"><a href="#tab-description" data-bs-toggle="tab" class="nav-link active">{{ tab_description }}</a></li>
               {% if size %}
-                <li class="nav-item"><a href="#tab-size" data-bs-toggle="tab" class="nav-link">Size</a></li>
+                <li class="nav-item"><a href="#tab-size" data-bs-toggle="tab" class="nav-link">{{ tab_size }}</a></li>
               {% endif %}
               {% if care %}
-                <li class="nav-item"><a href="#tab-care" data-bs-toggle="tab" class="nav-link">Care</a></li>
+                <li class="nav-item"><a href="#tab-care" data-bs-toggle="tab" class="nav-link">{{ tab_care }}</a></li>
               {% endif %}
               {% if delivery %}
-                <li class="nav-item"><a href="#tab-delivery" data-bs-toggle="tab" class="nav-link">Delivery</a></li>
+                <li class="nav-item"><a href="#tab-delivery" data-bs-toggle="tab" class="nav-link">{{ tab_delivery }}</a></li>
               {% endif %}
               {% if attribute_groups %}
                 <li class="nav-item"><a href="#tab-specification" data-bs-toggle="tab" class="nav-link">{{ tab_attribute }}</a></li>
@@ -431,6 +431,7 @@
   </div>
 </div>
 <script type="text/javascript"><!--
+var textNone = '{{ text_none }}';
 $('#input-subscription').on('change', function(e) {
     var element = this;
 
@@ -538,7 +539,7 @@ function updateProductPrice() {
     
     // Calculate price from selected vase
     var vasePrice = 0;
-    var selectedVase = $('.vase-option:checked');
+    var selectedVase = $('.vase-option:checked').last();
     if (selectedVase.length > 0) {
         vasePrice = parseFloat(selectedVase.data('price')) || 0;
         totalOptionPrice += vasePrice;
@@ -563,6 +564,8 @@ function updateProductPrice() {
     
     // Update button-cart with price + button text
     $('#button-cart .price-display').html(formattedPrice + ' ' + buttonText);
+    // Update main page price near the title
+    $('#price-main-display').text(formattedPrice);
     
     // Update step buttons with just the price (they have their own text)
     $('#button-step1 .priceFinal').html(formattedPrice);
@@ -603,7 +606,7 @@ $(document).ready(function() {
     $('.option-select').on('change', updateProductPrice);
     $('.option-radio').on('change', updateProductPrice);
     $('.option-checkbox').on('change', updateProductPrice);
-    $('.vase-option').on('change', updateProductPrice);
+    $(document).on('change', '.vase-option', updateProductPrice); // delegated to catch dynamically injected vases
     $('.addon-option').on('change', updateProductPrice);
     
     // Initial price calculation on page load
@@ -639,12 +642,12 @@ $(document).ready(function() {
 
         // Set initial label based on checked radio button
         if (label) {
-            var checkedVase = document.querySelector('.btn-vase-img.active');
-            if (checkedVase) {
-                label.textContent = checkedVase.getAttribute('data-name') || checkedVase.getAttribute('title') || 'None';
-            } else {
-                label.textContent = 'None';
-            }
+          var checkedVase = document.querySelector('.btn-vase-img.active');
+          if (checkedVase) {
+            label.textContent = checkedVase.getAttribute('data-name') || checkedVase.getAttribute('title') || textNone;
+          } else {
+            label.textContent = textNone;
+          }
         }
 
         document.querySelectorAll('.btn-vase-img').forEach(function(btn){
@@ -657,7 +660,7 @@ $(document).ready(function() {
                 this.classList.add('active');
                 this.setAttribute('aria-pressed','true');
 
-                if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title');
+                if (label) label.textContent = this.getAttribute('data-name') || this.getAttribute('title') || textNone;
                 var radioInput = this.querySelector('input[type="radio"]');
                 radioInput.checked = true;
                 
@@ -677,7 +680,7 @@ $(document).ready(function() {
             });
             var label = document.getElementById('selectedAddons');
             if (label) {
-                label.textContent = selectedAddons.length > 0 ? selectedAddons.join(', ') : 'None';
+              label.textContent = selectedAddons.length > 0 ? selectedAddons.join(', ') : textNone;
             }
         };
 
@@ -762,16 +765,19 @@ $(document).ready(function() {
         if (vases.length > 0) {
             // Hide regular vases if we have option-specific ones
             $('#regular-vases').addClass('d-none');
+            // Uncheck and deactivate any regular vase selection so price reads from option list
+            $('#regular-vases .vase-option').prop('checked', false);
+            $('#regular-vases .btn-vase-img').removeClass('active').attr('aria-pressed', 'false');
             
             var html = '';
             
-            // Add "None" option first (selected by default)
+            // Add default none option first (selected by default)
             html += '<label class="btn-vase-img btn active" ';
             html += 'data-id="0" ';
-            html += 'data-name="None" ';
+            html += 'data-name="' + textNone + '" ';
             html += 'data-price="0" ';
             html += 'aria-pressed="true" ';
-            html += 'title="None">';
+            html += 'title="' + textNone + '">';
             html += '<input type="radio" name="vase_id" class="d-none vase-option option-vase" ';
             html += 'value="0" ';
             html += 'data-price="0" checked/>';
@@ -780,14 +786,15 @@ $(document).ready(function() {
             
             vases.forEach(function(vase) {
                 html += '<label class="btn-vase-img btn" ';
+                var vasePriceValue = (vase.price_value !== undefined && vase.price_value !== null) ? vase.price_value : (vase.price !== undefined ? vase.price : 0);
                 html += 'data-id="' + vase.product_id + '" ';
                 html += 'data-name="' + vase.name + '" ';
-                html += 'data-price="' + (vase.price_value || 0) + '" ';
+                html += 'data-price="' + vasePriceValue + '" ';
                 html += 'aria-pressed="false" ';
                 html += 'title="' + vase.name + '">';
                 html += '<input type="radio" name="vase_id" class="d-none vase-option option-vase" ';
                 html += 'value="' + vase.product_id + '" ';
-                html += 'data-price="' + (vase.price_value || 0) + '"/>';
+                html += 'data-price="' + vasePriceValue + '"/>';
                 html += '<img src="' + vase.thumb + '" alt="' + vase.name + '" ';
                 html += 'class="rounded-circle" style="width: 60px; height: 60px; object-fit: none; border: none; display: block;" />';
                 html += '</label>';
@@ -826,6 +833,13 @@ $(document).ready(function() {
             // No option-specific vases, show regular vases
             $container.html('').addClass('d-none');
             $('#regular-vases').removeClass('d-none');
+            // Reset regular vase default selection
+            var $regularDefault = $('#regular-vases .vase-option[value="0"]');
+            if ($regularDefault.length) {
+                $regularDefault.prop('checked', true);
+                $('#regular-vases .btn-vase-img').removeClass('active').attr('aria-pressed','false');
+                $regularDefault.closest('.btn-vase-img').addClass('active').attr('aria-pressed','true');
+            }
         }
     }
     

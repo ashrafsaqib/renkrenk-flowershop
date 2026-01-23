@@ -32,10 +32,14 @@ $_['entry_rating']               = 'Rating';
 $_['tab_description']            = 'Description';
 $_['tab_attribute']              = 'Specification';
 $_['tab_review']                 = 'Reviews (%s)';
+$_['tab_size']                   = 'Size';
+$_['tab_care']                   = 'Care';
+$_['tab_delivery']               = 'Delivery';
 
 // UI Labels
 $_['text_none']                  = 'None';
 $_['text_select_color']          = 'Select Color';
+$_['text_from']                  = 'FROM';
 $_['button_add_to_cart']         = 'Add to Cart';
 $_['text_select_vase']           = 'Select Vase';
 $_['text_select_addons']         = 'Select Add ons';
