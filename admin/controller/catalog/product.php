@@ -1147,6 +1147,14 @@ class Product extends \Opencart\System\Engine\Controller {
 
 		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', (int)$this->config->get('config_image_default_width'), (int)$this->config->get('config_image_default_height'));
 
+		foreach ($data['product_description'] as $language_id => $description) {
+			if (!empty($description['size_guide']) && is_file(DIR_IMAGE . html_entity_decode($description['size_guide'], ENT_QUOTES, 'UTF-8'))) {
+				$data['product_description'][$language_id]['size_guide_thumb'] = $this->model_tool_image->resize($description['size_guide'], (int)$this->config->get('config_image_default_width'), (int)$this->config->get('config_image_default_height'));
+			} else {
+				$data['product_description'][$language_id]['size_guide_thumb'] = $data['placeholder'];
+			}
+		}
+
 		if ($data['image'] && is_file(DIR_IMAGE . html_entity_decode($data['image'], ENT_QUOTES, 'UTF-8'))) {
 			$data['thumb'] = $this->model_tool_image->resize($data['image'], (int)$this->config->get('config_image_default_width'), (int)$this->config->get('config_image_default_height'));
 		} else {

@@ -40,6 +40,7 @@ $_['tab_delivery']               = 'Delivery';
 $_['text_none']                  = 'None';
 $_['text_select_color']          = 'Select Color';
 $_['text_from']                  = 'FROM';
+$_['text_size_guide']           = 'See Size Guide';
 $_['button_add_to_cart']         = 'Add to Cart';
 $_['text_select_vase']           = 'Select Vase';
 $_['text_select_addons']         = 'Select Add ons';

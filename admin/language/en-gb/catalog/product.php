@@ -66,6 +66,7 @@ $_['entry_name']                 = 'Product Name';
 $_['entry_description']          = 'Description';
 $_['entry_short_description']    = 'Short Description';
 $_['entry_size']                 = 'Size';
+$_['entry_size_guide']           = 'Size Guide';
 $_['entry_care']                 = 'Care Instructions';
 $_['entry_delivery']             = 'Delivery';
 $_['entry_meta_title']           = 'Meta Tag Title';

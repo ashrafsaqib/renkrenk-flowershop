@@ -63,6 +63,7 @@ $_['column_action']              = 'İşlem';
 // Entry
 $_['entry_name']                 = 'Ürün Adı';
 $_['entry_description']          = 'Açıklama';
+$_['entry_size_guide']           = 'Beden Rehberi';
 $_['entry_meta_title']           = 'Meta Başlığı';
 $_['entry_meta_keyword']         = 'Meta Anahtar Kelimeler';
 $_['entry_meta_description']     = 'Meta Açıklaması';

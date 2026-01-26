@@ -315,6 +315,12 @@ class Product extends \Opencart\System\Engine\Controller {
 			// Image
 			$this->load->model('tool/image');
 
+			$data['size_guide_popup'] = '';
+
+			if (!empty($product_info['size_guide']) && is_file(DIR_IMAGE . html_entity_decode($product_info['size_guide'], ENT_QUOTES, 'UTF-8'))) {
+				$data['size_guide_popup'] = 'image/' . $product_info['size_guide'];
+			}
+
 			if ($product_info['image'] && is_file(DIR_IMAGE . html_entity_decode($product_info['image'], ENT_QUOTES, 'UTF-8'))) {
 				$data['popup'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('config_image_popup_width'), $this->config->get('config_image_popup_height'));
 				$data['thumb'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('config_image_thumb_width'), $this->config->get('config_image_thumb_height'));
@@ -377,6 +383,7 @@ class Product extends \Opencart\System\Engine\Controller {
 			}
 
 			$data['options'] = [];
+			$data['has_size_guide_option'] = false;
 
 			// Check if product is variant
 			if ($product_info['master_id']) {
@@ -388,6 +395,10 @@ class Product extends \Opencart\System\Engine\Controller {
 			$product_options = $this->model_catalog_product->getOptions($master_id);
 
 			foreach ($product_options as $option) {
+				if (!empty($option['show_size_guide'])) {
+					$data['has_size_guide_option'] = true;
+				}
+
 				if ((int)$this->request->get['product_id'] && !isset($product_info['override']['variant'][$option['product_option_id']])) {
 					$product_option_value_data = [];
 

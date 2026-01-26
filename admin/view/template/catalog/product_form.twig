@@ -115,6 +115,19 @@
                       </div>
                     </div>
                     <div class="row mb-3">
+                      <label class="col-sm-2 col-form-label">{{ entry_size_guide }}</label>
+                      <div class="col-sm-10">
+                        <div class="border rounded d-block" style="max-width: 300px;">
+                          <img src="{{ product_description[language.language_id] ? product_description[language.language_id].size_guide_thumb : placeholder }}" alt="" title="" id="thumb-size-guide-{{ language.language_id }}" data-oc-placeholder="{{ placeholder }}" class="img-fluid"/>
+                          <input type="hidden" name="product_description[{{ language.language_id }}][size_guide]" value="{{ product_description[language.language_id] ? product_description[language.language_id].size_guide }}" id="input-size-guide-{{ language.language_id }}"/>
+                          <div class="d-grid">
+                            <button type="button" data-oc-toggle="image" data-oc-target="#input-size-guide-{{ language.language_id }}" data-oc-thumb="#thumb-size-guide-{{ language.language_id }}" class="btn btn-primary rounded-0"><i class="fa-solid fa-pencil"></i> {{ button_edit }}</button>
+                            <button type="button" data-oc-toggle="clear" data-oc-target="#input-size-guide-{{ language.language_id }}" data-oc-thumb="#thumb-size-guide-{{ language.language_id }}" class="btn btn-warning rounded-0"><i class="fa-regular fa-trash-can"></i> {{ button_clear }}</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row mb-3">
                       <label for="input-care-{{ language.language_id }}" class="col-sm-2 col-form-label">{{ entry_care }}</label>
                       <div class="col-sm-10">
                         <div class="input-group">

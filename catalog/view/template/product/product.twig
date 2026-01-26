@@ -87,7 +87,11 @@
                 <hr>
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h3 class="mb-0">{{ text_option }}</h3>
-                  <span id="option-price-display" style="display: none;"></span>
+                  {% if has_size_guide_option and size_guide_popup %}
+                    <a href="{{ size_guide_popup }}" id="size-guide-link" class="size-guide-link">{{ text_size_guide }}</a>
+                  {% else %}
+                    <span id="option-price-display" style="display: none;"></span>
+                  {% endif %}
                 </div>
                 <div>
                   {% for option in options %}
@@ -618,6 +622,10 @@ $(document).ready(function() {
         gallery: {
             enabled: true
         }
+    });
+
+    $('.size-guide-link').magnificPopup({
+      type: 'image'
     });
 
     // Initialize calendar for date options

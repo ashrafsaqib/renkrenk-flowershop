@@ -31,6 +31,7 @@ $_['column_action']      = 'İşlem';
 $_['entry_name']         = 'Seçenek Adı';
 $_['entry_type']         = 'Tür';
 $_['entry_validation']   = 'Doğrulama';
+$_['entry_show_size_guide'] = 'Beden Rehberi Göster';
 $_['entry_option_value'] = 'Seçenek Değeri Adı';
 $_['entry_image']        = 'Görsel';
 $_['entry_sort_order']   = 'Sıralama';

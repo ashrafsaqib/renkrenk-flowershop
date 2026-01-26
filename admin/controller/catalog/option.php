@@ -246,6 +246,11 @@ class Option extends \Opencart\System\Engine\Controller {
 		} else {
 			$data['sort_order'] = '';
 		}
+		if (!empty($option_info)) {
+			$data['show_size_guide'] = (int)$option_info['show_size_guide'];
+		} else {
+			$data['show_size_guide'] = 0;
+		}
 
 		if (!empty($option_info)) {
 			$option_values = $this->model_catalog_option->getValueDescriptions($option_info['option_id']);
@@ -304,6 +309,7 @@ class Option extends \Opencart\System\Engine\Controller {
 		$required = [
 			'option_id'          => 0,
 			'type'               => '',
+			'show_size_guide'    => 0,
 			'sort_order'         => 0,
 			'option_description' => [],
 			'option_value'       => []
